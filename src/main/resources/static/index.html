@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>终身学习学分银行平台</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<aside class="sidebar">
+    <div class="brand">
+        <span class="brand-mark">CB</span>
+        <div>
+            <strong>学分银行</strong>
+            <small>Credit Bank Admin</small>
+        </div>
+    </div>
+    <nav>
+        <button class="active" data-module="dashboard">总览</button>
+        <button data-module="learners">学员档案</button>
+        <button data-module="courses">课程资源</button>
+        <button data-module="credit-accounts">积分账户</button>
+        <button data-module="achievements">成果认定</button>
+        <button data-module="forum-posts">论坛管理</button>
+        <button data-module="jobs">招聘求职</button>
+    </nav>
+</aside>
+
+<main class="workspace">
+    <header class="topbar">
+        <div>
+            <h1 id="page-title">平台总览</h1>
+            <p id="page-subtitle">学习、成果、积分、社区与就业数据统一管理</p>
+        </div>
+        <a class="doc-link" href="/swagger-ui.html" target="_blank">接口文档</a>
+    </header>
+
+    <section id="dashboard" class="panel"></section>
+    <section id="table-panel" class="panel hidden">
+        <div class="panel-head">
+            <h2 id="table-title">数据列表</h2>
+            <button id="refresh-btn">刷新</button>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead id="table-head"></thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>
