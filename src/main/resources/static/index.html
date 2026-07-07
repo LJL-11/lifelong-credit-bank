@@ -3,53 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>终身学习学分银行平台</title>
+    <title>终身学习学分银行管理平台</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<aside class="sidebar">
-    <div class="brand">
-        <span class="brand-mark">CB</span>
-        <div>
-            <strong>学分银行</strong>
-            <small>Credit Bank Admin</small>
+<div id="app" v-cloak>
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-mark">LB</span>
+            <div>
+                <strong>学分银行</strong>
+                <small>Credit Bank Admin</small>
+            </div>
         </div>
+
+        <nav class="nav">
+            <button
+                v-for="item in menu"
+                :key="item.key"
+                :class="{ active: activeModule === item.key }"
+                type="button"
+                @click="switchModule(item.key)"
+            >
+                <span class="nav-icon">{{ item.icon }}</span>
+                <span>{{ item.label }}</span>
+            </button>
+        </nav>
+    </aside>
+
+    <main class="workspace">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">Lifelong Credit Bank</p>
+                <h1>{{ currentModule.title }}</h1>
+                <p class="subtitle">{{ currentModule.subtitle }}</p>
+            </div>
+            <div class="top-actions">
+                <a class="ghost-button" href="/swagger-ui.html" target="_blank">接口文档</a>
+                <button class="primary-button" type="button" @click="reloadActive">刷新</button>
+            </div>
+        </header>
+
+        <section v-if="activeModule === 'dashboard'" class="dashboard">
+            <div class="stats-grid">
+                <article class="stat-card" v-for="card in statCards" :key="card.key">
+                    <span>{{ card.label }}</span>
+                    <strong>{{ card.value }}</strong>
+                    <small>{{ card.note }}</small>
+                </article>
+            </div>
+
+            <div class="split-grid">
+                <section class="panel">
+                    <div class="section-head">
+                        <h2>平台概览</h2>
+                        <span :class="['status-pill', apiOnline ? 'ok' : 'warn']">
+                            {{ apiOnline ? '服务正常' : '服务异常' }}
+                        </span>
+                    </div>
+                    <div class="overview-list">
+                        <div v-for="item in overview" :key="item.label">
+                            <span>{{ item.label }}</span>
+                            <strong>{{ item.value }}</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="section-head">
+                        <h2>快捷入口</h2>
+                    </div>
+                    <div class="quick-actions">
+                        <button
+                            v-for="item in quickActions"
+                            :key="item.key"
+                            type="button"
+                            @click="switchModule(item.key)"
+                        >
+                            {{ item.label }}
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <section v-else class="panel">
+            <div class="section-head table-headline">
+                <div>
+                    <h2>{{ currentModule.tableTitle }}</h2>
+                    <p>{{ page.total }} 条记录</p>
+                </div>
+                <div class="table-actions">
+                    <button
+                        v-if="currentModule.operations?.credit"
+                        class="ghost-button"
+                        type="button"
+                        @click="openCreditDialog('increase')"
+                    >
+                        增加积分
+                    </button>
+                    <button
+                        v-if="currentModule.operations?.credit"
+                        class="ghost-button"
+                        type="button"
+                        @click="openCreditDialog('consume')"
+                    >
+                        消费积分
+                    </button>
+                    <button
+                        v-if="currentModule.operations?.openAccount"
+                        class="ghost-button"
+                        type="button"
+                        @click="openAccountDialog"
+                    >
+                        开通账户
+                    </button>
+                    <button
+                        v-if="currentModule.canCreate"
+                        class="primary-button"
+                        type="button"
+                        @click="openEditor()"
+                    >
+                        新增
+                    </button>
+                </div>
+            </div>
+
+            <div v-if="loading" class="state-block">正在加载数据...</div>
+            <div v-else-if="error" class="state-block error">{{ error }}</div>
+            <div v-else class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th v-for="column in currentModule.columns" :key="column.key">
+                            {{ column.label }}
+                        </th>
+                        <th v-if="currentModule.canEdit || currentModule.canDelete">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-if="rows.length === 0">
+                        <td :colspan="currentModule.columns.length + 1" class="empty-cell">暂无数据</td>
+                    </tr>
+                    <tr v-for="row in rows" :key="row.id">
+                        <td v-for="column in currentModule.columns" :key="column.key">
+                            <span v-if="column.badge" :class="['data-badge', badgeClass(row[column.key])]">
+                                {{ formatCell(row[column.key]) }}
+                            </span>
+                            <span v-else>{{ formatCell(row[column.key]) }}</span>
+                        </td>
+                        <td v-if="currentModule.canEdit || currentModule.canDelete" class="row-actions">
+                            <button v-if="currentModule.canEdit" type="button" @click="openEditor(row)">编辑</button>
+                            <button v-if="currentModule.canDelete" type="button" @click="removeRow(row)">删除</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <footer class="pager">
+                <button type="button" :disabled="page.current <= 1" @click="changePage(page.current - 1)">上一页</button>
+                <span>第 {{ page.current }} / {{ totalPages }} 页</span>
+                <button type="button" :disabled="page.current >= totalPages" @click="changePage(page.current + 1)">下一页</button>
+            </footer>
+        </section>
+    </main>
+
+    <div v-if="editor.open" class="modal-backdrop" @click.self="closeEditor">
+        <form class="modal" @submit.prevent="submitEditor">
+            <div class="modal-head">
+                <h2>{{ editor.row?.id ? '编辑' : '新增' }}{{ currentModule.title }}</h2>
+                <button type="button" class="icon-button" @click="closeEditor">×</button>
+            </div>
+            <div class="form-grid">
+                <label v-for="field in currentModule.fields" :key="field.key">
+                    <span>{{ field.label }}</span>
+                    <textarea
+                        v-if="field.type === 'textarea'"
+                        v-model="editor.form[field.key]"
+                        :placeholder="field.placeholder || field.label"
+                    ></textarea>
+                    <input
+                        v-else
+                        v-model="editor.form[field.key]"
+                        :type="field.type || 'text'"
+                        :placeholder="field.placeholder || field.label"
+                    >
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button class="ghost-button" type="button" @click="closeEditor">取消</button>
+                <button class="primary-button" type="submit" :disabled="saving">
+                    {{ saving ? '保存中...' : '保存' }}
+                </button>
+            </div>
+        </form>
     </div>
-    <nav>
-        <button class="active" data-module="dashboard">总览</button>
-        <button data-module="learners">学员档案</button>
-        <button data-module="courses">课程资源</button>
-        <button data-module="credit-accounts">积分账户</button>
-        <button data-module="achievements">成果认定</button>
-        <button data-module="forum-posts">论坛管理</button>
-        <button data-module="jobs">招聘求职</button>
-    </nav>
-</aside>
 
-<main class="workspace">
-    <header class="topbar">
-        <div>
-            <h1 id="page-title">平台总览</h1>
-            <p id="page-subtitle">学习、成果、积分、社区与就业数据统一管理</p>
-        </div>
-        <a class="doc-link" href="/swagger-ui.html" target="_blank">接口文档</a>
-    </header>
+    <div v-if="creditDialog.open" class="modal-backdrop" @click.self="closeCreditDialog">
+        <form class="modal compact" @submit.prevent="submitCreditDialog">
+            <div class="modal-head">
+                <h2>{{ creditDialog.type === 'increase' ? '增加积分' : '消费积分' }}</h2>
+                <button type="button" class="icon-button" @click="closeCreditDialog">×</button>
+            </div>
+            <div class="form-grid one">
+                <label>
+                    <span>学员 ID</span>
+                    <input v-model="creditDialog.form.learnerId" type="number" min="1" required>
+                </label>
+                <label>
+                    <span>积分数量</span>
+                    <input v-model="creditDialog.form.amount" type="number" min="1" required>
+                </label>
+                <label>
+                    <span>来源类型</span>
+                    <input v-model="creditDialog.form.sourceType" placeholder="COURSE / MANUAL">
+                </label>
+                <label>
+                    <span>来源编号</span>
+                    <input v-model="creditDialog.form.sourceNo" placeholder="业务编号">
+                </label>
+                <label>
+                    <span>备注</span>
+                    <textarea v-model="creditDialog.form.remark" placeholder="操作说明"></textarea>
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button class="ghost-button" type="button" @click="closeCreditDialog">取消</button>
+                <button class="primary-button" type="submit" :disabled="saving">提交</button>
+            </div>
+        </form>
+    </div>
 
-    <section id="dashboard" class="panel"></section>
-    <section id="table-panel" class="panel hidden">
-        <div class="panel-head">
-            <h2 id="table-title">数据列表</h2>
-            <button id="refresh-btn">刷新</button>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <thead id="table-head"></thead>
-                <tbody id="table-body"></tbody>
-            </table>
-        </div>
-    </section>
-</main>
+    <div v-if="accountDialog.open" class="modal-backdrop" @click.self="closeAccountDialog">
+        <form class="modal compact" @submit.prevent="submitOpenAccount">
+            <div class="modal-head">
+                <h2>开通积分账户</h2>
+                <button type="button" class="icon-button" @click="closeAccountDialog">×</button>
+            </div>
+            <div class="form-grid one">
+                <label>
+                    <span>学员 ID</span>
+                    <input v-model="accountDialog.learnerId" type="number" min="1" required>
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button class="ghost-button" type="button" @click="closeAccountDialog">取消</button>
+                <button class="primary-button" type="submit" :disabled="saving">开通</button>
+            </div>
+        </form>
+    </div>
 
+    <div v-if="toast.text" :class="['toast', toast.type]">{{ toast.text }}</div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>
