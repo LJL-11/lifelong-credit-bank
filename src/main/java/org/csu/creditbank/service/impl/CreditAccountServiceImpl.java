@@ -43,10 +43,23 @@ public class CreditAccountServiceImpl extends ServiceImpl<CreditAccountMapper, C
     @Transactional
     public CreditAccount increaseCredits(CreditChangeRequest request) {
         CreditAccount account = openAccount(request.getLearnerId());
+        int balanceBefore = account.getAvailableCredits();
         account.setTotalCredits(account.getTotalCredits() + request.getAmount());
         account.setAvailableCredits(account.getAvailableCredits() + request.getAmount());
         updateById(account);
-        saveTransaction(request, account, "INCREASE");
+
+        CreditTransaction t = new CreditTransaction();
+        t.setLearnerId(request.getLearnerId());
+        t.setAccountId(account.getId());
+        t.setTransactionType("INCREASE");
+        t.setAmount(request.getAmount());
+        t.setBalanceBefore(balanceBefore);
+        t.setBalanceAfter(account.getAvailableCredits());
+        t.setSourceType(request.getSourceType());
+        t.setSourceNo(request.getSourceNo());
+        t.setRemark(request.getRemark());
+        transactionService.save(t);
+
         return account;
     }
 
@@ -57,12 +70,78 @@ public class CreditAccountServiceImpl extends ServiceImpl<CreditAccountMapper, C
         if (account.getAvailableCredits() < request.getAmount()) {
             throw new BusinessException("可用积分不足");
         }
+        int balanceBefore = account.getAvailableCredits();
         account.setAvailableCredits(account.getAvailableCredits() - request.getAmount());
         updateById(account);
-        saveTransaction(request, account, "CONSUME");
+
+        CreditTransaction t = new CreditTransaction();
+        t.setLearnerId(request.getLearnerId());
+        t.setAccountId(account.getId());
+        t.setTransactionType("CONSUME");
+        t.setAmount(request.getAmount());
+        t.setBalanceBefore(balanceBefore);
+        t.setBalanceAfter(account.getAvailableCredits());
+        t.setSourceType(request.getSourceType());
+        t.setSourceNo(request.getSourceNo());
+        t.setRemark(request.getRemark());
+        transactionService.save(t);
+
         return account;
     }
 
+    @Override
+    @Transactional
+    public CreditAccount freezeCredits(Long learnerId, Integer amount) {
+        CreditAccount account = openAccount(learnerId);
+        if (account.getAvailableCredits() < amount) {
+            throw new BusinessException("可用积分不足，无法冻结");
+        }
+        account.setAvailableCredits(account.getAvailableCredits() - amount);
+        account.setFrozenCredits(account.getFrozenCredits() + amount);
+        updateById(account);
+        return account;
+    }
+
+    @Override
+    @Transactional
+    public CreditAccount unfreezeCredits(Long learnerId, Integer amount) {
+        CreditAccount account = openAccount(learnerId);
+        if (account.getFrozenCredits() < amount) {
+            throw new BusinessException("冻结积分不足，无法解冻");
+        }
+        account.setFrozenCredits(account.getFrozenCredits() - amount);
+        account.setAvailableCredits(account.getAvailableCredits() + amount);
+        updateById(account);
+        return account;
+    }
+
+    @Override
+    @Transactional
+    public CreditAccount confirmDeduct(Long learnerId, Integer amount) {
+        CreditAccount account = openAccount(learnerId);
+        if (account.getFrozenCredits() < amount) {
+            throw new BusinessException("冻结积分不足，无法完成扣款");
+        }
+        account.setFrozenCredits(account.getFrozenCredits() - amount);
+        account.setTotalCredits(account.getTotalCredits() - amount);
+        updateById(account);
+        return account;
+    }
+
+    @Override
+    @Transactional
+    public CreditAccount refundCredits(Long learnerId, Integer amount) {
+        CreditAccount account = openAccount(learnerId);
+        account.setAvailableCredits(account.getAvailableCredits() + amount);
+        account.setTotalCredits(account.getTotalCredits() + amount);
+        updateById(account);
+        return account;
+    }
+
+    /**
+     * @deprecated 保留兼容，新代码直接内联写入 balanceBefore
+     */
+    @Deprecated
     private void saveTransaction(CreditChangeRequest request, CreditAccount account, String type) {
         CreditTransaction transaction = new CreditTransaction();
         transaction.setLearnerId(request.getLearnerId());

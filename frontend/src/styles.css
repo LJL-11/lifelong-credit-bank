@@ -44,6 +44,10 @@ button:disabled {
 }
 
 #app {
+  min-height: 100vh;
+}
+
+.app-layout {
   display: grid;
   grid-template-columns: 256px minmax(0, 1fr);
   min-height: 100vh;
@@ -117,6 +121,7 @@ button:disabled {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.13);
 }
+
 
 .workspace {
   min-width: 0;

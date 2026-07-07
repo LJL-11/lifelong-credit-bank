@@ -8,6 +8,8 @@ import org.csu.creditbank.entity.CreditAccount;
 import org.csu.creditbank.service.CreditAccountService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/admin/credit-accounts")
 public class CreditAccountController {
@@ -20,7 +22,7 @@ public class CreditAccountController {
 
     @GetMapping
     public ApiResult<Page<CreditAccount>> page(@RequestParam(defaultValue = "1") long current,
-                                               @RequestParam(defaultValue = "10") long size) {
+                                                @RequestParam(defaultValue = "10") long size) {
         return ApiResult.ok(creditAccountService.page(Page.of(current, size)));
     }
 
@@ -37,5 +39,21 @@ public class CreditAccountController {
     @PostMapping("/consume")
     public ApiResult<CreditAccount> consume(@Valid @RequestBody CreditChangeRequest request) {
         return ApiResult.ok(creditAccountService.consumeCredits(request));
+    }
+
+    /** 管理员冻结积分 */
+    @PostMapping("/freeze")
+    public ApiResult<CreditAccount> freeze(@RequestBody Map<String, Object> body) {
+        Long learnerId = Long.valueOf(body.get("learnerId").toString());
+        Integer amount = Integer.valueOf(body.get("amount").toString());
+        return ApiResult.ok(creditAccountService.freezeCredits(learnerId, amount));
+    }
+
+    /** 管理员解冻积分 */
+    @PostMapping("/unfreeze")
+    public ApiResult<CreditAccount> unfreeze(@RequestBody Map<String, Object> body) {
+        Long learnerId = Long.valueOf(body.get("learnerId").toString());
+        Integer amount = Integer.valueOf(body.get("amount").toString());
+        return ApiResult.ok(creditAccountService.unfreezeCredits(learnerId, amount));
     }
 }

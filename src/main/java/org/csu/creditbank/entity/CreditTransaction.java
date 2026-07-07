@@ -16,8 +16,12 @@ public class CreditTransaction extends BaseEntity {
     private Long accountId;
     private String transactionType;
     private Integer amount;
+    private Integer balanceBefore;
     private Integer balanceAfter;
     private String sourceType;
     private String sourceNo;
     private String remark;
+    private Long relatedTransactionId;
+    private String conversionId;
+    private Integer feeAmount;
 }

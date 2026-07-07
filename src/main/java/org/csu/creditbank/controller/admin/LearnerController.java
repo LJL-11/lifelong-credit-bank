@@ -3,9 +3,12 @@ package org.csu.creditbank.controller.admin;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.validation.Valid;
 import org.csu.creditbank.common.ApiResult;
+import org.csu.creditbank.common.BusinessException;
 import org.csu.creditbank.entity.Learner;
 import org.csu.creditbank.service.LearnerService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/learners")
@@ -19,7 +22,7 @@ public class LearnerController {
 
     @GetMapping
     public ApiResult<Page<Learner>> page(@RequestParam(defaultValue = "1") long current,
-                                         @RequestParam(defaultValue = "10") long size) {
+                                          @RequestParam(defaultValue = "10") long size) {
         return ApiResult.ok(learnerService.page(Page.of(current, size)));
     }
 
@@ -45,5 +48,21 @@ public class LearnerController {
     public ApiResult<Void> delete(@PathVariable Long id) {
         learnerService.removeById(id);
         return ApiResult.ok();
+    }
+
+    /** 管理员修改学员状态 */
+    @PutMapping("/{id}/status")
+    public ApiResult<Learner> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String status = body.get("status");
+        if (status == null || (!"ACTIVE".equals(status) && !"DISABLED".equals(status))) {
+            throw new BusinessException("状态值无效，允许值: ACTIVE / DISABLED");
+        }
+        Learner learner = learnerService.getById(id);
+        if (learner == null) {
+            throw new BusinessException("学员不存在");
+        }
+        learner.setStatus(status);
+        learnerService.updateById(learner);
+        return ApiResult.ok(learner);
     }
 }
