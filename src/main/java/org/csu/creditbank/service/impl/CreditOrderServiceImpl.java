@@ -1,0 +1,278 @@
+package org.csu.creditbank.service.impl;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.csu.creditbank.common.BusinessException;
+import org.csu.creditbank.dto.PlaceOrderRequest;
+import org.csu.creditbank.entity.*;
+import org.csu.creditbank.mapper.CreditOrderMapper;
+import org.csu.creditbank.service.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
+@Service
+public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, CreditOrder> implements CreditOrderService {
+
+    private final CreditProductService productService;
+    private final CreditAccountService accountService;
+    private final CreditTransactionService transactionService;
+    private final CartService cartService;
+    private final CreditOrderDetailService detailService;
+
+    public CreditOrderServiceImpl(CreditProductService productService,
+                                  CreditAccountService accountService,
+                                  CreditTransactionService transactionService,
+                                  CartService cartService,
+                                  CreditOrderDetailService detailService) {
+        this.productService = productService;
+        this.accountService = accountService;
+        this.transactionService = transactionService;
+        this.cartService = cartService;
+        this.detailService = detailService;
+    }
+
+    @Override
+    @Transactional
+    public CreditOrder placeOrder(PlaceOrderRequest request) {
+        CreditProduct product = productService.getById(request.getProductId());
+        if (product == null || product.getIsActive() != 1) {
+            throw new BusinessException("商品不存在或已下架");
+        }
+        if (product.getStock() == 0) {
+            throw new BusinessException("商品库存不足");
+        }
+
+        int totalAmount = product.getCreditPrice() * request.getQuantity();
+        CreditAccount account = accountService.freezeCredits(request.getLearnerId(), totalAmount);
+
+        if (product.getStock() > 0) {
+            product.setStock(product.getStock() - request.getQuantity());
+            productService.updateById(product);
+        }
+
+        CreditOrder order = buildOrder(request.getLearnerId(), account.getId(), totalAmount, 1, null, request.getRemark());
+        save(order);
+
+        // 订单明细
+        CreditOrderDetail detail = new CreditOrderDetail();
+        detail.setOrderId(order.getId());
+        detail.setOrderNo(order.getOrderNo());
+        detail.setProductId(product.getId());
+        detail.setProductName(product.getProductName());
+        detail.setCreditPrice(product.getCreditPrice());
+        detail.setNum(request.getQuantity());
+        detail.setAmount(totalAmount);
+        detail.setImageUrl(product.getImageUrl());
+        detailService.save(detail);
+
+        saveTransaction(request.getLearnerId(), account.getId(), "FREEZE",
+                totalAmount, account.getAvailableCredits() + totalAmount,
+                account.getAvailableCredits(), "ORDER_FREEZE", order.getOrderNo(),
+                "下单冻结: " + product.getProductName());
+
+        return order;
+    }
+
+    @Override
+    @Transactional
+    public List<CreditOrder> placeOrderFromCart(PlaceOrderRequest request) {
+        List<Cart> cartItems = cartService.lambdaQuery()
+                .eq(Cart::getLearnerId, request.getLearnerId())
+                .in(Cart::getId, request.getCartIds())
+                .list();
+        if (cartItems.isEmpty()) throw new BusinessException("购物车选项为空");
+
+        int totalAmount = cartItems.stream().mapToInt(c -> c.getCreditPrice() * c.getNum()).sum();
+        CreditAccount account = accountService.freezeCredits(request.getLearnerId(), totalAmount);
+
+        // 同一批次号
+        String batchNo = "B" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+                + ThreadLocalRandom.current().nextInt(100, 999);
+        List<CreditOrder> orders = new ArrayList<>();
+
+        for (Cart cartItem : cartItems) {
+            CreditProduct product = productService.getById(cartItem.getProductId());
+            if (product == null || product.getIsActive() != 1) continue;
+            if (product.getStock() == 0) continue;
+
+            int itemAmount = cartItem.getCreditPrice() * cartItem.getNum();
+
+            if (product.getStock() > 0) {
+                product.setStock(product.getStock() - cartItem.getNum());
+                productService.updateById(product);
+            }
+
+            CreditOrder order = buildOrder(request.getLearnerId(), account.getId(),
+                    itemAmount, cartItem.getNum(), batchNo, request.getRemark());
+            save(order);
+
+            CreditOrderDetail detail = new CreditOrderDetail();
+            detail.setOrderId(order.getId());
+            detail.setOrderNo(order.getOrderNo());
+            detail.setProductId(product.getId());
+            detail.setProductName(cartItem.getProductName());
+            detail.setCreditPrice(cartItem.getCreditPrice());
+            detail.setNum(cartItem.getNum());
+            detail.setAmount(itemAmount);
+            detail.setImageUrl(product.getImageUrl());
+            detailService.save(detail);
+
+            saveTransaction(request.getLearnerId(), account.getId(), "FREEZE",
+                    itemAmount, 0, 0, "ORDER_FREEZE", order.getOrderNo(),
+                    "购物车下单: " + cartItem.getProductName());
+
+            orders.add(order);
+        }
+
+        cartService.removeByIds(request.getCartIds());
+        return orders;
+    }
+
+    @Override
+    @Transactional
+    public CreditOrder confirmPay(Long orderId) {
+        CreditOrder order = getById(orderId);
+        if (order == null) throw new BusinessException("订单不存在");
+        if (!"PENDING".equals(order.getOrderStatus()))
+            throw new BusinessException("订单状态不允许支付，当前状态: " + order.getOrderStatus());
+
+        CreditAccount account = accountService.confirmDeduct(order.getLearnerId(), order.getTotalAmount());
+
+        order.setOrderStatus("PAID");
+        order.setPaidAt(LocalDateTime.now());
+        updateById(order);
+
+        // 销量+1（按订单明细）
+        List<CreditOrderDetail> details = detailService.lambdaQuery()
+                .eq(CreditOrderDetail::getOrderId, orderId).list();
+        for (CreditOrderDetail d : details) {
+            CreditProduct product = productService.getById(d.getProductId());
+            if (product != null) {
+                product.setSold((product.getSold() == null ? 0 : product.getSold()) + d.getNum());
+                productService.updateById(product);
+            }
+        }
+
+        saveTransaction(order.getLearnerId(), order.getAccountId(), "CONSUME",
+                order.getTotalAmount(),
+                account.getAvailableCredits() + order.getTotalAmount(),
+                account.getAvailableCredits(), "ORDER_PAY", order.getOrderNo(),
+                "兑换消费");
+
+        return order;
+    }
+
+    @Override
+    @Transactional
+    public CreditOrder deliver(Long orderId) {
+        CreditOrder order = getById(orderId);
+        if (order == null) throw new BusinessException("订单不存在");
+        if (!"PAID".equals(order.getOrderStatus()))
+            throw new BusinessException("订单状态不允许发货，当前状态: " + order.getOrderStatus());
+        order.setOrderStatus("DELIVERED");
+        order.setDeliveredAt(LocalDateTime.now());
+        updateById(order);
+        return order;
+    }
+
+    @Override
+    @Transactional
+    public CreditOrder cancel(Long orderId) {
+        CreditOrder order = getById(orderId);
+        if (order == null) throw new BusinessException("订单不存在");
+        if (!"PENDING".equals(order.getOrderStatus()))
+            throw new BusinessException("仅待支付订单可取消，当前状态: " + order.getOrderStatus());
+
+        CreditAccount account = accountService.unfreezeCredits(order.getLearnerId(), order.getTotalAmount());
+
+        // 恢复库存（按明细）
+        List<CreditOrderDetail> details = detailService.lambdaQuery()
+                .eq(CreditOrderDetail::getOrderId, orderId).list();
+        for (CreditOrderDetail d : details) {
+            CreditProduct product = productService.getById(d.getProductId());
+            if (product != null && product.getStock() >= 0) {
+                product.setStock(product.getStock() + d.getNum());
+                productService.updateById(product);
+            }
+        }
+
+        order.setOrderStatus("CANCELLED");
+        order.setCancelledAt(LocalDateTime.now());
+        order.setCloseTime(LocalDateTime.now());
+        updateById(order);
+
+        saveTransaction(order.getLearnerId(), order.getAccountId(), "UNFREEZE",
+                order.getTotalAmount(),
+                account.getAvailableCredits() - order.getTotalAmount(),
+                account.getAvailableCredits(), "ORDER_CANCEL", order.getOrderNo(),
+                "取消订单解冻");
+
+        return order;
+    }
+
+    @Override
+    @Transactional
+    public CreditOrder refund(Long orderId) {
+        CreditOrder order = getById(orderId);
+        if (order == null) throw new BusinessException("订单不存在");
+        if (!"PAID".equals(order.getOrderStatus()) && !"DELIVERED".equals(order.getOrderStatus()))
+            throw new BusinessException("仅已支付/已发货订单可退款");
+
+        CreditAccount account = accountService.refundCredits(order.getLearnerId(), order.getTotalAmount());
+        order.setOrderStatus("REFUNDED");
+        order.setCloseTime(LocalDateTime.now());
+        updateById(order);
+
+        saveTransaction(order.getLearnerId(), order.getAccountId(), "REFUND",
+                order.getTotalAmount(),
+                account.getAvailableCredits() - order.getTotalAmount(),
+                account.getAvailableCredits(), "ORDER_REFUND", order.getOrderNo(),
+                "订单退款");
+
+        return order;
+    }
+
+    private CreditOrder buildOrder(Long learnerId, Long accountId, int amount, int count, String batchNo, String remark) {
+        CreditOrder order = new CreditOrder();
+        order.setOrderNo(generateOrderNo());
+        order.setLearnerId(learnerId);
+        order.setAccountId(accountId);
+        order.setProductId(0L);
+        order.setProductName("多商品订单");
+        order.setCreditAmount(amount);
+        order.setTotalAmount(amount);
+        order.setItemCount(count);
+        order.setBatchNo(batchNo);
+        order.setOrderStatus("PENDING");
+        order.setRemark(remark);
+        return order;
+    }
+
+    private String generateOrderNo() {
+        String datePart = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        int random = ThreadLocalRandom.current().nextInt(1000, 9999);
+        return "CO" + datePart + random;
+    }
+
+    private void saveTransaction(Long learnerId, Long accountId, String type,
+                                  int amount, int balanceBefore, int balanceAfter,
+                                  String sourceType, String sourceNo, String remark) {
+        CreditTransaction t = new CreditTransaction();
+        t.setLearnerId(learnerId);
+        t.setAccountId(accountId);
+        t.setTransactionType(type);
+        t.setAmount(amount);
+        t.setBalanceBefore(balanceBefore);
+        t.setBalanceAfter(balanceAfter);
+        t.setSourceType(sourceType);
+        t.setSourceNo(sourceNo);
+        t.setRemark(remark);
+        transactionService.save(t);
+    }
+}
