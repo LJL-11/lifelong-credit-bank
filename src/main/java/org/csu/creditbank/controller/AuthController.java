@@ -5,9 +5,7 @@ import jakarta.validation.Valid;
 import org.csu.creditbank.common.ApiResult;
 import org.csu.creditbank.dto.LoginRequest;
 import org.csu.creditbank.dto.LoginResult;
-import org.csu.creditbank.entity.Institution;
 import org.csu.creditbank.entity.Learner;
-import org.csu.creditbank.service.InstitutionService;
 import org.csu.creditbank.service.LearnerService;
 import org.csu.creditbank.util.TokenUtil;
 import org.springframework.web.bind.annotation.*;
@@ -17,25 +15,18 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final LearnerService learnerService;
-    private final InstitutionService institutionService;
     private final TokenUtil tokenUtil;
 
-    public AuthController(LearnerService learnerService, InstitutionService institutionService, TokenUtil tokenUtil) {
+    public AuthController(LearnerService learnerService, TokenUtil tokenUtil) {
         this.learnerService = learnerService;
-        this.institutionService = institutionService;
         this.tokenUtil = tokenUtil;
     }
 
     @PostMapping("/login")
     public ApiResult<LoginResult> login(@Valid @RequestBody LoginRequest request) {
         Learner learner = learnerService.login(request.getUsername(), request.getPassword());
-        Institution inst = null;
-        if (learner.getInstitutionId() != null && learner.getInstitutionId() > 0) {
-            inst = institutionService.getById(learner.getInstitutionId());
-        }
         String token = tokenUtil.generateToken();
-        tokenUtil.storeToken(token, learner.getId(), learner.getRole(),
-                learner.getInstitutionId(), inst != null ? inst.getName() : "");
+        tokenUtil.storeToken(token, learner.getId(), learner.getRole());
         LoginResult result = new LoginResult(
                 token, learner.getId(), learner.getUsername(),
                 learner.getRealName(), learner.getRole());

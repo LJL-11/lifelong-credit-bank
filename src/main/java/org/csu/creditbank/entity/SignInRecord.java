@@ -18,5 +18,4 @@ public class SignInRecord extends BaseEntity {
     private LocalDate signDate;
     private Integer rewardCredits;
     private String signType;
-    private Long institutionId;
 }

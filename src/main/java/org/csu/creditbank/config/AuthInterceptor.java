@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.csu.creditbank.common.ApiResult;
-import org.csu.creditbank.util.InstitutionContext;
 import org.csu.creditbank.util.TokenUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -40,18 +39,8 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
 
         String role = tokenUtil.getRole(token);
-        Long institutionId = tokenUtil.getInstitutionId(token);
-        String institutionName = tokenUtil.getInstitutionName(token);
-
         request.setAttribute("userId", userId);
         request.setAttribute("role", role);
-        request.setAttribute("institutionId", institutionId);
-        request.setAttribute("institutionName", institutionName);
-
-        // 设置 ThreadLocal 供多租户插件使用
-        if (institutionId != null && institutionId > 0) {
-            InstitutionContext.setInstitutionId(institutionId);
-        }
 
         // /api/admin/** 需要 ADMIN 角色
         String uri = request.getRequestURI();
@@ -60,14 +49,9 @@ public class AuthInterceptor implements HandlerInterceptor {
             return false;
         }
 
+        // 刷新 token 过期时间
         tokenUtil.refreshToken(token);
         return true;
-    }
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
-                                 Object handler, Exception ex) {
-        InstitutionContext.clear();
     }
 
     private void writeError(HttpServletResponse response, String message) throws Exception {

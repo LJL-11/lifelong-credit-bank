@@ -21,5 +21,4 @@ public class LearningRecord extends BaseEntity {
     private BigDecimal score;
     private String result;
     private LocalDateTime completedAt;
-    private Long institutionId;
 }

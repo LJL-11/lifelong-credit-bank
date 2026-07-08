@@ -21,5 +21,4 @@ public class Course extends BaseEntity {
     private BigDecimal creditValue;
     private Integer creditPoint;
     private String status;
-    private Long institutionId;
 }
