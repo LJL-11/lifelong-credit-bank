@@ -20,7 +20,8 @@ public class MybatisPlusConfig {
     private static final Set<String> SHARED_TABLES = Set.of(
             "credit_product", "credit_order", "credit_order_detail",
             "credit_account", "credit_transaction", "cart",
-            "flash_sale", "flash_sale_record", "institution"
+            "flash_sale", "flash_sale_record", "institution",
+            "forum_post_like"
     );
 
     @Bean
@@ -40,6 +41,8 @@ public class MybatisPlusConfig {
             }
             @Override
             public boolean ignoreTable(String tableName) {
+                // 未登录时不启用多租户过滤（登录接口需要查用户）
+                if (InstitutionContext.get() == null) return true;
                 return SHARED_TABLES.contains(tableName) || "flyway_schema_history".equals(tableName);
             }
         });
