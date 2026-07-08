@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import {
   MessageCircle, MessagesSquare, Plus, Send, X, Eye, User, Tag,
-  BookOpen, ShoppingBag, GraduationCap, HelpCircle, PartyPopper, Clock, RefreshCw,
+  BookOpen, ShoppingBag, GraduationCap, HelpCircle, PartyPopper, Clock, RefreshCw, ThumbsUp,
 } from "@lucide/vue";
 
 const props = defineProps({
@@ -117,6 +117,23 @@ async function submitPost() {
     showToast("发帖成功！");
     closeEditor();
     await loadPosts();
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+}
+
+// ==================== 点赞 ====================
+async function toggleLike(post) {
+  try {
+    if (post.liked) {
+      await request(`/api/student/forum/${post.id}/like`, { method: "DELETE" });
+      post.liked = false;
+      post.likeCount = Math.max(0, (post.likeCount || 0) - 1);
+    } else {
+      await request(`/api/student/forum/${post.id}/like`, { method: "POST" });
+      post.liked = true;
+      post.likeCount = (post.likeCount || 0) + 1;
+    }
   } catch (err) {
     showToast(err.message, "error");
   }
@@ -243,6 +260,10 @@ onMounted(loadPosts);
             <MessageCircle :size="14" />
             {{ post.replyCount || 0 }}
           </span>
+          <button class="like-button" :class="{ liked: post.liked }" @click.stop="toggleLike(post)">
+            <ThumbsUp :size="14" />
+            {{ post.likeCount || 0 }}
+          </button>
           <button v-if="isAdmin" class="ghost-button small" @click.stop="togglePostStatus(post)">
             {{ post.status === "VISIBLE" ? "隐藏" : "显示" }}
           </button>
@@ -300,6 +321,10 @@ onMounted(loadPosts);
           <span><User :size="15" /> {{ detailDialog.post?.learnerName || `学员${detailDialog.post?.learnerId}` }}</span>
           <span><Clock :size="15" /> {{ formatTime(detailDialog.post?.createdAt) }}</span>
           <span><MessageCircle :size="15" /> {{ detailDialog.post?.replyCount || 0 }} 回复</span>
+          <button class="like-button detail-like" :class="{ liked: detailDialog.post?.liked }" @click="toggleLike(detailDialog.post)">
+            <ThumbsUp :size="15" />
+            {{ detailDialog.post?.likeCount || 0 }}
+          </button>
         </div>
         <div class="detail-content">
           {{ detailDialog.post?.content }}
@@ -348,6 +373,10 @@ onMounted(loadPosts);
 .post-foot { display: flex; align-items: center; gap: 14px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
 .post-author { display: flex; align-items: center; gap: 5px; }
 .post-meta-item { display: flex; align-items: center; gap: 4px; }
+.like-button { display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--muted); font-size: 13px; cursor: pointer; transition: all 0.15s; }
+.like-button:hover { border-color: var(--primary); color: var(--primary); }
+.like-button.liked { border-color: var(--primary); color: #fff; background: var(--primary); }
+.detail-like { height: 30px; padding: 0 12px; }
 button.small { height: 28px; padding: 0 10px; font-size: 12px; margin-left: auto; }
 
 /* 弹窗 */

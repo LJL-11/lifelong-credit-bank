@@ -6,10 +6,12 @@ import org.csu.creditbank.common.ApiResult;
 import org.csu.creditbank.common.BusinessException;
 import org.csu.creditbank.entity.ForumPost;
 import org.csu.creditbank.entity.Learner;
+import org.csu.creditbank.service.ForumPostLikeService;
 import org.csu.creditbank.service.ForumPostService;
 import org.csu.creditbank.service.LearnerService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -17,10 +19,14 @@ import java.util.Map;
 public class ForumPostController {
 
     private final ForumPostService forumPostService;
+    private final ForumPostLikeService forumPostLikeService;
     private final LearnerService learnerService;
 
-    public ForumPostController(ForumPostService forumPostService, LearnerService learnerService) {
+    public ForumPostController(ForumPostService forumPostService,
+                               ForumPostLikeService forumPostLikeService,
+                               LearnerService learnerService) {
         this.forumPostService = forumPostService;
+        this.forumPostLikeService = forumPostLikeService;
         this.learnerService = learnerService;
     }
 
@@ -38,8 +44,8 @@ public class ForumPostController {
         }
         wrapper.orderByDesc(ForumPost::getCreatedAt);
         Page<ForumPost> page = forumPostService.page(Page.of(current, size), wrapper);
-        // 填充发帖人姓名
         page.getRecords().forEach(this::fillLearnerName);
+        fillLikeCount(page.getRecords());
         return ApiResult.ok(page);
     }
 
@@ -48,6 +54,7 @@ public class ForumPostController {
         ForumPost post = forumPostService.getById(id);
         if (post == null) throw new BusinessException("帖子不存在");
         fillLearnerName(post);
+        fillLikeCount(List.of(post));
         return ApiResult.ok(post);
     }
 
@@ -74,6 +81,15 @@ public class ForumPostController {
         if (post.getLearnerId() != null) {
             Learner learner = learnerService.getById(post.getLearnerId());
             if (learner != null) post.setLearnerName(learner.getRealName());
+        }
+    }
+
+    private void fillLikeCount(List<ForumPost> posts) {
+        if (posts.isEmpty()) return;
+        List<Long> postIds = posts.stream().map(ForumPost::getId).toList();
+        Map<Long, Integer> likeCounts = forumPostLikeService.getLikeCounts(postIds);
+        for (ForumPost post : posts) {
+            post.setLikeCount(likeCounts.getOrDefault(post.getId(), 0));
         }
     }
 }

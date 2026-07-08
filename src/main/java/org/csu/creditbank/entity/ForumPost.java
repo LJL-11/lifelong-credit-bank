@@ -23,4 +23,12 @@ public class ForumPost extends BaseEntity {
     /** 发帖人姓名（非数据库字段） */
     @TableField(exist = false)
     private String learnerName;
+
+    /** 点赞数（非数据库字段） */
+    @TableField(exist = false)
+    private Integer likeCount;
+
+    /** 当前用户是否已点赞（非数据库字段） */
+    @TableField(exist = false)
+    private Boolean liked;
 }

@@ -181,6 +181,7 @@ export const modules = {
       { key: "title", label: "标题" },
       { key: "section", label: "板块" },
       { key: "replyCount", label: "回复数" },
+      { key: "likeCount", label: "点赞数" },
       { key: "status", label: "状态", badge: true },
     ],
     fields: [
@@ -189,6 +190,7 @@ export const modules = {
       { key: "section", label: "板块" },
       { key: "content", label: "内容", type: "textarea" },
       { key: "replyCount", label: "回复数", type: "number" },
+      { key: "likeCount", label: "点赞数", type: "number" },
       { key: "status", label: "状态", placeholder: "VISIBLE / HIDDEN" },
     ],
   },

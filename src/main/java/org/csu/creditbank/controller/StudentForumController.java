@@ -8,19 +8,28 @@ import org.csu.creditbank.common.ApiResult;
 import org.csu.creditbank.common.BusinessException;
 import org.csu.creditbank.entity.ForumPost;
 import org.csu.creditbank.entity.Learner;
+import org.csu.creditbank.service.ForumPostLikeService;
 import org.csu.creditbank.service.ForumPostService;
 import org.csu.creditbank.service.LearnerService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/student/forum")
 public class StudentForumController {
 
     private final ForumPostService forumPostService;
+    private final ForumPostLikeService forumPostLikeService;
     private final LearnerService learnerService;
 
-    public StudentForumController(ForumPostService forumPostService, LearnerService learnerService) {
+    public StudentForumController(ForumPostService forumPostService,
+                                  ForumPostLikeService forumPostLikeService,
+                                  LearnerService learnerService) {
         this.forumPostService = forumPostService;
+        this.forumPostLikeService = forumPostLikeService;
         this.learnerService = learnerService;
     }
 
@@ -28,7 +37,9 @@ public class StudentForumController {
     @GetMapping
     public ApiResult<Page<ForumPost>> list(@RequestParam(defaultValue = "1") long current,
                                             @RequestParam(defaultValue = "10") long size,
-                                            @RequestParam(required = false) String section) {
+                                            @RequestParam(required = false) String section,
+                                            HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
         LambdaQueryWrapper<ForumPost> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ForumPost::getStatus, "VISIBLE");
         if (section != null && !section.isEmpty()) {
@@ -40,16 +51,19 @@ public class StudentForumController {
             Learner l = learnerService.getById(p.getLearnerId());
             if (l != null) p.setLearnerName(l.getRealName());
         });
+        fillLikeInfo(page.getRecords(), userId);
         return ApiResult.ok(page);
     }
 
     /** 帖子详情 */
     @GetMapping("/{id}")
-    public ApiResult<ForumPost> detail(@PathVariable Long id) {
+    public ApiResult<ForumPost> detail(@PathVariable Long id, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
         ForumPost post = forumPostService.getById(id);
         if (post == null) throw new BusinessException("帖子不存在");
         Learner l = learnerService.getById(post.getLearnerId());
         if (l != null) post.setLearnerName(l.getRealName());
+        fillLikeInfo(List.of(post), userId);
         return ApiResult.ok(post);
     }
 
@@ -67,6 +81,7 @@ public class StudentForumController {
             Learner l = learnerService.getById(userId);
             if (l != null) p.setLearnerName(l.getRealName());
         });
+        fillLikeInfo(page.getRecords(), userId);
         return ApiResult.ok(page);
     }
 
@@ -87,9 +102,41 @@ public class StudentForumController {
         return ApiResult.ok(post);
     }
 
+    /** 点赞（Redisson 分布式锁防并发） */
+    @PostMapping("/{id}/like")
+    public ApiResult<Void> like(@PathVariable Long id, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        ForumPost post = forumPostService.getById(id);
+        if (post == null) throw new BusinessException("帖子不存在");
+        forumPostLikeService.like(id, userId);
+        return ApiResult.ok();
+    }
+
+    /** 取消点赞 */
+    @DeleteMapping("/{id}/like")
+    public ApiResult<Void> unlike(@PathVariable Long id, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        forumPostLikeService.unlike(id, userId);
+        return ApiResult.ok();
+    }
+
     /** 板块列表 */
     @GetMapping("/sections")
     public ApiResult<String[]> sections() {
         return ApiResult.ok(new String[]{"学习交流", "积分商城", "课程讨论", "技术问答", "活动分享"});
+    }
+
+    /** 批量填充点赞数和当前用户是否已点赞 */
+    private void fillLikeInfo(List<ForumPost> posts, Long userId) {
+        if (posts.isEmpty()) return;
+        List<Long> postIds = posts.stream().map(ForumPost::getId).toList();
+
+        Map<Long, Integer> likeCounts = forumPostLikeService.getLikeCounts(postIds);
+        Set<Long> likedPostIds = forumPostLikeService.getLikedPostIds(postIds, userId);
+
+        for (ForumPost post : posts) {
+            post.setLikeCount(likeCounts.getOrDefault(post.getId(), 0));
+            post.setLiked(likedPostIds.contains(post.getId()));
+        }
     }
 }

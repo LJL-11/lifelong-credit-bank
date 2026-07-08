@@ -3,6 +3,8 @@
 -- ============================================================
 
 CREATE TABLE flash_sale (
+
+
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     product_id BIGINT NOT NULL COMMENT '关联商品ID',
     product_name VARCHAR(128) NOT NULL COMMENT '商品名称快照',
