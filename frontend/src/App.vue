@@ -51,6 +51,7 @@ const currentLearnerId = computed(() => userInfo.value?.learnerId || 0);
 const adminMenu = computed(() => menu);
 const studentMenu = computed(() => [
   { key: "profile", label: "我的信息", icon: "UserCircle" },
+  { key: "courses", label: "我的课程", icon: "BookOpen" },
   { key: "forum", label: "学习论坛", icon: "MessagesSquare" },
   { key: "mall", label: "积分商城", icon: "ShoppingBag" },
 ]);
@@ -145,10 +146,36 @@ async function loadTable() {
 }
 
 const profile = ref(null);
+const courses = ref([]);
+const coursePage = ref({ current: 1, size: 10, total: 0 });
+const learnedCourseIds = ref(new Set());
 async function loadProfile() {
   loading.value = true;
   try { profile.value = await request("/api/student/profile"); }
   catch (err) { showToast(err.message, "error"); }
+  finally { loading.value = false; }
+}
+
+async function loadCourses() {
+  loading.value = true;
+  try {
+    const data = await request(`/api/student/courses?current=${coursePage.value.current}&size=${coursePage.value.size}`);
+    courses.value = data.records || [];
+    coursePage.value.total = data.total || 0;
+  } catch (err) { showToast(err.message, "error"); }
+  finally { loading.value = false; }
+}
+
+async function learnCourse(course) {
+  if (!confirm(`确认学习「${course.courseName}」并获得 ${course.creditPoint} 积分？`)) return;
+  loading.value = true;
+  try {
+    const result = await request(`/api/student/courses/${course.id}/learn`, { method: "POST" });
+    learnedCourseIds.value = new Set([...learnedCourseIds.value, course.id]);
+    showToast(`完成学习！获得 ${result.creditPoint} 积分`);
+    // 刷新用户信息中的积分余额
+    if (currentView.value === "profile") loadProfile();
+  } catch (err) { showToast(err.message, "error"); }
   finally { loading.value = false; }
 }
 
@@ -167,6 +194,14 @@ function switchModule(key) {
   } else if (key === "profile") {
     currentView.value = "profile";
     loadProfile();
+  } else if (key === "courses") {
+    if (isAdmin.value) {
+      currentView.value = "admin";
+      loadTable();
+    } else {
+      currentView.value = "courses";
+      loadCourses();
+    }
   } else {
     currentView.value = "admin";
     loadTable();
@@ -177,6 +212,10 @@ function reloadActive() {
   if (activeModule.value === "dashboard") loadDashboard();
   else if (activeModule.value === "mall" || activeModule.value === "forum") { /* own refresh */ }
   else if (activeModule.value === "profile") loadProfile();
+  else if (activeModule.value === "courses") {
+    if (isAdmin.value) loadTable();
+    else loadCourses();
+  }
   else loadTable();
 }
 
@@ -347,6 +386,39 @@ onMounted(() => {
       :current-user-id="currentLearnerId"
       :current-user-name="userInfo?.realName || ''"
     />
+
+
+    <!-- 学员我的课程 -->
+    <main v-else-if="currentView === 'courses'" class="workspace">
+      <header class="topbar">
+        <div><p class="eyebrow">Student Portal</p><h1>我的课程</h1><p class="subtitle">本机构发布的课程资源</p></div>
+      </header>
+      <section class="panel">
+        <div v-if="loading" class="state-block"><LoaderCircle class="spin" :size="22" /> 加载中...</div>
+        <div v-else-if="courses.length === 0" class="state-block">暂无课程</div>
+        <div v-else class="table-wrap">
+          <table><thead><tr><th>ID</th><th>课程编码</th><th>课程名称</th><th>提供方</th><th>分类</th><th>学分</th><th>积分</th><th>操作</th></tr></thead>
+            <tbody><tr v-for="c in courses" :key="c.id">
+              <td>{{ c.id }}</td><td>{{ c.courseCode }}</td><td>{{ c.courseName }}</td>
+              <td>{{ c.provider }}</td><td>{{ c.category }}</td><td>{{ c.creditValue }}</td><td>{{ c.creditPoint }}</td>
+              <td>
+                <button v-if="!learnedCourseIds.has(c.id)"
+                  class="primary-button small" type="button"
+                  :disabled="loading"
+                  @click="learnCourse(c)">开始学习</button>
+                <span v-else class="data-badge success">已学完</span>
+              </td>
+            </tr></tbody>
+          </table>
+        </div>
+        <footer v-if="coursePage.total > coursePage.size" class="pager">
+          <button :disabled="coursePage.current <= 1" @click="coursePage.current--; loadCourses()">上一页</button>
+          <span>第 {{ coursePage.current }} / {{ Math.ceil(coursePage.total / coursePage.size) }} 页</span>
+          <button :disabled="coursePage.current >= Math.ceil(coursePage.total / coursePage.size)" @click="coursePage.current++; loadCourses()">下一页</button>
+        </footer>
+      </section>
+    </main>
+
 
     <!-- ====== 学员个人信息 ====== -->
     <main v-else-if="currentView === 'profile'" class="workspace">

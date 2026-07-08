@@ -7,18 +7,23 @@ import jakarta.validation.Valid;
 import org.csu.creditbank.common.ApiResult;
 import org.csu.creditbank.common.BusinessException;
 import org.csu.creditbank.dto.PlaceOrderRequest;
+import org.csu.creditbank.dto.CreditChangeRequest;
 import org.csu.creditbank.entity.CreditAccount;
 import org.csu.creditbank.entity.CreditOrder;
 import org.csu.creditbank.entity.CreditProduct;
 import org.csu.creditbank.entity.Learner;
+import org.csu.creditbank.entity.LearningRecord;
 import org.csu.creditbank.service.CreditAccountService;
 import org.csu.creditbank.service.CourseService;
 import org.csu.creditbank.entity.Course;
 import org.csu.creditbank.service.CreditOrderService;
 import org.csu.creditbank.service.CreditProductService;
 import org.csu.creditbank.service.LearnerService;
+import org.csu.creditbank.service.LearningRecordService;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -30,17 +35,20 @@ public class StudentController {
     private final CreditProductService productService;
     private final CreditOrderService orderService;
     private final CourseService courseService;
+    private final LearningRecordService learningRecordService;
 
     public StudentController(LearnerService learnerService,
                              CourseService courseService,
                              CreditAccountService accountService,
                              CreditProductService productService,
-                             CreditOrderService orderService) {
+                             CreditOrderService orderService,
+                             LearningRecordService learningRecordService) {
         this.learnerService = learnerService;
         this.accountService = accountService;
         this.productService = productService;
         this.orderService = orderService;
         this.courseService = courseService;
+        this.learningRecordService = learningRecordService;
     }
 
     /** 获取当前学员个人信息 */
@@ -140,6 +148,17 @@ public class StudentController {
         return ApiResult.ok(orderService.cancel(id));
     }
 
+    /** 学员所属机构课程列表（多租户自动过滤 institution_id） */
+    @GetMapping("/courses")
+    public ApiResult<Page<Course>> courses(@RequestParam(defaultValue = "1") long current,
+                                            @RequestParam(defaultValue = "10") long size) {
+        Page<Course> page = courseService.lambdaQuery()
+                .eq(Course::getStatus, "PUBLISHED")
+                .orderByDesc(Course::getCreatedAt)
+                .page(Page.of(current, size));
+        return ApiResult.ok(page);
+    }
+
     /** 学员积分统计 */
     @GetMapping("/stats")
     public ApiResult<Map<String, Object>> stats(HttpServletRequest request) {
@@ -152,5 +171,60 @@ public class StudentController {
                 "account", account,
                 "totalOrders", orderCount
         ));
+    }
+
+    /** 学习课程：一键完成，获得积分 */
+    @PostMapping("/courses/{courseId}/learn")
+    public ApiResult<Map<String, Object>> learnCourse(@PathVariable Long courseId,
+                                                       HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+
+        // 1. 检查课程存在且已发布
+        Course course = courseService.getById(courseId);
+        if (course == null || !"PUBLISHED".equals(course.getStatus())) {
+            throw new BusinessException("课程不存在或已下架");
+        }
+
+        // 2. 检查是否已学完
+        long completed = learningRecordService.lambdaQuery()
+                .eq(LearningRecord::getLearnerId, userId)
+                .eq(LearningRecord::getCourseId, courseId)
+                .eq(LearningRecord::getResult, "PASSED")
+                .count();
+        if (completed > 0) {
+            throw new BusinessException("该课程已完成，无需重复学习");
+        }
+
+        // 3. 创建学习记录（同步到机构）
+        Long institutionId = (Long) request.getAttribute("institutionId");
+        LearningRecord record = new LearningRecord();
+        record.setLearnerId(userId);
+        record.setCourseId(courseId);
+        record.setInstitutionId(institutionId);
+        record.setProgress(new BigDecimal("100"));
+        record.setScore(new BigDecimal("100"));
+        record.setResult("PASSED");
+        record.setCompletedAt(LocalDateTime.now());
+        learningRecordService.save(record);
+
+        // 4. 发放积分
+        int creditPoint = course.getCreditPoint() != null ? course.getCreditPoint() : 0;
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("courseName", course.getCourseName());
+        result.put("creditPoint", creditPoint);
+        result.put("learningRecord", record);
+
+        if (creditPoint > 0) {
+            CreditChangeRequest reward = new CreditChangeRequest();
+            reward.setLearnerId(userId);
+            reward.setAmount(creditPoint);
+            reward.setSourceType("COURSE_COMPLETE");
+            reward.setSourceNo("COURSE-" + course.getCourseCode());
+            reward.setRemark("完成课程《" + course.getCourseName() + "》获得积分");
+            CreditAccount account = accountService.increaseCredits(reward);
+            result.put("account", account);
+        }
+
+        return ApiResult.ok(result);
     }
 }

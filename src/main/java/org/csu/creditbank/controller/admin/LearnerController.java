@@ -1,5 +1,6 @@
 package org.csu.creditbank.controller.admin;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.validation.Valid;
 import org.csu.creditbank.common.ApiResult;
@@ -23,7 +24,9 @@ public class LearnerController {
     @GetMapping
     public ApiResult<Page<Learner>> page(@RequestParam(defaultValue = "1") long current,
                                           @RequestParam(defaultValue = "10") long size) {
-        return ApiResult.ok(learnerService.page(Page.of(current, size)));
+        Page<Learner> page = learnerService.page(Page.of(current, size),
+                new LambdaQueryWrapper<Learner>().eq(Learner::getRole, "STUDENT"));
+        return ApiResult.ok(page);
     }
 
     @GetMapping("/{id}")
