@@ -17,4 +17,5 @@ public class BlockchainCredential extends BaseEntity {
     private String businessNo;
     private String hashValue;
     private String chainStatus;
+    private Long institutionId;
 }

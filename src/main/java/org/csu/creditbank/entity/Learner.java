@@ -24,4 +24,9 @@ public class Learner extends BaseEntity {
     private String password;
 
     private String role;
+    private Long institutionId;
+
+    /** 机构名称（非数据库字段，查询时填充） */
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
+    private String institutionName;
 }

@@ -18,4 +18,5 @@ public class JobPosting extends BaseEntity {
     private String requirement;
     private String contact;
     private String status;
+    private Long institutionId;
 }

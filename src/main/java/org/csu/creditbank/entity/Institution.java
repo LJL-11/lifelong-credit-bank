@@ -5,18 +5,16 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalDate;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("sign_in_record")
-public class SignInRecord extends BaseEntity {
+@TableName("institution")
+public class Institution extends BaseEntity {
 
     @TableId
     private Long id;
-    private Long learnerId;
-    private LocalDate signDate;
-    private Integer rewardCredits;
-    private String signType;
-    private Long institutionId;
+    private String name;
+    private String code;
+    private String contact;
+    private String phone;
+    private String status;
 }
