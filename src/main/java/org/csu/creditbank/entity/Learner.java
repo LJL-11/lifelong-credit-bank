@@ -24,4 +24,7 @@ public class Learner extends BaseEntity {
     private String password;
 
     private String role;
+    private Long institutionId;
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
+    private String institutionName;
 }

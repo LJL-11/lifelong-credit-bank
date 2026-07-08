@@ -174,7 +174,7 @@ export const modules = {
     subtitle: "维护学习交流社区内容、板块和可见状态",
     tableTitle: "帖子列表",
     api: "/api/admin/forum-posts",
-    canCreate: true,
+    canCreate: false,
     columns: [
       { key: "id", label: "ID" },
       { key: "learnerId", label: "学员 ID" },

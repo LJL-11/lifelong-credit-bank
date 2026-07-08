@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.csu.creditbank.common.ApiResult;
+import org.csu.creditbank.util.InstitutionContext;
 import org.csu.creditbank.util.TokenUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -21,9 +22,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                              Object handler) throws Exception {
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            return true;
-        }
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -39,19 +38,32 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
 
         String role = tokenUtil.getRole(token);
+        Long institutionId = tokenUtil.getInstitutionId(token);
+        String institutionName = tokenUtil.getInstitutionName(token);
+
         request.setAttribute("userId", userId);
         request.setAttribute("role", role);
+        request.setAttribute("institutionId", institutionId);
+        request.setAttribute("institutionName", institutionName);
 
-        // /api/admin/** 需要 ADMIN 角色
+        if (institutionId != null && institutionId > 0) {
+            InstitutionContext.set(institutionId);
+        }
+
         String uri = request.getRequestURI();
         if (uri.contains("/api/admin/") && !"ADMIN".equals(role)) {
             writeError(response, "权限不足，需要管理员身份");
             return false;
         }
 
-        // 刷新 token 过期时间
         tokenUtil.refreshToken(token);
         return true;
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+                                 Object handler, Exception ex) {
+        InstitutionContext.clear();
     }
 
     private void writeError(HttpServletResponse response, String message) throws Exception {

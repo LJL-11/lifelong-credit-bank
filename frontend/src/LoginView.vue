@@ -27,8 +27,8 @@ async function handleLogin() {
       error.value = result.message || "登录失败";
       return;
     }
-    const { token, learnerId, realName, role } = result.data;
-    const userInfo = { learnerId, username: result.data.username, realName, role };
+    const { token, learnerId, realName, role, institutionName } = result.data;
+    const userInfo = { learnerId, username: result.data.username, realName, role, institutionName };
     localStorage.setItem("token", token);
     localStorage.setItem("userInfo", JSON.stringify(userInfo));
     emit("login-success", { token, userInfo });

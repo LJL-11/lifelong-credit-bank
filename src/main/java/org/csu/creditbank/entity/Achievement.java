@@ -18,6 +18,7 @@ public class Achievement extends BaseEntity {
     private String achievementName;
     private String achievementType;
     private Integer suggestedCredits;
+    private Long institutionId;
     private String auditStatus;
     private String auditor;
     private LocalDateTime auditedAt;

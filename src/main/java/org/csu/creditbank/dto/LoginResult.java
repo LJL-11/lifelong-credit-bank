@@ -12,4 +12,5 @@ public class LoginResult {
     private String username;
     private String realName;
     private String role;
+    private String institutionName;
 }

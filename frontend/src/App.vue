@@ -310,7 +310,11 @@ onMounted(() => {
         <div>
           <strong>{{ userInfo?.realName }}</strong>
           <small>{{ userInfo?.username }}</small>
+          <small v-if="userInfo?.institutionName" class="inst-label">{{ userInfo.institutionName }}</small>
         </div>
+      </div>
+      <div v-if="isAdmin && userInfo?.institutionName" class="inst-badge">
+        {{ userInfo.institutionName }}
       </div>
 
       <nav class="nav">
@@ -550,4 +554,12 @@ onMounted(() => {
 .profile-field strong { font-size: 18px; }
 
 .sidebar { display: flex; flex-direction: column; }
+
+/* 机构标签 */
+.inst-label { display: block; margin-top: 2px; font-size: 11px; color: #f0c46a; }
+.inst-badge {
+  padding: 6px 12px; margin-bottom: 8px; border-radius: 6px;
+  background: rgba(240,196,106,0.12); color: #f0c46a; font-size: 12px;
+  font-weight: 600; text-align: center;
+}
 </style>

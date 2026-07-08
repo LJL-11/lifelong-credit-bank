@@ -22,9 +22,11 @@ public class TokenUtil {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    public void storeToken(String token, Long userId, String role) {
+    public void storeToken(String token, Long userId, String role, Long institutionId, String institutionName) {
         redis.opsForHash().put(PREFIX + token, "userId", String.valueOf(userId));
         redis.opsForHash().put(PREFIX + token, "role", role);
+        redis.opsForHash().put(PREFIX + token, "institutionId", String.valueOf(institutionId != null ? institutionId : 0));
+        redis.opsForHash().put(PREFIX + token, "institutionName", institutionName != null ? institutionName : "");
         redis.expire(PREFIX + token, TTL);
     }
 
@@ -38,11 +40,20 @@ public class TokenUtil {
         return val != null ? val.toString() : null;
     }
 
+    public Long getInstitutionId(String token) {
+        Object val = redis.opsForHash().get(PREFIX + token, "institutionId");
+        return val != null ? Long.valueOf(val.toString()) : 0L;
+    }
+
+    public String getInstitutionName(String token) {
+        Object val = redis.opsForHash().get(PREFIX + token, "institutionName");
+        return val != null ? val.toString() : "";
+    }
+
     public void removeToken(String token) {
         redis.delete(PREFIX + token);
     }
 
-    /** 刷新 token 过期时间 */
     public void refreshToken(String token) {
         redis.expire(PREFIX + token, TTL);
     }

@@ -19,6 +19,7 @@ public class ForumPost extends BaseEntity {
     private String section;
     private Integer replyCount;
     private String status;
+    private Long institutionId;
 
     /** 发帖人姓名（非数据库字段） */
     @TableField(exist = false)

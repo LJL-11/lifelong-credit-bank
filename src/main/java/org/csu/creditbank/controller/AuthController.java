@@ -5,7 +5,9 @@ import jakarta.validation.Valid;
 import org.csu.creditbank.common.ApiResult;
 import org.csu.creditbank.dto.LoginRequest;
 import org.csu.creditbank.dto.LoginResult;
+import org.csu.creditbank.entity.Institution;
 import org.csu.creditbank.entity.Learner;
+import org.csu.creditbank.service.InstitutionService;
 import org.csu.creditbank.service.LearnerService;
 import org.csu.creditbank.util.TokenUtil;
 import org.springframework.web.bind.annotation.*;
@@ -15,22 +17,27 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final LearnerService learnerService;
+    private final InstitutionService institutionService;
     private final TokenUtil tokenUtil;
 
-    public AuthController(LearnerService learnerService, TokenUtil tokenUtil) {
+    public AuthController(LearnerService learnerService, InstitutionService institutionService, TokenUtil tokenUtil) {
         this.learnerService = learnerService;
+        this.institutionService = institutionService;
         this.tokenUtil = tokenUtil;
     }
 
     @PostMapping("/login")
     public ApiResult<LoginResult> login(@Valid @RequestBody LoginRequest request) {
         Learner learner = learnerService.login(request.getUsername(), request.getPassword());
+        String instName = "";
+        if (learner.getInstitutionId() != null && learner.getInstitutionId() > 0) {
+            Institution inst = institutionService.getById(learner.getInstitutionId());
+            if (inst != null) instName = inst.getName();
+        }
         String token = tokenUtil.generateToken();
-        tokenUtil.storeToken(token, learner.getId(), learner.getRole());
-        LoginResult result = new LoginResult(
-                token, learner.getId(), learner.getUsername(),
-                learner.getRealName(), learner.getRole());
-        return ApiResult.ok(result);
+        tokenUtil.storeToken(token, learner.getId(), learner.getRole(), learner.getInstitutionId(), instName);
+        return ApiResult.ok(new LoginResult(token, learner.getId(), learner.getUsername(),
+                learner.getRealName(), learner.getRole(), instName));
     }
 
     @PostMapping("/logout")
@@ -47,12 +54,9 @@ public class AuthController {
         Long userId = (Long) request.getAttribute("userId");
         String role = (String) request.getAttribute("role");
         Learner learner = learnerService.getById(userId);
-        if (learner == null) {
-            return ApiResult.fail("用户不存在");
-        }
-        LoginResult result = new LoginResult(
-                null, learner.getId(), learner.getUsername(),
-                learner.getRealName(), role);
-        return ApiResult.ok(result);
+        if (learner == null) return ApiResult.fail("用户不存在");
+        String instName = (String) request.getAttribute("institutionName");
+        return ApiResult.ok(new LoginResult(null, learner.getId(), learner.getUsername(),
+                learner.getRealName(), role, instName != null ? instName : ""));
     }
 }

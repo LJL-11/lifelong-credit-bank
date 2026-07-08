@@ -12,6 +12,8 @@ import org.csu.creditbank.entity.CreditOrder;
 import org.csu.creditbank.entity.CreditProduct;
 import org.csu.creditbank.entity.Learner;
 import org.csu.creditbank.service.CreditAccountService;
+import org.csu.creditbank.service.CourseService;
+import org.csu.creditbank.entity.Course;
 import org.csu.creditbank.service.CreditOrderService;
 import org.csu.creditbank.service.CreditProductService;
 import org.csu.creditbank.service.LearnerService;
@@ -27,8 +29,10 @@ public class StudentController {
     private final CreditAccountService accountService;
     private final CreditProductService productService;
     private final CreditOrderService orderService;
+    private final CourseService courseService;
 
     public StudentController(LearnerService learnerService,
+                             CourseService courseService,
                              CreditAccountService accountService,
                              CreditProductService productService,
                              CreditOrderService orderService) {
@@ -36,6 +40,7 @@ public class StudentController {
         this.accountService = accountService;
         this.productService = productService;
         this.orderService = orderService;
+        this.courseService = courseService;
     }
 
     /** 获取当前学员个人信息 */
