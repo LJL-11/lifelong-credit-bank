@@ -1,4 +1,4 @@
-package org.csu.creditbank.controller.admin;
+package org.csu.creditbank.controller.admin.credit;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.csu.creditbank.common.ApiResult;
