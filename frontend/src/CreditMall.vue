@@ -60,6 +60,12 @@ async function request(url, options = {}) {
   };
   const response = await fetch(url, { ...options, headers });
   const result = await response.json();
+  if (response.status === 401) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userInfo");
+    window.location.reload();
+    throw new Error(result.message || "登录已过期");
+  }
   if (!response.ok || result.code !== 200) throw new Error(result.message || "请求失败");
   return result.data;
 }
