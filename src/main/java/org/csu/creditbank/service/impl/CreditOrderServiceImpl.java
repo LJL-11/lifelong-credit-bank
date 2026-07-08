@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -49,8 +48,14 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         }
 
         int totalAmount = product.getCreditPrice() * request.getQuantity();
-        CreditAccount account = accountService.freezeCredits(request.getLearnerId(), totalAmount);
 
+        // 只校验账户存在且可用积分充足，不冻结
+        CreditAccount account = accountService.openAccount(request.getLearnerId());
+        if (account.getAvailableCredits() < totalAmount) {
+            throw new BusinessException("可用积分不足");
+        }
+
+        // 扣库存
         if (product.getStock() > 0) {
             product.setStock(product.getStock() - request.getQuantity());
             productService.updateById(product);
@@ -59,7 +64,6 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         CreditOrder order = buildOrder(request.getLearnerId(), account.getId(), totalAmount, 1, null, request.getRemark());
         save(order);
 
-        // 订单明细
         CreditOrderDetail detail = new CreditOrderDetail();
         detail.setOrderId(order.getId());
         detail.setOrderNo(order.getOrderNo());
@@ -70,11 +74,6 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         detail.setAmount(totalAmount);
         detail.setImageUrl(product.getImageUrl());
         detailService.save(detail);
-
-        saveTransaction(request.getLearnerId(), account.getId(), "FREEZE",
-                totalAmount, account.getAvailableCredits() + totalAmount,
-                account.getAvailableCredits(), "ORDER_FREEZE", order.getOrderNo(),
-                "下单冻结: " + product.getProductName());
 
         return order;
     }
@@ -89,9 +88,13 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         if (cartItems.isEmpty()) throw new BusinessException("购物车选项为空");
 
         int totalAmount = cartItems.stream().mapToInt(c -> c.getCreditPrice() * c.getNum()).sum();
-        CreditAccount account = accountService.freezeCredits(request.getLearnerId(), totalAmount);
 
-        // 同一批次号
+        // 只校验可用积分充足，不冻结
+        CreditAccount account = accountService.openAccount(request.getLearnerId());
+        if (account.getAvailableCredits() < totalAmount) {
+            throw new BusinessException("可用积分不足，还差 " + (totalAmount - account.getAvailableCredits()) + " 积分");
+        }
+
         String batchNo = "B" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
                 + ThreadLocalRandom.current().nextInt(100, 999);
         List<CreditOrder> orders = new ArrayList<>();
@@ -123,10 +126,6 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
             detail.setImageUrl(product.getImageUrl());
             detailService.save(detail);
 
-            saveTransaction(request.getLearnerId(), account.getId(), "FREEZE",
-                    itemAmount, 0, 0, "ORDER_FREEZE", order.getOrderNo(),
-                    "购物车下单: " + cartItem.getProductName());
-
             orders.add(order);
         }
 
@@ -142,13 +141,20 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         if (!"PENDING".equals(order.getOrderStatus()))
             throw new BusinessException("订单状态不允许支付，当前状态: " + order.getOrderStatus());
 
-        CreditAccount account = accountService.confirmDeduct(order.getLearnerId(), order.getTotalAmount());
+        // 直接扣积分
+        CreditAccount account = accountService.openAccount(order.getLearnerId());
+        int balanceBefore = account.getAvailableCredits();
+        if (balanceBefore < order.getTotalAmount()) {
+            throw new BusinessException("积分不足，当前可用: " + balanceBefore + "，需要: " + order.getTotalAmount());
+        }
+        account.setAvailableCredits(balanceBefore - order.getTotalAmount());
+        accountService.updateById(account);
 
         order.setOrderStatus("PAID");
         order.setPaidAt(LocalDateTime.now());
         updateById(order);
 
-        // 销量+1（按订单明细）
+        // 销量+1
         List<CreditOrderDetail> details = detailService.lambdaQuery()
                 .eq(CreditOrderDetail::getOrderId, orderId).list();
         for (CreditOrderDetail d : details) {
@@ -160,10 +166,8 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         }
 
         saveTransaction(order.getLearnerId(), order.getAccountId(), "CONSUME",
-                order.getTotalAmount(),
-                account.getAvailableCredits() + order.getTotalAmount(),
-                account.getAvailableCredits(), "ORDER_PAY", order.getOrderNo(),
-                "兑换消费");
+                order.getTotalAmount(), balanceBefore, account.getAvailableCredits(),
+                "ORDER_PAY", order.getOrderNo(), "支付扣减");
 
         return order;
     }
@@ -189,9 +193,7 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         if (!"PENDING".equals(order.getOrderStatus()))
             throw new BusinessException("仅待支付订单可取消，当前状态: " + order.getOrderStatus());
 
-        CreditAccount account = accountService.unfreezeCredits(order.getLearnerId(), order.getTotalAmount());
-
-        // 恢复库存（按明细）
+        // 恢复库存
         List<CreditOrderDetail> details = detailService.lambdaQuery()
                 .eq(CreditOrderDetail::getOrderId, orderId).list();
         for (CreditOrderDetail d : details) {
@@ -207,12 +209,6 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         order.setCloseTime(LocalDateTime.now());
         updateById(order);
 
-        saveTransaction(order.getLearnerId(), order.getAccountId(), "UNFREEZE",
-                order.getTotalAmount(),
-                account.getAvailableCredits() - order.getTotalAmount(),
-                account.getAvailableCredits(), "ORDER_CANCEL", order.getOrderNo(),
-                "取消订单解冻");
-
         return order;
     }
 
@@ -224,16 +220,19 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         if (!"PAID".equals(order.getOrderStatus()) && !"DELIVERED".equals(order.getOrderStatus()))
             throw new BusinessException("仅已支付/已发货订单可退款");
 
-        CreditAccount account = accountService.refundCredits(order.getLearnerId(), order.getTotalAmount());
+        // 退还积分
+        CreditAccount account = accountService.openAccount(order.getLearnerId());
+        int balanceBefore = account.getAvailableCredits();
+        account.setAvailableCredits(balanceBefore + order.getTotalAmount());
+        accountService.updateById(account);
+
         order.setOrderStatus("REFUNDED");
         order.setCloseTime(LocalDateTime.now());
         updateById(order);
 
         saveTransaction(order.getLearnerId(), order.getAccountId(), "REFUND",
-                order.getTotalAmount(),
-                account.getAvailableCredits() - order.getTotalAmount(),
-                account.getAvailableCredits(), "ORDER_REFUND", order.getOrderNo(),
-                "订单退款");
+                order.getTotalAmount(), balanceBefore, account.getAvailableCredits(),
+                "ORDER_REFUND", order.getOrderNo(), "订单退款");
 
         return order;
     }

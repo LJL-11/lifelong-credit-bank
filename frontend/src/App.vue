@@ -4,7 +4,7 @@ import {
   Award, BookOpen, BriefcaseBusiness, ClipboardList, FileText,
   LayoutDashboard, LoaderCircle, LogOut, MessagesSquare, Plus,
   ReceiptText, RefreshCw, Save, ShoppingBag, Trash2, UserCircle,
-  Users, WalletCards, X,
+  Users, WalletCards, X, Zap,
 } from "@lucide/vue";
 import { menu, modules } from "./modules";
 import LoginView from "./LoginView.vue";
@@ -60,7 +60,7 @@ const currentMenu = computed(() => isAdmin.value ? adminMenu.value : studentMenu
 const icons = {
   Award, BookOpen, BriefcaseBusiness, ClipboardList,
   LayoutDashboard, MessagesSquare, ReceiptText, Users, WalletCards,
-  UserCircle, ShoppingBag,
+  UserCircle, ShoppingBag, Zap,
 };
 
 const activeModule = ref("dashboard");
@@ -268,7 +268,8 @@ function badgeClass(v) {
   const t = String(v || "").toLowerCase();
   if (/active|open|published|approved|passed|increase|paid|delivered/.test(t)) return "success";
   if (/pending|learning/.test(t)) return "pending";
-  if (/reject|disable|closed|failed|consume|refunded|cancelled/.test(t)) return "danger";
+  if (/upcoming/.test(t)) return "pending";
+  if (/reject|disable|closed|ended|failed|consume|refunded|cancelled/.test(t)) return "danger";
   return "neutral";
 }
 function showToast(text, type = "ok") {

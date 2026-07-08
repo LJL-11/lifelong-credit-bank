@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import {
   Award, Coins, LoaderCircle, Minus, Package, Plus, ReceiptText, RefreshCw,
   ShoppingBag, ShoppingCart, Store, Trash2, Undo2, UserCheck, X, Sparkles,
+  Zap, Clock,
 } from "@lucide/vue";
 
 const props = defineProps({
@@ -13,6 +14,12 @@ const props = defineProps({
 
 const learnerId = ref(props.learnerId);
 const activeTab = ref("mall");
+
+// 秒杀
+const flashSales = ref([]);
+const flashLoading = ref(false);
+const flashCountdowns = ref({});
+let flashTimer = 0;
 const loading = ref(false);
 const saving = ref(false);
 const products = ref([]);
@@ -89,6 +96,66 @@ async function loadOrders() {
 }
 
 async function loadAll() { await Promise.all([loadProducts(), loadAccount(), loadOrders()]); }
+
+// ==================== 秒杀 ====================
+async function loadFlashSales() {
+  flashLoading.value = true;
+  try {
+    flashSales.value = await request("/api/flash/active");
+    // 开始倒计时
+    clearInterval(flashTimer);
+    flashTimer = setInterval(updateCountdowns, 1000);
+  } catch { flashSales.value = []; }
+  finally { flashLoading.value = false; }
+}
+
+function updateCountdowns() {
+  const now = Date.now();
+  const newCounts = {};
+  for (const s of flashSales.value) {
+    const end = new Date(s.endTime).getTime();
+    const begin = new Date(s.beginTime).getTime();
+    if (now < begin) {
+      const diff = Math.floor((begin - now) / 1000);
+      newCounts[s.id] = { text: formatCountdown(diff), state: "upcoming" };
+    } else if (now < end) {
+      const diff = Math.floor((end - now) / 1000);
+      newCounts[s.id] = { text: formatCountdown(diff), state: "active" };
+    }
+  }
+  flashCountdowns.value = newCounts;
+}
+
+function formatCountdown(seconds) {
+  if (seconds <= 0) return "已结束";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+async function doSeckill(sale) {
+  if (!account.value) { showToast("请先开通积分账户", "error"); return; }
+  const cd = flashCountdowns.value[sale.id];
+  if (cd?.state === "upcoming") { showToast("秒杀尚未开始", "error"); return; }
+  saving.value = true;
+  try {
+    const orderId = await request(`/api/flash/seckill/${sale.id}`, { method: "POST" });
+    showToast(`秒杀成功！订单号: ${orderId}`);
+    await Promise.all([loadAccount(), loadOrders()]);
+    // 刷新秒杀库存
+    const stockKey = `flash:stock:${sale.id}`;
+    sale.redisStock = Math.max(0, (sale.redisStock || sale.stock) - 1);
+  } catch (err) {
+    showToast(err.message, "error");
+    if (err.message?.includes("不能重复参与")) {
+      sale.redisStock = -1; // 标记已参与
+    }
+  }
+  finally { saving.value = false; }
+}
+
+onMounted(() => { loadAll(); loadFlashSales(); });
 
 // ==================== 购物车 ====================
 async function loadCart() {
@@ -309,8 +376,7 @@ async function refundOrder(order) {
 function formatTime(v) { if (!v) return "-"; return String(v).replace("T", " ").slice(0, 16); }
 function showToast(text, type = "ok") { toast.value = { text, type }; clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast.value.text = ""; }, 2800); }
 function switchLearner() { if (!Number(learnerId.value) || Number(learnerId.value) < 1) { showToast("无效ID", "error"); return; } loadAll(); }
-watch(() => props.learnerId, (newId) => { learnerId.value = newId; loadAll(); });
-onMounted(loadAll);
+watch(() => props.learnerId, (newId) => { learnerId.value = newId; loadAll(); loadFlashSales(); });
 </script>
 
 <template>
@@ -324,6 +390,7 @@ onMounted(loadAll);
       </div>
       <div class="mall-nav">
         <button :class="{ active: activeTab === 'mall' }" @click="activeTab = 'mall'"><ShoppingBag :size="17" /> 商品</button>
+        <button :class="{ active: activeTab === 'flash' }" @click="activeTab = 'flash'; loadFlashSales()"><Zap :size="17" /> 秒杀</button>
         <button :class="{ active: activeTab === 'orders' }" @click="activeTab = 'orders'"><Package :size="17" /> 订单</button>
         <button class="ghost-button cart-btn" @click="toggleCart"><ShoppingCart :size="16" /> 购物车 ({{ cartItems.length }})</button>
         <button class="ghost-button" @click="loadAll"><RefreshCw :size="16" /> 刷新</button>
@@ -383,6 +450,43 @@ onMounted(loadAll);
               <button class="ghost-button full" type="button" @click="openDetailDialog(p)">查看详情</button>
               <button class="ghost-button full" type="button" @click="addToCart(p)"><ShoppingCart :size="15" /> 加入购物车</button>
               <button class="primary-button full" :disabled="!account || account.availableCredits < p.creditPrice || p.stock === 0" @click="openOrderDialog(p)"><ShoppingBag :size="16" /> {{ !account ? "请先开通" : account.availableCredits < p.creditPrice ? "积分不足" : p.stock === 0 ? "已售罄" : "立即兑换" }}</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ====== 秒杀专区 ====== -->
+      <section v-if="activeTab === 'flash'" class="mall-content">
+        <div v-if="flashLoading" class="state-block"><LoaderCircle class="spin" :size="24" /> 加载中...</div>
+        <div v-else-if="flashSales.length === 0" class="state-block"><Zap :size="32" /> 暂无明显秒杀活动</div>
+        <div v-else class="flash-grid">
+          <article v-for="sale in flashSales" :key="sale.id" class="flash-card">
+            <div class="flash-cover">
+              <span class="flash-badge">秒杀</span>
+              <span class="flash-emoji">⚡</span>
+              <div v-if="flashCountdowns[sale.id]" :class="['flash-cd', flashCountdowns[sale.id].state]">
+                <Clock :size="14" /> {{ flashCountdowns[sale.id]?.text }}
+              </div>
+            </div>
+            <div class="flash-body">
+              <h3>{{ sale.productName }}</h3>
+              <div class="flash-prices">
+                <span class="flash-origin">{{ sale.originPrice }} 积分</span>
+                <span class="flash-price">{{ sale.flashPrice }} 积分</span>
+              </div>
+              <div class="flash-stock">
+                剩余: {{ sale.redisStock !== undefined ? sale.redisStock : sale.stock }}
+              </div>
+            </div>
+            <div class="flash-foot">
+              <button
+                class="primary-button full"
+                :disabled="saving || !account || (sale.redisStock !== undefined ? sale.redisStock <= 0 : sale.stock <= 0) || (flashCountdowns[sale.id]?.state === 'upcoming')"
+                @click="doSeckill(sale)"
+              >
+                <Zap :size="16" />
+                {{ !account ? "请先开通账户" : sale.redisStock === -1 ? "已参与" : flashCountdowns[sale.id]?.state === 'upcoming' ? "未开始" : (sale.redisStock !== undefined ? sale.redisStock <= 0 : sale.stock <= 0) ? "已售罄" : "立即秒杀" }}
+              </button>
             </div>
           </article>
         </div>
@@ -700,5 +804,23 @@ button.danger { color: var(--danger); border-color: var(--danger-bg); }
 .checkout-actions button { flex: 1; }
 button.large { height: 46px; font-size: 15px; justify-content: center; border-radius: 10px; }
 
-@media (max-width: 860px) { .mall-header { flex-direction: column; align-items: stretch; } .mall-nav { margin-left: 0; flex-wrap: wrap; } .balance-cards { flex-direction: column; } .product-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } .mall-body:has(.cart-panel) { grid-template-columns: 1fr; } .checkout-header { flex-direction: column; } }
+/* ====== 秒杀 ====== */
+.flash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.flash-card { border: 2px solid #f0c46a; border-radius: 10px; background: var(--panel); overflow: hidden; position: relative; }
+.flash-card:hover { box-shadow: 0 6px 20px rgba(240,196,106,0.20); }
+.flash-cover { height: 90px; background: linear-gradient(135deg, #fef3c7, #fde68a, #f0c46a); display: grid; place-items: center; position: relative; }
+.flash-badge { position: absolute; top: 10px; left: 10px; padding: 3px 10px; border-radius: 999px; background: #b42318; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: 1px; }
+.flash-emoji { font-size: 38px; }
+.flash-cd { position: absolute; right: 10px; bottom: 10px; display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.flash-cd.active { background: #fff; color: #b42318; }
+.flash-cd.upcoming { background: rgba(255,255,255,0.7); color: #92400e; }
+.flash-body { padding: 12px 14px; }
+.flash-body h3 { margin: 0 0 8px; font-size: 16px; }
+.flash-prices { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.flash-origin { font-size: 13px; color: var(--muted); text-decoration: line-through; }
+.flash-price { font-size: 22px; font-weight: 800; color: #b42318; }
+.flash-stock { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.flash-foot { padding: 0 14px 14px; }
+
+@media (max-width: 860px) { .mall-header { flex-direction: column; align-items: stretch; } .mall-nav { margin-left: 0; flex-wrap: wrap; } .balance-cards { flex-direction: column; } .product-grid, .flash-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } .mall-body:has(.cart-panel) { grid-template-columns: 1fr; } .checkout-header { flex-direction: column; } }
 </style>
