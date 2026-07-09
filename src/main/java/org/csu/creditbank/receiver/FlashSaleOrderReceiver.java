@@ -26,7 +26,6 @@ public class FlashSaleOrderReceiver {
 
     /**
      * 秒杀下单消费者 —— 监听秒杀下单队列（队列由 FlashSaleMqConfig 声明）
-     * 仿照 share-parent 的 @RabbitListener + 手动应答 + Redis 防重
      */
     @RabbitListener(queues = MqConst.QUEUE_FLASH_ORDER)
     public void handleFlashOrder(String content, Message message, Channel channel) {

@@ -1,9 +1,9 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import {
-  Award, BookOpen, BriefcaseBusiness, ClipboardList, FileText,
+  Award, BookOpen, Bot, BriefcaseBusiness, ClipboardList, FileText,
   LayoutDashboard, LoaderCircle, LogOut, MessagesSquare, Plus,
-  ReceiptText, RefreshCw, Save, ShoppingBag, Trash2, UserCircle,
+  ReceiptText, RefreshCw, Save, ShoppingBag, Sparkles, Trash2, UserCircle,
   Users, WalletCards, X, Zap,
 } from "@lucide/vue";
 import { menu, modules } from "./modules";
@@ -54,14 +54,15 @@ const studentMenu = computed(() => [
   { key: "courses", label: "我的课程", icon: "BookOpen" },
   { key: "forum", label: "学习论坛", icon: "MessagesSquare" },
   { key: "mall", label: "积分商城", icon: "ShoppingBag" },
+  { key: "ai", label: "AI 助手", icon: "Sparkles" },
 ]);
 const currentMenu = computed(() => isAdmin.value ? adminMenu.value : studentMenu.value);
 
 // ==================== 图标 ====================
 const icons = {
-  Award, BookOpen, BriefcaseBusiness, ClipboardList,
+  Award, BookOpen, Bot, BriefcaseBusiness, ClipboardList,
   LayoutDashboard, MessagesSquare, ReceiptText, Users, WalletCards,
-  UserCircle, ShoppingBag, Zap,
+  UserCircle, ShoppingBag, Zap, Sparkles,
 };
 
 const activeModule = ref("dashboard");
@@ -179,6 +180,73 @@ async function learnCourse(course) {
   finally { loading.value = false; }
 }
 
+// ==================== AI 助手 ====================
+const aiMessages = ref([]);
+const aiInput = ref("");
+const aiSending = ref(false);
+const aiMsgListRef = ref(null);
+
+function newAiChat() {
+  aiMessages.value = [];
+}
+
+function scrollAiToBottom() {
+  requestAnimationFrame(() => {
+    if (aiMsgListRef.value) {
+      aiMsgListRef.value.scrollTop = aiMsgListRef.value.scrollHeight;
+    }
+  });
+}
+
+async function sendAiMessage() {
+  const msg = aiInput.value.trim();
+  if (!msg || aiSending.value) return;
+  aiInput.value = "";
+  aiSending.value = true;
+
+  // 添加用户消息
+  aiMessages.value.push({ isUser: true, content: msg });
+
+  // 添加机器人占位消息
+  const botIdx = aiMessages.value.length;
+  aiMessages.value.push({ isUser: false, content: "", isTyping: true });
+  scrollAiToBottom();
+
+  try {
+    const response = await fetch("/api/student/ai/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token.value}`,
+      },
+      body: JSON.stringify({ message: msg }),
+    });
+
+    if (!response.ok) {
+      aiMessages.value[botIdx].content = "抱歉，AI 助手暂时无法响应，请稍后再试。";
+      aiMessages.value[botIdx].isTyping = false;
+      aiSending.value = false;
+      return;
+    }
+
+    // langchain4j reactor 输出纯文本流，逐块读取追加
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      aiMessages.value[botIdx].content += decoder.decode(value, { stream: true });
+      scrollAiToBottom();
+    }
+    aiMessages.value[botIdx].isTyping = false;
+  } catch (err) {
+    aiMessages.value[botIdx].content = "网络错误，请稍后重试。";
+    aiMessages.value[botIdx].isTyping = false;
+  } finally {
+    aiSending.value = false;
+  }
+}
+
 function switchModule(key) {
   activeModule.value = key;
   page.value.current = 1;
@@ -191,6 +259,8 @@ function switchModule(key) {
     currentView.value = "mall";
   } else if (key === "forum") {
     currentView.value = "forum";
+  } else if (key === "ai") {
+    currentView.value = "ai";
   } else if (key === "profile") {
     currentView.value = "profile";
     loadProfile();
@@ -210,7 +280,7 @@ function switchModule(key) {
 
 function reloadActive() {
   if (activeModule.value === "dashboard") loadDashboard();
-  else if (activeModule.value === "mall" || activeModule.value === "forum") { /* own refresh */ }
+  else if (activeModule.value === "mall" || activeModule.value === "forum" || activeModule.value === "ai") { /* own refresh */ }
   else if (activeModule.value === "profile") loadProfile();
   else if (activeModule.value === "courses") {
     if (isAdmin.value) loadTable();
@@ -419,6 +489,51 @@ onMounted(() => {
       </section>
     </main>
 
+
+    <!-- ====== AI 学习助手 ====== -->
+    <main v-else-if="currentView === 'ai'" class="workspace">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Student Portal</p>
+          <h1><Sparkles :size="22" class="ai-title-icon" /> AI 学习助手</h1>
+          <p class="subtitle">问课程、查积分、推荐学习路径 — 你的专属学习伙伴</p>
+        </div>
+        <div class="top-actions">
+          <button class="ghost-button" type="button" @click="newAiChat">新对话</button>
+        </div>
+      </header>
+      <section class="panel ai-chat-panel">
+        <div class="ai-msg-list" ref="aiMsgListRef">
+          <div v-if="aiMessages.length === 0" class="ai-welcome">
+            <Bot :size="48" class="ai-bot-icon" />
+            <h3>你好！我是学分助手 🎓</h3>
+            <p>试试问我：</p>
+            <div class="ai-hints">
+              <button v-for="h in ['有哪些Java课程？','我的积分是多少？','推荐适合我的课程','我学了哪些课程？']" :key="h"
+                class="ghost-button small" @click="aiInput = h; sendAiMessage()">{{ h }}</button>
+            </div>
+          </div>
+          <div v-for="(msg, idx) in aiMessages" :key="idx"
+            :class="['ai-msg', msg.isUser ? 'ai-user' : 'ai-bot']">
+            <div class="ai-msg-avatar">
+              <UserCircle v-if="msg.isUser" :size="28" />
+              <Bot v-else :size="28" />
+            </div>
+            <div class="ai-msg-body">
+              <div class="ai-msg-content" v-html="msg.content || (msg.isTyping ? '<span class=ai-typing>思考中<span class=dotting>...</span></span>' : '')"></div>
+            </div>
+          </div>
+        </div>
+        <div class="ai-input-bar">
+          <input v-model="aiInput" type="text" placeholder="输入你的问题..."
+            :disabled="aiSending"
+            @keyup.enter="sendAiMessage" />
+          <button class="primary-button" :disabled="aiSending || !aiInput.trim()" @click="sendAiMessage">
+            {{ aiSending ? '发送中...' : '发送' }}
+          </button>
+        </div>
+      </section>
+    </main>
 
     <!-- ====== 学员个人信息 ====== -->
     <main v-else-if="currentView === 'profile'" class="workspace">
@@ -634,4 +749,34 @@ onMounted(() => {
   background: rgba(240,196,106,0.12); color: #f0c46a; font-size: 12px;
   font-weight: 600; text-align: center;
 }
+
+/* AI 助手 */
+.ai-title-icon { vertical-align: -4px; margin-right: 4px; color: #f0c46a; }
+.ai-chat-panel { display: flex; flex-direction: column; height: calc(100vh - 180px); min-height: 400px; }
+.ai-msg-list { flex: 1; overflow-y: auto; padding: 12px 0; display: flex; flex-direction: column; gap: 12px; }
+.ai-welcome { text-align: center; padding: 48px 20px 32px; }
+.ai-bot-icon { color: #166a5f; margin-bottom: 12px; }
+.ai-welcome h3 { margin: 0 0 8px; font-size: 20px; color: #123c39; }
+.ai-welcome p { color: #66758a; margin: 0 0 16px; }
+.ai-hints { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.ai-hints .ghost-button.small { font-size: 12px; padding: 6px 14px; }
+
+.ai-msg { display: flex; gap: 10px; max-width: 90%; }
+.ai-user { align-self: flex-end; flex-direction: row-reverse; }
+.ai-bot { align-self: flex-start; }
+.ai-msg-avatar { flex-shrink: 0; color: #166a5f; }
+.ai-user .ai-msg-avatar { color: #66758a; }
+.ai-msg-body { padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.6; }
+.ai-user .ai-msg-body { background: #e8f4f2; color: #182235; border-bottom-right-radius: 4px; }
+.ai-bot .ai-msg-body { background: #f4f6f9; color: #182235; border-bottom-left-radius: 4px; white-space: pre-wrap; word-break: break-word; }
+
+.ai-typing { color: #66758a; font-style: italic; }
+.dotting::after { content: ''; animation: aiDots 1.4s steps(3, end) infinite; }
+@keyframes aiDots {
+  0% { content: ''; } 33% { content: '.'; } 66% { content: '..'; } 100% { content: '...'; }
+}
+
+.ai-input-bar { display: flex; gap: 10px; padding: 12px 0 0; border-top: 1px solid var(--line); margin-top: auto; }
+.ai-input-bar input { flex: 1; height: 42px; padding: 0 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; }
+.ai-input-bar input:focus { outline: 2px solid rgba(18,60,57,0.16); border-color: #166a5f; }
 </style>

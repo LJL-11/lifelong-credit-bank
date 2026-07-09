@@ -76,7 +76,7 @@ public class FlashSaleOrderServiceImpl extends ServiceImpl<FlashSaleRecordMapper
         // 2. 生成全局唯一订单ID
         long orderId = redisIdWorker.nextId("flash-order");
 
-        // 3. 发送消息到 RabbitMQ 异步下单（仿照 share-parent 的 RabbitService）
+        // 3. 发送消息到 RabbitMQ 异步下单
         String message = flashSaleId + ":" + learnerId + ":" + orderId;
         String messageId = "mq:" + UUID.randomUUID().toString().replace("-", "");
         rabbitTemplate.convertAndSend(MqConst.EXCHANGE_FLASH, MqConst.ROUTING_FLASH_ORDER,

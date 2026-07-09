@@ -47,3 +47,22 @@ management:
     web:
       exposure:
         include: health,info,metrics
+
+# ==================== AI 学习助手 ====================
+langchain4j:
+  open-ai:
+    chat-model:
+      base-url: https://api.deepseek.com
+      api-key: sk-ae3a8e73fd0441afa3c6a7ea0a59712c
+      model-name: deepseek-chat
+      log-requests: true
+      log-responses: true
+    streaming-chat-model:
+      base-url: https://api.deepseek.com
+      api-key: sk-ae3a8e73fd0441afa3c6a7ea0a59712c
+      model-name: deepseek-chat
+  community:
+    dashscope:
+      embedding-model:
+        api-key: sk-6bf3b98fc9d949559c979bf370dfa7f9
+        model-name: text-embedding-v3
