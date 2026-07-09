@@ -2,10 +2,12 @@ package org.csu.creditbank.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.csu.creditbank.common.BusinessException;
+import org.csu.creditbank.config.MqConst;
 import org.csu.creditbank.dto.PlaceOrderRequest;
 import org.csu.creditbank.entity.*;
 import org.csu.creditbank.mapper.CreditOrderMapper;
 import org.csu.creditbank.service.*;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,17 +25,20 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
     private final CreditTransactionService transactionService;
     private final CartService cartService;
     private final CreditOrderDetailService detailService;
+    private final RabbitTemplate rabbitTemplate;
 
     public CreditOrderServiceImpl(CreditProductService productService,
                                   CreditAccountService accountService,
                                   CreditTransactionService transactionService,
                                   CartService cartService,
-                                  CreditOrderDetailService detailService) {
+                                  CreditOrderDetailService detailService,
+                                  RabbitTemplate rabbitTemplate) {
         this.productService = productService;
         this.accountService = accountService;
         this.transactionService = transactionService;
         this.cartService = cartService;
         this.detailService = detailService;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Override
@@ -77,7 +82,16 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         detail.setImageUrl(product.getImageUrl());
         detailService.save(detail);
 
+        // 发送 15 分钟超时取消消息
+        sendTimeoutMessage(order.getId());
+
         return order;
+    }
+
+    /** 发送订单超时延时消息（15 分钟后自动取消未支付订单） */
+    private void sendTimeoutMessage(Long orderId) {
+        rabbitTemplate.convertAndSend(MqConst.EXCHANGE_ORDER,
+                MqConst.QUEUE_ORDER_TIMEOUT_TASK, orderId.toString());
     }
 
     @Override
@@ -134,6 +148,11 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         }
 
         cartService.removeByIds(request.getCartIds());
+
+        // 每个订单发送 15 分钟超时取消消息
+        for (CreditOrder o : orders) {
+            sendTimeoutMessage(o.getId());
+        }
         return orders;
     }
 
