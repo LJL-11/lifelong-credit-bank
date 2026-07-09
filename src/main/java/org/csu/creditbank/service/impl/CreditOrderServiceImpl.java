@@ -61,7 +61,9 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
             productService.updateById(product);
         }
 
-        CreditOrder order = buildOrder(request.getLearnerId(), account.getId(), totalAmount, 1, null, request.getRemark());
+        CreditOrder order = buildOrder(request.getLearnerId(), account.getId(), totalAmount, request.getQuantity(), null, request.getRemark());
+        order.setProductId(product.getId());
+        order.setProductName(product.getProductName());
         save(order);
 
         CreditOrderDetail detail = new CreditOrderDetail();
@@ -113,6 +115,8 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
 
             CreditOrder order = buildOrder(request.getLearnerId(), account.getId(),
                     itemAmount, cartItem.getNum(), batchNo, request.getRemark());
+            order.setProductId(product.getId());
+            order.setProductName(cartItem.getProductName());
             save(order);
 
             CreditOrderDetail detail = new CreditOrderDetail();
@@ -141,13 +145,18 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         if (!"PENDING".equals(order.getOrderStatus()))
             throw new BusinessException("订单状态不允许支付，当前状态: " + order.getOrderStatus());
 
-        // 直接扣积分
+        // 直接扣积分（totalAmount 有 DB NOT NULL 兜底，加 null 保护防 NPE）
+        int totalAmount = order.getTotalAmount() != null ? order.getTotalAmount() : 0;
+        if (totalAmount <= 0) {
+            throw new BusinessException("订单金额异常");
+        }
         CreditAccount account = accountService.openAccount(order.getLearnerId());
         int balanceBefore = account.getAvailableCredits();
-        if (balanceBefore < order.getTotalAmount()) {
-            throw new BusinessException("积分不足，当前可用: " + balanceBefore + "，需要: " + order.getTotalAmount());
+        if (balanceBefore < totalAmount) {
+            throw new BusinessException("积分不足，当前可用: " + balanceBefore + "，需要: " + totalAmount);
         }
-        account.setAvailableCredits(balanceBefore - order.getTotalAmount());
+        account.setAvailableCredits(balanceBefore - totalAmount);
+        account.setTotalCredits(account.getTotalCredits() - totalAmount);
         accountService.updateById(account);
 
         order.setOrderStatus("PAID");
@@ -224,6 +233,7 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         CreditAccount account = accountService.openAccount(order.getLearnerId());
         int balanceBefore = account.getAvailableCredits();
         account.setAvailableCredits(balanceBefore + order.getTotalAmount());
+        account.setTotalCredits(account.getTotalCredits() + order.getTotalAmount());
         accountService.updateById(account);
 
         order.setOrderStatus("REFUNDED");
@@ -239,6 +249,7 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
 
     private CreditOrder buildOrder(Long learnerId, Long accountId, int amount, int count, String batchNo, String remark) {
         CreditOrder order = new CreditOrder();
+        order.setDeleted(0); // @TableLogic: 必须显式设0，否则 null 查不到
         order.setOrderNo(generateOrderNo());
         order.setLearnerId(learnerId);
         order.setAccountId(accountId);

@@ -266,9 +266,8 @@ function startCheckoutTimer() {
     checkoutTimerText.value = `${m}:${String(s).padStart(2, "0")}`;
     if (checkoutTimer.value <= 0) {
       clearInterval(checkoutInterval);
-      // 超时自动取消所有订单
       for (const o of checkoutOrders.value) {
-        try { await cancelOrderById(o.id); } catch {}
+        try { await cancelOrderById(o.id); } catch (e) { console.error("超时取消失败:", e); }
       }
       checkoutView.value = false;
       await Promise.all([loadAccount(), loadOrders()]);
@@ -280,29 +279,27 @@ function startCheckoutTimer() {
 async function cancelCheckout() {
   clearInterval(checkoutInterval);
   saving.value = true;
-  try {
-    for (const o of checkoutOrders.value) {
-      try { await cancelOrderById(o.id); } catch {}
-    }
-    showToast("订单已取消，积分已退回");
-    checkoutView.value = false;
-    await Promise.all([loadAccount(), loadOrders()]);
-  } catch (err) { showToast(err.message, "error"); }
-  finally { saving.value = false; }
+  let allOk = true;
+  for (const o of checkoutOrders.value) {
+    try { await cancelOrderById(o.id); } catch (err) { allOk = false; showToast(err.message, "error"); }
+  }
+  if (allOk) showToast("订单已取消，积分已退回");
+  checkoutView.value = false;
+  await Promise.all([loadAccount(), loadOrders()]);
+  saving.value = false;
 }
 
 async function confirmCheckout() {
   clearInterval(checkoutInterval);
   saving.value = true;
-  try {
-    for (const o of checkoutOrders.value) {
-      try { await payOrderById(o.id); } catch {}
-    }
-    showToast("支付成功！");
-    checkoutView.value = false;
-    await Promise.all([loadAccount(), loadOrders()]);
-  } catch (err) { showToast(err.message, "error"); }
-  finally { saving.value = false; }
+  let allOk = true;
+  for (const o of checkoutOrders.value) {
+    try { await payOrderById(o.id); } catch (err) { allOk = false; showToast(err.message, "error"); }
+  }
+  if (allOk) showToast("支付成功！");
+  checkoutView.value = false;
+  await Promise.all([loadAccount(), loadOrders()]);
+  saving.value = false;
 }
 
 async function cancelOrderById(orderId) {

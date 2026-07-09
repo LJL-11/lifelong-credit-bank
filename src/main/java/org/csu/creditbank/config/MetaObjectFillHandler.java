@@ -14,6 +14,7 @@ public class MetaObjectFillHandler implements MetaObjectHandler {
         LocalDateTime now = LocalDateTime.now();
         strictInsertFill(metaObject, "createdAt", LocalDateTime.class, now);
         strictInsertFill(metaObject, "updatedAt", LocalDateTime.class, now);
+        strictInsertFill(metaObject, "deleted", Integer.class, 0); // @TableLogic 必须非NULL
     }
 
     @Override

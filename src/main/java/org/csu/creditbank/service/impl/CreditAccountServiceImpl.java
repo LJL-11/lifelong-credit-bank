@@ -72,6 +72,7 @@ public class CreditAccountServiceImpl extends ServiceImpl<CreditAccountMapper, C
         }
         int balanceBefore = account.getAvailableCredits();
         account.setAvailableCredits(account.getAvailableCredits() - request.getAmount());
+        account.setTotalCredits(account.getTotalCredits() - request.getAmount());
         updateById(account);
 
         CreditTransaction t = new CreditTransaction();

@@ -31,6 +31,7 @@ public class FlashSaleOrderServiceImpl extends ServiceImpl<FlashSaleRecordMapper
     private final CreditAccountService accountService;
     private final CreditOrderService orderService;
     private final CreditProductService productService;
+    private final CreditTransactionService transactionService;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedisIdWorker redisIdWorker;
     private final RedissonClient redissonClient;
@@ -40,6 +41,7 @@ public class FlashSaleOrderServiceImpl extends ServiceImpl<FlashSaleRecordMapper
                                       CreditAccountService accountService,
                                       CreditOrderService orderService,
                                       CreditProductService productService,
+                                      CreditTransactionService transactionService,
                                       StringRedisTemplate stringRedisTemplate,
                                       RedisIdWorker redisIdWorker,
                                       RedissonClient redissonClient,
@@ -48,6 +50,7 @@ public class FlashSaleOrderServiceImpl extends ServiceImpl<FlashSaleRecordMapper
         this.accountService = accountService;
         this.orderService = orderService;
         this.productService = productService;
+        this.transactionService = transactionService;
         this.stringRedisTemplate = stringRedisTemplate;
         this.redisIdWorker = redisIdWorker;
         this.redissonClient = redissonClient;
@@ -144,17 +147,19 @@ public class FlashSaleOrderServiceImpl extends ServiceImpl<FlashSaleRecordMapper
             return;
         }
         account.setAvailableCredits(balanceBefore - flashSale.getFlashPrice());
+        account.setTotalCredits(account.getTotalCredits() - flashSale.getFlashPrice());
         accountService.updateById(account);
 
         // 5. 创建订单（秒杀直接支付 = PAID）
         CreditOrder order = new CreditOrder();
+        order.setDeleted(0); // @TableLogic 兜底
         order.setId(orderId);
         order.setOrderNo("FS" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
                 + orderId % 10000);
         order.setLearnerId(learnerId);
         order.setAccountId(account.getId());
         order.setProductId(flashSale.getProductId());
-        order.setProductName(flashSale.getProductName() + " 【秒杀】");
+        order.setProductName(flashSale.getProductName() + "【秒杀】");
         order.setCreditAmount(flashSale.getFlashPrice());
         order.setTotalAmount(flashSale.getFlashPrice());
         order.setItemCount(1);
@@ -171,6 +176,25 @@ public class FlashSaleOrderServiceImpl extends ServiceImpl<FlashSaleRecordMapper
         record.setOrderId(orderId);
         save(record);
 
+        // 7. 积分流水
+        saveTransaction(learnerId, account.getId(), order.getOrderNo(),
+                flashSale.getFlashPrice(), balanceBefore, account.getAvailableCredits());
+
         log.info("[秒杀服务] 秒杀成功: 用户={}, 活动={}, 订单={}", learnerId, flashSaleId, orderId);
+    }
+
+    private void saveTransaction(Long learnerId, Long accountId, String orderNo,
+                                  int amount, int balanceBefore, int balanceAfter) {
+        CreditTransaction t = new CreditTransaction();
+        t.setLearnerId(learnerId);
+        t.setAccountId(accountId);
+        t.setTransactionType("CONSUME");
+        t.setAmount(amount);
+        t.setBalanceBefore(balanceBefore);
+        t.setBalanceAfter(balanceAfter);
+        t.setSourceType("FLASH_SALE");
+        t.setSourceNo(orderNo);
+        t.setRemark("秒杀消费");
+        transactionService.save(t);
     }
 }
