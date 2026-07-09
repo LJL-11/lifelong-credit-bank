@@ -131,7 +131,7 @@ CREATE TABLE blockchain_credential (
 );
 
 INSERT INTO learner (username, real_name, phone, email, education_level, status, created_at, updated_at, deleted)
-VALUES ('student001', '张三', '13800000001', 'student001@example.com', '本科', 'ACTIVE', NOW(), NOW(), 0);
+VALUES ('student001', '张三', '13800000001', 'zhang@example.com', '本科', 'ACTIVE', NOW(), NOW(), 0);
 
 INSERT INTO course (course_code, course_name, provider, category, credit_value, credit_point, status, created_at, updated_at, deleted)
 VALUES

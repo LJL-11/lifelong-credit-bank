@@ -1,25 +1,23 @@
 package org.csu.creditbank.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalDateTime;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("blockchain_credential")
-public class BlockchainCredential extends BaseEntity {
-
+@TableName("forum_reply")
+public class ForumReply extends BaseEntity {
     @TableId
     private Long id;
+    private Long postId;
     private Long learnerId;
-    private String credentialType;
-    private String businessNo;
-    private String hashValue;
-    private String chainStatus;
+    private String content;
+    private String status;
     private Long institutionId;
-    private LocalDateTime verifiedAt;
-    private String sourcePayload;
+
+    @TableField(exist = false)
+    private String learnerName;
 }

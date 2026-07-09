@@ -27,4 +27,17 @@ public class JobPostingController {
         jobPostingService.save(jobPosting);
         return ApiResult.ok(jobPosting);
     }
+
+    @PutMapping("/{id}")
+    public ApiResult<JobPosting> update(@PathVariable Long id, @RequestBody JobPosting jobPosting) {
+        jobPosting.setId(id);
+        jobPostingService.updateById(jobPosting);
+        return ApiResult.ok(jobPostingService.getById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResult<Void> delete(@PathVariable Long id) {
+        jobPostingService.removeById(id);
+        return ApiResult.ok();
+    }
 }

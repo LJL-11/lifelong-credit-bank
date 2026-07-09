@@ -11,6 +11,7 @@ import org.csu.creditbank.dto.CreditChangeRequest;
 import org.csu.creditbank.entity.CreditAccount;
 import org.csu.creditbank.entity.CreditOrder;
 import org.csu.creditbank.entity.CreditProduct;
+import org.csu.creditbank.entity.CreditTransaction;
 import org.csu.creditbank.entity.Learner;
 import org.csu.creditbank.entity.LearningRecord;
 import org.csu.creditbank.service.CreditAccountService;
@@ -18,6 +19,7 @@ import org.csu.creditbank.service.CourseService;
 import org.csu.creditbank.entity.Course;
 import org.csu.creditbank.service.CreditOrderService;
 import org.csu.creditbank.service.CreditProductService;
+import org.csu.creditbank.service.CreditTransactionService;
 import org.csu.creditbank.service.LearnerService;
 import org.csu.creditbank.service.LearningRecordService;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +36,7 @@ public class StudentController {
     private final CreditAccountService accountService;
     private final CreditProductService productService;
     private final CreditOrderService orderService;
+    private final CreditTransactionService transactionService;
     private final CourseService courseService;
     private final LearningRecordService learningRecordService;
 
@@ -42,11 +45,13 @@ public class StudentController {
                              CreditAccountService accountService,
                              CreditProductService productService,
                              CreditOrderService orderService,
+                             CreditTransactionService transactionService,
                              LearningRecordService learningRecordService) {
         this.learnerService = learnerService;
         this.accountService = accountService;
         this.productService = productService;
         this.orderService = orderService;
+        this.transactionService = transactionService;
         this.courseService = courseService;
         this.learningRecordService = learningRecordService;
     }
@@ -89,6 +94,20 @@ public class StudentController {
     public ApiResult<CreditAccount> openAccount(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         return ApiResult.ok(accountService.openAccount(userId));
+    }
+
+
+    /** 我的积分来源明细 */
+    @GetMapping("/credit-transactions")
+    public ApiResult<Page<CreditTransaction>> creditTransactions(@RequestParam(defaultValue = "1") long current,
+                                                                 @RequestParam(defaultValue = "20") long size,
+                                                                 HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        Page<CreditTransaction> page = transactionService.lambdaQuery()
+                .eq(CreditTransaction::getLearnerId, userId)
+                .orderByDesc(CreditTransaction::getCreatedAt)
+                .page(Page.of(current, size));
+        return ApiResult.ok(page);
     }
 
     /** 上架商品列表 */
@@ -157,6 +176,19 @@ public class StudentController {
                 .orderByDesc(Course::getCreatedAt)
                 .page(Page.of(current, size));
         return ApiResult.ok(page);
+    }
+
+
+    /** 我的学习记录 */
+    @GetMapping("/learning-records")
+    public ApiResult<Page<LearningRecord>> learningRecords(@RequestParam(defaultValue = "1") long current,
+                                                           @RequestParam(defaultValue = "100") long size,
+                                                           HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        return ApiResult.ok(learningRecordService.lambdaQuery()
+                .eq(LearningRecord::getLearnerId, userId)
+                .orderByDesc(LearningRecord::getCompletedAt)
+                .page(Page.of(current, size)));
     }
 
     /** 学员积分统计 */

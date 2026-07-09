@@ -5,21 +5,20 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.time.LocalDateTime;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("blockchain_credential")
-public class BlockchainCredential extends BaseEntity {
-
+@TableName("integrity_rating")
+public class IntegrityRating extends BaseEntity {
     @TableId
     private Long id;
     private Long learnerId;
-    private String credentialType;
-    private String businessNo;
-    private String hashValue;
-    private String chainStatus;
+    private Integer score;
+    private String levelName;
+    private Integer learningScore;
+    private Integer forumScore;
+    private Integer signinScore;
+    private Integer achievementScore;
+    private Integer jobScore;
+    private String remark;
     private Long institutionId;
-    private LocalDateTime verifiedAt;
-    private String sourcePayload;
 }

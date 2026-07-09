@@ -22,4 +22,9 @@ public class Course extends BaseEntity {
     private Integer creditPoint;
     private String status;
     private Long institutionId;
+    private String resourceTitle;
+    private String resourceUrl;
+    private String resourceSummary;
+    private Integer estimatedMinutes;
+    private String learningStages;
 }

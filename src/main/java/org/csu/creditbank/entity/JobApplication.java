@@ -9,17 +9,16 @@ import java.time.LocalDateTime;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("blockchain_credential")
-public class BlockchainCredential extends BaseEntity {
-
+@TableName("job_application")
+public class JobApplication extends BaseEntity {
     @TableId
     private Long id;
+    private Long jobId;
     private Long learnerId;
-    private String credentialType;
-    private String businessNo;
-    private String hashValue;
-    private String chainStatus;
+    private String resumeSummary;
+    private String applyStatus;
+    private String reviewer;
+    private LocalDateTime reviewedAt;
+    private String remark;
     private Long institutionId;
-    private LocalDateTime verifiedAt;
-    private String sourcePayload;
 }

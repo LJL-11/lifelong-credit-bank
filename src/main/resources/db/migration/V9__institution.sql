@@ -19,6 +19,15 @@ INSERT INTO institution (name, code, status, created_at, updated_at) VALUES
 ('计算机科学与技术学院', 'CS', 'ACTIVE', NOW(), NOW()),
 ('经济管理学院', 'ECON', 'ACTIVE', NOW(), NOW());
 
+ALTER TABLE learner ADD COLUMN institution_id BIGINT DEFAULT 1;
+ALTER TABLE course ADD COLUMN institution_id BIGINT DEFAULT 1;
+ALTER TABLE learning_record ADD COLUMN institution_id BIGINT DEFAULT 1;
+ALTER TABLE achievement ADD COLUMN institution_id BIGINT DEFAULT 1;
+ALTER TABLE forum_post ADD COLUMN institution_id BIGINT DEFAULT 1;
+ALTER TABLE sign_in_record ADD COLUMN institution_id BIGINT DEFAULT 1;
+ALTER TABLE job_posting ADD COLUMN institution_id BIGINT DEFAULT 1;
+ALTER TABLE blockchain_credential ADD COLUMN institution_id BIGINT DEFAULT 1;
+
 UPDATE learner SET institution_id = 1 WHERE id IN (1, 4, 5);
 UPDATE learner SET institution_id = 2 WHERE id IN (2, 6);
 UPDATE learner SET institution_id = 3 WHERE id IN (3, 7);

@@ -22,4 +22,6 @@ public class Achievement extends BaseEntity {
     private String auditStatus;
     private String auditor;
     private LocalDateTime auditedAt;
+    private String proofUrl;
+    private String rejectReason;
 }
