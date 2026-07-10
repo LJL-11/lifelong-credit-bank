@@ -221,10 +221,10 @@ onMounted(loadPosts);
     <nav v-if="!showMyPosts" class="section-tabs">
       <button :class="{ active: !activeSection }" @click="switchTab('')">全部板块</button>
       <button
-        v-for="sec in sections"
-        :key="sec"
-        :class="{ active: activeSection === sec }"
-        @click="switchTab(sec)"
+          v-for="sec in sections"
+          :key="sec"
+          :class="{ active: activeSection === sec }"
+          @click="switchTab(sec)"
       >
         <component :is="sectionIcons[sec]" :size="15" />
         {{ sec }}
@@ -343,70 +343,70 @@ onMounted(loadPosts);
 </template>
 
 <style scoped>
-.forum-page { background: var(--bg); min-height: 100vh; color: var(--ink); font-family: "Microsoft YaHei","PingFang SC","Segoe UI",sans-serif; }
+.forum-page { background: #f1f5f9; min-height: 100vh; color: #1e293b; font-family: "Microsoft YaHei","PingFang SC","Segoe UI",sans-serif; }
 
-.forum-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 28px; background: #fff; border-bottom: 1px solid var(--line); flex-wrap: wrap; gap: 12px; }
+.forum-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 28px; background: #fff; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 12px; }
 .forum-title { display: flex; align-items: center; gap: 12px; }
 .forum-title h2 { margin: 0; font-size: 20px; }
-.forum-title p { margin: 3px 0 0; font-size: 13px; color: var(--muted); }
+.forum-title p { margin: 3px 0 0; font-size: 13px; color: #64748b; }
 .forum-actions { display: flex; gap: 8px; }
-.forum-actions .ghost-button.active { border-color: var(--primary); color: var(--primary); background: var(--success-bg); }
+.forum-actions .ghost-button.active { border-color: #6366f1; color: #6366f1; background: rgba(99, 102, 241, 0.08); }
 
-.section-tabs { display: flex; gap: 6px; padding: 14px 28px; flex-wrap: wrap; background: #fff; border-bottom: 1px solid var(--line); }
-.section-tabs button { display: flex; align-items: center; gap: 5px; height: 34px; padding: 0 14px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--muted); font-size: 13px; cursor: pointer; transition: all 0.15s; }
-.section-tabs button:hover, .section-tabs button.active { border-color: var(--primary); color: var(--primary); background: var(--success-bg); }
+.section-tabs { display: flex; gap: 6px; padding: 14px 28px; flex-wrap: wrap; background: #fff; border-bottom: 1px solid #e2e8f0; }
+.section-tabs button { display: flex; align-items: center; gap: 5px; height: 34px; padding: 0 14px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; color: #64748b; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+.section-tabs button:hover, .section-tabs button.active { border-color: #6366f1; color: #6366f1; background: rgba(99, 102, 241, 0.08); }
 
 .post-list { padding: 18px 28px; display: grid; gap: 10px; }
-.post-card { padding: 16px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); cursor: pointer; transition: box-shadow 0.15s; }
-.post-card:hover { box-shadow: 0 4px 16px rgba(24,34,53,0.07); }
+.post-card { padding: 16px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #ffffff; cursor: pointer; transition: box-shadow 0.15s; }
+.post-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 .post-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .post-meta { display: flex; align-items: center; gap: 8px; }
-.post-time { font-size: 12px; color: var(--muted); }
+.post-time { font-size: 12px; color: #64748b; }
 
-.section-tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; color: var(--primary-dark); background: var(--success-bg); }
+.section-tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; color: #4f46e5; background: rgba(99, 102, 241, 0.08); }
 .status-dot { width: 8px; height: 8px; border-radius: 50%; }
-.status-dot.ok { background: #166a5f; }
-.status-dot.warn { background: #a45f00; }
+.status-dot.ok { background: #059669; }
+.status-dot.warn { background: #d97706; }
 
 .post-title { margin: 0 0 6px; font-size: 17px; line-height: 1.35; }
-.post-preview { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.5; }
-.post-foot { display: flex; align-items: center; gap: 14px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.post-preview { margin: 0; font-size: 14px; color: #64748b; line-height: 1.5; }
+.post-foot { display: flex; align-items: center; gap: 14px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 13px; color: #64748b; }
 .post-author { display: flex; align-items: center; gap: 5px; }
 .post-meta-item { display: flex; align-items: center; gap: 4px; }
-.like-button { display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--muted); font-size: 13px; cursor: pointer; transition: all 0.15s; }
-.like-button:hover { border-color: var(--primary); color: var(--primary); }
-.like-button.liked { border-color: var(--primary); color: #fff; background: var(--primary); }
+.like-button { display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 10px; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; color: #64748b; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+.like-button:hover { border-color: #6366f1; color: #6366f1; }
+.like-button.liked { border-color: #6366f1; color: #fff; background: #6366f1; }
 .detail-like { height: 30px; padding: 0 12px; }
 button.small { height: 28px; padding: 0 10px; font-size: 12px; margin-left: auto; }
 
 /* 弹窗 */
-.modal-backdrop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 22px; background: rgba(10,18,30,0.48); }
-.modal { width: min(680px, 100%); max-height: calc(100vh - 44px); overflow: auto; padding: 22px; border-radius: 10px; background: var(--panel); box-shadow: 0 24px 70px rgba(10,18,30,0.25); }
+.modal-backdrop { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 22px; background: rgba(0,0,0,0.3); }
+.modal { width: min(680px, 100%); max-height: calc(100vh - 44px); overflow: auto; padding: 22px; border-radius: 10px; background: #ffffff; box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
 .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
-.icon-button { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); cursor: pointer; }
+.icon-button { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; cursor: pointer; }
 
 .form-grid.two-col { display: grid; grid-template-columns: 140px 1fr; gap: 12px; align-items: end; }
-label span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: var(--muted); }
-input, select, textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 0 12px; font-size: 14px; color: var(--ink); background: #fff; }
+label span { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: #64748b; }
+input, select, textarea { width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0 12px; font-size: 14px; color: #1e293b; background: #fff; }
 input, select { height: 40px; }
 textarea { min-height: 120px; resize: vertical; padding: 10px 12px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
 
-.detail-meta { display: flex; gap: 16px; flex-wrap: wrap; padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.detail-meta { display: flex; gap: 16px; flex-wrap: wrap; padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; font-size: 13px; color: #64748b; }
 .detail-meta span { display: flex; align-items: center; gap: 5px; }
 .detail-content { font-size: 15px; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
 
 /* 复用全局样式 */
-.state-block { min-height: 160px; display: grid; place-items: center; gap: 8px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); }
+.state-block { min-height: 160px; display: grid; place-items: center; gap: 8px; border: 1px dashed #e2e8f0; border-radius: 10px; color: #64748b; }
 .pager { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 10px; }
-.pager button, .pager span { display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; cursor: pointer; font-size: 13px; }
+.pager button, .pager span { display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; cursor: pointer; font-size: 13px; }
 .pager button:disabled { opacity: 0.5; cursor: not-allowed; }
-.pager span { border: 0; color: var(--muted); }
-.primary-button, .ghost-button { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-size: 14px; }
-.primary-button { border-color: var(--primary); color: #fff; background: var(--primary); }
-.ghost-button:hover { border-color: var(--primary); color: var(--primary); }
-.toast { position: fixed; right: 24px; bottom: 24px; z-index: 30; padding: 12px 16px; border-radius: 8px; color: #fff; background: var(--primary); box-shadow: 0 8px 28px rgba(0,0,0,0.2); }
-.toast.error { background: #b42318; }
+.pager span { border: 0; color: #64748b; }
+.primary-button, .ghost-button { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 8px; border: 1px solid #e2e8f0; background: #ffffff; cursor: pointer; font-size: 14px; }
+.primary-button { border-color: #6366f1; color: #fff; background: #6366f1; }
+.ghost-button:hover { border-color: #6366f1; color: #6366f1; }
+.toast { position: fixed; right: 24px; bottom: 24px; z-index: 30; padding: 12px 16px; border-radius: 8px; color: #fff; background: #6366f1; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.toast.error { background: #dc2626; }
 .spin { animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>

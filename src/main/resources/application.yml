@@ -3,10 +3,10 @@ server:
 
 spring:
   application:
-    name: lifelong-credit-bank
+    name: credit-bank
   datasource:
-    url: jdbc:mysql://localhost:3306/lifelong_credit_bank?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
-    username: creditbank
+    url: jdbc:mysql://localhost:3306/credit_bank?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
@@ -53,20 +53,21 @@ management:
         include: health,info,metrics
 
 # ==================== AI 学习助手 ====================
+# ==================== AI 学习助手 ====================
 langchain4j:
   open-ai:
     chat-model:
       base-url: https://api.deepseek.com
-      api-key: sk-ae3a8e73fd0441afa3c6a7ea0a59712c
+      api-key: ${deepseek:}
       model-name: deepseek-chat
       log-requests: true
       log-responses: true
     streaming-chat-model:
       base-url: https://api.deepseek.com
-      api-key: sk-ae3a8e73fd0441afa3c6a7ea0a59712c
+      api-key: ${deekseek:}
       model-name: deepseek-chat
   community:
     dashscope:
       embedding-model:
-        api-key: sk-6bf3b98fc9d949559c979bf370dfa7f9
+        api-key: ${DASHSCOPE_API_KEY:}
         model-name: text-embedding-v3
