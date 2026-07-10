@@ -6,7 +6,7 @@ local stockKey = 'flash:stock:' .. flashSaleId
 local orderKey = 'flash:order:' .. flashSaleId
 
 -- 1. 判断库存是否充足
-if tonumber(redis.call('get', stockKey)) <= 0 then
+if (tonumber(redis.call('get', stockKey)) or 0) <= 0 then
     return 1
 end
 
