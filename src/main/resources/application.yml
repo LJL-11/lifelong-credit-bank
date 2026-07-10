@@ -11,7 +11,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
-      host: 127.0.0.1
+      host: 192.168.116.130
       port: 6379
       database: 4
   rabbitmq:
@@ -53,21 +53,20 @@ management:
         include: health,info,metrics
 
 # ==================== AI 学习助手 ====================
-# ==================== AI 学习助手 ====================
 langchain4j:
   open-ai:
     chat-model:
       base-url: https://api.deepseek.com
-      api-key: ${deepseek:}
+      api-key: ${DEEPSEEK_API_KEY}
       model-name: deepseek-chat
       log-requests: true
       log-responses: true
     streaming-chat-model:
       base-url: https://api.deepseek.com
-      api-key: ${deekseek:}
+      api-key: ${DEEPSEEK_API_KEY}
       model-name: deepseek-chat
   community:
     dashscope:
       embedding-model:
-        api-key: ${DASHSCOPE_API_KEY:}
+        api-key: ${DASHSCOPE_API_KEY}
         model-name: text-embedding-v3

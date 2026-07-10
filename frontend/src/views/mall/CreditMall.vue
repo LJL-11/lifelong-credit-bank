@@ -5,10 +5,10 @@ import {
   ShoppingBag, ShoppingCart, Store, UserCheck, Sparkles,
   Search, CheckCircle2, AlertCircle,
 } from "@lucide/vue";
-import FlashSaleSection from "./components/mall/FlashSaleSection.vue";
-import CartSidebar from "./components/mall/CartSidebar.vue";
-import CheckoutOverlay from "./components/mall/CheckoutOverlay.vue";
-import ProductDialogs from "./components/mall/ProductDialogs.vue";
+import FlashSaleSection from "@/components/mall/FlashSaleSection.vue";
+import CartSidebar from "@/components/mall/CartSidebar.vue";
+import CheckoutOverlay from "@/components/mall/CheckoutOverlay.vue";
+import ProductDialogs from "@/components/mall/ProductDialogs.vue";
 
 const props = defineProps({
   learnerId: { type: Number, required: true },
