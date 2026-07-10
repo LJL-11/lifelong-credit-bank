@@ -65,10 +65,7 @@ const userInfo = computed(() => authStore.userInfo);
 const loggedIn = computed(() => authStore.loggedIn);
 
 function handleLoginSuccess({token: t, userInfo: u}) {
-  authStore.token = t;
-  authStore.userInfo = u;
-  localStorage.setItem("token", t);
-  localStorage.setItem("userInfo", JSON.stringify(u));
+  authStore.setAuth(t, u);
   if (u.role === "ADMIN") {
     currentView.value = "admin";
     activeModule.value = "dashboard";
