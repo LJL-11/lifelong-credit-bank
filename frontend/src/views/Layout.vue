@@ -9,22 +9,24 @@ import {menu, modules} from "@/config/modules.js";
 import LoginView from "@/views/Login.vue";
 import CreditMall from "@/views/mall/CreditMall.vue";
 import ForumView from "@/views/Forum.vue";
-import Sidebar from "@/components/Sidebar.vue";
-import ToastMessage from "@/components/ToastMessage.vue";
-import AdminDashboard from "@/components/admin/AdminDashboard.vue";
-import AdminDataTable from "@/components/admin/AdminDataTable.vue";
-import AdminDialogs from "@/components/admin/AdminDialogs.vue";
-import StudentCourses from "@/components/student/StudentCourses.vue";
-import StudentSign from "@/components/student/StudentSign.vue";
-import StudentCreditSources from "@/components/student/StudentCreditSources.vue";
-import StudentAchievements from "@/components/student/StudentAchievements.vue";
-import StudentJobs from "@/components/student/StudentJobs.vue";
-import StudentIntegrity from "@/components/student/StudentIntegrity.vue";
-import StudentProfile from "@/components/student/StudentProfile.vue";
-import AiChat from "@/components/student/AiChat.vue";
-import LearningModal from "@/components/student/LearningModal.vue";
-import JobApplyDialog from "@/components/student/JobApplyDialog.vue";
+import Sidebar from "@/views/components/Sidebar.vue";
+import ToastMessage from "@/views/components/ToastMessage.vue";
+import AdminDashboard from "@/views/admin/AdminDashboard.vue";
+import AdminDataTable from "@/views/admin/AdminDataTable.vue";
+import AdminDialogs from "@/views/admin/AdminDialogs.vue";
+import StudentCourses from "@/views/student/components/StudentCourses.vue";
+import StudentSign from "@/views/student/components/StudentSign.vue";
+import StudentCreditSources from "@/views/student/components/StudentCreditSources.vue";
+import StudentAchievements from "@/views/student/components/StudentAchievements.vue";
+import StudentJobs from "@/views/student/components/StudentJobs.vue";
+import StudentIntegrity from "@/views/student/components/StudentIntegrity.vue";
+import StudentProfile from "@/views/student/components/StudentProfile.vue";
+import AiChat from "@/views/student/components/AiChat.vue";
+import LearningModal from "@/views/student/components/LearningModal.vue";
+import JobApplyDialog from "@/views/student/components/JobApplyDialog.vue";
 import { useAuthStore } from "@/store/auth.js";
+import * as adminApi from "@/api/admin.js";
+import * as studentApi from "@/api/student.js";
 
 // ==================== 主题切换 ====================
 const isDark = ref(false);
@@ -143,31 +145,13 @@ const quickActions = computed(() => menu.filter((item) => item.key !== "dashboar
 const hasCustomRowActions = computed(() => ["enrollments", "job-applications", "integrity-ratings"].includes(activeModule.value));
 const studentSectionModules = ["sign", "credit-sources", "achievements", "jobs", "integrity"];
 
-// ==================== API ====================
-async function request(url, options = {}) {
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token.value ? {Authorization: `Bearer ${token.value}`} : {}),
-    ...(options.headers || {}),
-  };
-  const response = await fetch(url, {...options, headers});
-  const result = await response.json();
-  if (response.status === 401) {
-    showToast(result.message || "登录已过期", "error");
-    logout();
-    throw new Error(result.message || "未登录");
-  }
-  if (!response.ok || result.code !== 200) {
-    throw new Error(result.message || "请求失败");
-  }
-  return result.data;
-}
+// ==================== API 层已迁移到 @/api/* ====================
 
 async function loadDashboard() {
   loading.value = true;
   error.value = "";
   try {
-    stats.value = await request("/api/admin/dashboard/stats");
+    stats.value = await adminApi.getDashboardStats();
     apiOnline.value = true;
   } catch (err) {
     apiOnline.value = false;
@@ -181,7 +165,7 @@ async function loadTable() {
   loading.value = true;
   error.value = "";
   try {
-    const data = await request(`${currentModule.value.api}?current=${page.value.current}&size=${page.value.size}`);
+    const data = await adminApi.getTableData(currentModule.value.api, page.value.current, page.value.size);
     rows.value = data.records || [];
     page.value.total = data.total || 0;
     page.value.current = data.current || page.value.current;
@@ -205,7 +189,7 @@ const activeLearning = ref({open: false, course: null, completedStages: new Set(
 async function loadProfile() {
   loading.value = true;
   try {
-    profile.value = await request("/api/student/profile");
+    profile.value = await studentApi.getProfile();
   } catch (err) {
     showToast(err.message, "error");
   } finally {
@@ -217,8 +201,8 @@ async function loadCourses() {
   loading.value = true;
   try {
     const [courseData, recordData] = await Promise.all([
-      request(`/api/student/courses?current=${coursePage.value.current}&size=${coursePage.value.size}`),
-      request("/api/student/learning-records?current=1&size=200"),
+      studentApi.getCourses(coursePage.value.current, coursePage.value.size),
+      studentApi.getLearningRecords(1, 200),
     ]);
     courses.value = courseData.records || [];
     coursePage.value.total = courseData.total || 0;
@@ -269,7 +253,7 @@ async function completeCourse() {
   if (!course || !allStagesDone.value) return;
   loading.value = true;
   try {
-    const result = await request(`/api/student/courses/${course.id}/learn`, {method: "POST"});
+    const result = await studentApi.learnCourse(course.id);
     learnedCourseIds.value = new Set([...learnedCourseIds.value, course.id]);
     closeLearningCourse();
     showToast(`完成学习，获得 ${result.creditPoint} 积分`);
@@ -307,7 +291,7 @@ function todayString() {
 
 async function enrollCourse(course) {
   try {
-    await request(`/api/student/courses/${course.id}/enroll`, {method: "POST"});
+    await studentApi.enrollCourse(course.id);
     showToast("报名已提交，等待管理员审核");
     await loadEnrollments();
   } catch (err) {
@@ -316,19 +300,19 @@ async function enrollCourse(course) {
 }
 
 async function loadEnrollments() {
-  const data = await request("/api/student/enrollments?current=1&size=20");
+  const data = await studentApi.getEnrollments(1, 20);
   enrollments.value = data.records || [];
 }
 
 async function loadSignIns() {
-  const data = await request("/api/student/sign-ins?current=1&size=20");
+  const data = await studentApi.getSignIns(1, 20);
   signIns.value = data.records || [];
 }
 
 async function signToday() {
   if (todaySigned.value) return;
   try {
-    const record = await request("/api/student/sign-ins/today", {method: "POST"});
+    const record = await studentApi.signToday();
     signIns.value = [record, ...signIns.value.filter(s => s.signDate !== record.signDate)];
     showToast("签到成功，获得 2 积分");
     await loadCreditSources();
@@ -340,8 +324,8 @@ async function signToday() {
 
 async function loadCreditSources() {
   const [accountResult, transactionResult] = await Promise.allSettled([
-    request("/api/student/account"),
-    request(`/api/student/credit-transactions?current=${creditSourcePage.value.current}&size=${creditSourcePage.value.size}`),
+    studentApi.getAccount(),
+    studentApi.getCreditSources(creditSourcePage.value.current, creditSourcePage.value.size),
   ]);
   creditSourceAccount.value = accountResult.status === "fulfilled" ? accountResult.value : null;
   if (transactionResult.status === "rejected") throw transactionResult.reason;
@@ -366,7 +350,7 @@ const creditSourceStats = computed(() => {
 });
 
 async function loadMyAchievements() {
-  const data = await request("/api/student/achievements?current=1&size=20");
+  const data = await studentApi.getAchievements(1, 20);
   myAchievements.value = data.records || [];
 }
 
@@ -402,7 +386,7 @@ async function submitAchievement() {
     return;
   }
   try {
-    await request("/api/student/achievements", {method: "POST", body: JSON.stringify(achievementForm.value)});
+    await studentApi.submitAchievement(achievementForm.value);
     achievementForm.value = {achievementName: "", achievementType: "证书", suggestedCredits: 10, proofUrl: ""};
     proofFileName.value = "";
     showToast("成果已提交审核");
@@ -413,9 +397,9 @@ async function submitAchievement() {
 }
 
 async function loadJobs() {
-  const data = await request("/api/student/jobs?current=1&size=20");
+  const data = await studentApi.getJobs(1, 20);
   jobs.value = data.records || [];
-  const apps = await request("/api/student/job-applications?current=1&size=20");
+  const apps = await studentApi.getJobApplications(1, 20);
   jobApplications.value = apps.records || [];
 }
 
@@ -427,10 +411,7 @@ async function submitJobApplication() {
   const job = applyDialog.value.job;
   if (!job) return;
   try {
-    await request(`/api/student/jobs/${job.id}/apply`, {
-      method: "POST",
-      body: JSON.stringify({resumeSummary: applyDialog.value.resumeSummary})
-    });
+    await studentApi.applyJob(job.id, applyDialog.value.resumeSummary);
     applyDialog.value = {open: false, job: null, resumeSummary: ""};
     showToast("投递成功");
     await loadJobs();
@@ -440,7 +421,7 @@ async function submitJobApplication() {
 }
 
 async function loadIntegrity() {
-  integrity.value = await request("/api/student/integrity");
+  integrity.value = await studentApi.getIntegrity();
 }
 
 async function loadStudentSection(key) {
@@ -463,7 +444,7 @@ async function reviewEnrollment(row, status) {
   const remark = status === "REJECTED" ? prompt("请输入驳回原因", row.remark || "") : (row.remark || "");
   if (remark === null) return;
   try {
-    await request(`/api/admin/core/enrollments/${row.id}/review`, {method: "PUT", body: JSON.stringify({status, remark})});
+    await adminApi.reviewEnrollment(row.id, status, remark);
     showToast("报名审核已更新");
     await loadTable();
   } catch (err) {
@@ -475,7 +456,7 @@ async function reviewAchievement(row, status) {
   const rejectReason = status === "REJECTED" ? prompt("请输入驳回原因", row.rejectReason || "") : "";
   if (rejectReason === null) return;
   try {
-    await request(`/api/admin/core/achievements/${row.id}/review`, {method: "PUT", body: JSON.stringify({status, rejectReason})});
+    await adminApi.reviewAchievement(row.id, status, rejectReason);
     showToast(status === "APPROVED" ? "成果已通过，积分和存证已生成" : "成果已驳回");
     await loadTable();
   } catch (err) {
@@ -487,7 +468,7 @@ async function reviewJobApplication(row, status) {
   const remark = prompt("处理备注", row.remark || "");
   if (remark === null) return;
   try {
-    const updated = await request(`/api/admin/core/job-applications/${row.id}/review`, {method: "PUT", body: JSON.stringify({status, remark})});
+    const updated = await adminApi.reviewJobApplication(row.id, status, remark);
     Object.assign(row, updated);
     showToast(status === "ACCEPTED" ? "投递已接受" : "投递已拒绝");
     await loadTable();
@@ -498,7 +479,7 @@ async function reviewJobApplication(row, status) {
 
 async function recomputeIntegrity(row) {
   try {
-    await request(`/api/admin/core/integrity-ratings/${row.learnerId}/recompute`, {method: "POST"});
+    await adminApi.recomputeIntegrity(row.learnerId);
     showToast("诚信分已重新计算");
     await loadTable();
   } catch (err) {
@@ -585,7 +566,7 @@ async function submitEditor() {
   const url = id ? `${currentModule.value.api}/${id}` : currentModule.value.api;
   saving.value = true;
   try {
-    await request(url, {method, body: JSON.stringify(payload)});
+    await id ? adminApi.updateRecord(currentModule.value.api, id, payload) : adminApi.createRecord(currentModule.value.api, payload);
     showToast("保存成功");
     closeEditor();
     await loadTable();
@@ -599,7 +580,7 @@ async function submitEditor() {
 async function removeRow(row) {
   if (!confirm(`确认删除 ID ${row.id}？`)) return;
   try {
-    await request(`${currentModule.value.api}/${row.id}`, {method: "DELETE"});
+    await adminApi.deleteRecord(currentModule.value.api, row.id);
     showToast("删除成功");
     await loadTable();
   } catch (err) {
@@ -617,7 +598,7 @@ async function submitCreditDialog() {
   const payload = normalizePayload(creditDialog.value.form, [{key: "learnerId", type: "number"}, {key: "amount", type: "number"}]);
   saving.value = true;
   try {
-    await request(`/api/admin/credit-accounts/${creditDialog.value.type}`, {method: "POST", body: JSON.stringify(payload)});
+    await adminApi.creditOperation(creditDialog.value.type, payload);
     showToast("操作成功");
     closeCreditDialog();
     await loadTable();
@@ -634,7 +615,7 @@ function closeAccountDialog() { accountDialog.value.open = false; }
 async function submitOpenAccount() {
   saving.value = true;
   try {
-    await request(`/api/admin/credit-accounts/open/${accountDialog.value.learnerId}`, {method: "POST"});
+    await adminApi.openAccount(accountDialog.value.learnerId);
     showToast("账户已开通");
     closeAccountDialog();
     await loadTable();
@@ -652,7 +633,7 @@ async function submitFreezeDialog() {
   saving.value = true;
   try {
     const body = {learnerId: Number(freezeDialog.value.form.learnerId), amount: Number(freezeDialog.value.form.amount)};
-    await request(`/api/admin/credit-accounts/${freezeDialog.value.type}`, {method: "POST", body: JSON.stringify(body)});
+    await adminApi.freezeOperation(freezeDialog.value.type, body);
     showToast(freezeDialog.value.type === "freeze" ? "冻结成功" : "解冻成功");
     closeFreezeDialog();
     await loadTable();
@@ -667,7 +648,7 @@ async function toggleLearnerStatus(row) {
   const newStatus = row.status === "ACTIVE" ? "DISABLED" : "ACTIVE";
   if (!confirm(`确认将 ${row.realName} 的状态改为 ${newStatus}？`)) return;
   try {
-    await request(`/api/admin/learners/${row.id}/status`, {method: "PUT", body: JSON.stringify({status: newStatus})});
+    await adminApi.toggleLearnerStatus(row.id, newStatus);
     showToast("状态已更新");
     await loadTable();
   } catch (err) {

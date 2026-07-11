@@ -6,12 +6,12 @@ export function createRecord(url, data) { return request(url, { method: 'POST', 
 export function updateRecord(url, id, data) { return request(`${url}/${id}`, { method: 'PUT', body: JSON.stringify(data) }) }
 export function deleteRecord(url, id) { return request(`${url}/${id}`, { method: 'DELETE' }) }
 
-export function reviewEnrollment(id, action, remark) { return request(`/api/admin/core/enrollments/${id}/review`, { method: 'PUT', body: JSON.stringify({ action, remark }) }) }
-export function reviewAchievement(id, action, reason) { return request(`/api/admin/achievements/${id}/review`, { method: 'PUT', body: JSON.stringify({ action, reason }) }) }
-export function reviewJobApplication(id, action, remark) { return request(`/api/admin/core/job-applications/${id}/review`, { method: 'PUT', body: JSON.stringify({ action, remark }) }) }
+export function reviewEnrollment(id, status, remark) { return request(`/api/admin/core/enrollments/${id}/review`, { method: 'PUT', body: JSON.stringify({ status, remark }) }) }
+export function reviewAchievement(id, status, rejectReason) { return request(`/api/admin/core/achievements/${id}/review`, { method: 'PUT', body: JSON.stringify({ status, rejectReason }) }) }
+export function reviewJobApplication(id, status, remark) { return request(`/api/admin/core/job-applications/${id}/review`, { method: 'PUT', body: JSON.stringify({ status, remark }) }) }
 export function recomputeIntegrity(learnerId) { return request(`/api/admin/core/integrity-ratings/${learnerId}/recompute`, { method: 'POST' }) }
 
-export function toggleLearnerStatus(id) { return request(`/api/admin/learners/${id}/toggle-status`, { method: 'PUT' }) }
-export function creditTransaction(learnerId, amount, remark) { return request('/api/admin/credit-accounts/transaction', { method: 'POST', body: JSON.stringify({ learnerId, amount, remark }) }) }
-export function freezeCredits(learnerId, amount) { return request('/api/admin/credit-accounts/freeze', { method: 'POST', body: JSON.stringify({ learnerId, amount }) }) }
-export function unfreezeCredits(learnerId, amount) { return request('/api/admin/credit-accounts/unfreeze', { method: 'POST', body: JSON.stringify({ learnerId, amount }) }) }
+export function toggleLearnerStatus(rowId, newStatus) { return request(`/api/admin/learners/${rowId}/status`, { method: 'PUT', body: JSON.stringify({ status: newStatus }) }) }
+export function creditOperation(type, payload) { return request(`/api/admin/credit-accounts/${type}`, { method: 'POST', body: JSON.stringify(payload) }) }
+export function openAccount(learnerId) { return request(`/api/admin/credit-accounts/open/${learnerId}`, { method: 'POST' }) }
+export function freezeOperation(type, body) { return request(`/api/admin/credit-accounts/${type}`, { method: 'POST', body: JSON.stringify(body) }) }

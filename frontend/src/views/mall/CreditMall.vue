@@ -5,10 +5,11 @@ import {
   ShoppingBag, ShoppingCart, Store, UserCheck, Sparkles,
   Search, CheckCircle2, AlertCircle,
 } from "@lucide/vue";
-import FlashSaleSection from "@/components/mall/FlashSaleSection.vue";
-import CartSidebar from "@/components/mall/CartSidebar.vue";
-import CheckoutOverlay from "@/components/mall/CheckoutOverlay.vue";
-import ProductDialogs from "@/components/mall/ProductDialogs.vue";
+import FlashSaleSection from "@/views/mall/components/FlashSaleSection.vue";
+import CartSidebar from "@/views/mall/components/CartSidebar.vue";
+import CheckoutOverlay from "@/views/mall/components/CheckoutOverlay.vue";
+import ProductDialogs from "@/views/mall/components/ProductDialogs.vue";
+import { request } from "@/utils/request.js";
 
 const props = defineProps({
   learnerId: { type: Number, required: true },
@@ -55,24 +56,6 @@ const statusMap = {
   CANCELLED: { label: "已取消", class: "neutral" },
   REFUNDED: { label: "已退款", class: "danger" },
 };
-
-async function request(url, options = {}) {
-  const headers = {
-    "Content-Type": "application/json",
-    ...(props.token ? { Authorization: `Bearer ${props.token}` } : {}),
-    ...(options.headers || {}),
-  };
-  const response = await fetch(url, { ...options, headers });
-  const result = await response.json();
-  if (response.status === 401) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userInfo");
-    window.location.reload();
-    throw new Error(result.message || "登录已过期");
-  }
-  if (!response.ok || result.code !== 200) throw new Error(result.message || "请求失败");
-  return result.data;
-}
 
 async function loadProducts() {
   loading.value = true;

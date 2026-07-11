@@ -4,6 +4,7 @@ import {
   MessageCircle, MessagesSquare, Plus, Send, X, Eye, User, Tag,
   BookOpen, ShoppingBag, GraduationCap, HelpCircle, PartyPopper, Clock, RefreshCw, ThumbsUp,
 } from "@lucide/vue";
+import { request } from "@/utils/request.js";
 
 const props = defineProps({
   token: { type: String, default: "" },
@@ -32,27 +33,6 @@ const toast = ref({ text: "", type: "ok" });
 let toastTimer = 0;
 
 const currentPage = computed(() => Math.max(1, Math.ceil(page.value.total / page.value.size)));
-
-// ==================== API ====================
-async function request(url, options = {}) {
-  const headers = {
-    "Content-Type": "application/json",
-    ...(props.token ? { Authorization: `Bearer ${props.token}` } : {}),
-    ...(options.headers || {}),
-  };
-  const response = await fetch(url, { ...options, headers });
-  const result = await response.json();
-  if (response.status === 401) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userInfo");
-    window.location.reload();
-    throw new Error(result.message || "登录已过期");
-  }
-  if (!response.ok || result.code !== 200) {
-    throw new Error(result.message || "请求失败");
-  }
-  return result.data;
-}
 
 // ==================== 数据加载 ====================
 async function loadPosts() {
