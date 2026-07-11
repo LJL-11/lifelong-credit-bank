@@ -1,11 +1,11 @@
 <script setup>
 defineProps({
-  statCards: { type: Array, default: () => [] },
-  overview: { type: Array, default: () => [] },
-  quickActions: { type: Array, default: () => [] },
-  icons: { type: Object, default: () => ({}) },
-  apiOnline: { type: Boolean, default: false },
-  activeModule: { type: String, default: "" },
+  statCards: {type: Array, default: () => []},
+  overview: {type: Array, default: () => []},
+  quickActions: {type: Array, default: () => []},
+  icons: {type: Object, default: () => ({})},
+  apiOnline: {type: Boolean, default: false},
+  activeModule: {type: String, default: ""},
 });
 
 const emit = defineEmits(["switch-module"]);
@@ -100,5 +100,80 @@ const emit = defineEmits(["switch-module"]);
 .chart-panel {
   display: flex;
   flex-direction: column;
+}
+
+/* ========== 深色模式全局优化：高对比度文字 ========== */
+/* 卡片背景、面板深色底色 */
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .panel {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+}
+
+/* 一级标题、大数字、强调文字：纯白，最高清晰 */
+[data-theme="dark"] h2,
+[data-theme="dark"] .stat-card strong,
+[data-theme="dark"] .overview-list strong,
+[data-theme="dark"] .dist-item strong {
+  color: #ffffff;
+}
+
+/* 二级说明文字：亮浅灰，区别于纯白但清晰可见 */
+[data-theme="dark"] .stat-card-header > span:first-child,
+[data-theme="dark"] .overview-list span,
+[data-theme="dark"] .chart-label,
+[data-theme="dark"] .quick-actions button span,
+[data-theme="dark"] .dist-item span:nth-child(2) {
+  color: #e2e8f0;
+}
+
+/* 辅助小字、备注：中度灰色，不刺眼但看得清 */
+[data-theme="dark"] .stat-card > small {
+  color: #b8c2d3;
+}
+
+/* 快捷按钮样式深色适配 */
+[data-theme="dark"] .quick-actions button {
+  background-color: #334155;
+  border: 1px solid #475569;
+  color: #e2e8f0;
+}
+[data-theme="dark"] .quick-actions button:hover {
+  background-color: #475569;
+  color: #ffffff;
+}
+
+/* 趋势徽章深色配色 */
+[data-theme="dark"] .trend-badge.up {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+}
+[data-theme="dark"] .trend-badge.down {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+/* 服务状态徽章深色 */
+[data-theme="dark"] .status-pill.ok {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+}
+[data-theme="dark"] .status-pill.warn {
+  background: rgba(234, 179, 8, 0.2);
+  color: #facc15;
+}
+
+/* 进度条深色 */
+[data-theme="dark"] .progress-track {
+  background-color: #334155;
+}
+[data-theme="dark"] .progress-fill {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+}
+
+/* 图表柱状条深色 */
+[data-theme="dark"] .chart-bar {
+  background: linear-gradient(to top, #6366f1, #818cf8);
+  opacity: 0.85;
 }
 </style>
