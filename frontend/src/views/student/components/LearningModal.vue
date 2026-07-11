@@ -156,4 +156,28 @@ const emit = defineEmits(["close", "toggle-stage", "complete-course", "show-toas
   font-size: 12px;
   transition: color 0.3s ease;
 }
+
+:global([data-theme="dark"]) .course-learning-modal,
+:global([data-theme="dark"]) .course-learning-modal .learning-resource-box,
+:global([data-theme="dark"]) .course-learning-modal .learning-stage {
+  background: #1e293b;
+  border-color: rgba(51, 65, 85, 0.95);
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .course-learning-modal .modal-head h2,
+:global([data-theme="dark"]) .course-learning-modal .learning-resource-box strong,
+:global([data-theme="dark"]) .course-learning-modal .stage-body strong {
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .course-learning-modal .modal-head p,
+:global([data-theme="dark"]) .course-learning-modal .learning-resource-box span,
+:global([data-theme="dark"]) .course-learning-modal .stage-body small {
+  color: #cbd5e1;
+}
+
+:global([data-theme="dark"]) .course-learning-modal .learning-stage:hover {
+  background: #243449;
+}
 </style>

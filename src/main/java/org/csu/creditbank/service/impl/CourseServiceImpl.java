@@ -63,6 +63,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
 
         product.setProductName(course.getCourseName());
         product.setProductType("COURSE");
+        product.setCourseId(course.getId());
         product.setCreditPrice(course.getCreditPoint() != null ? course.getCreditPoint() : 0);
         product.setDescription(course.getProvider() + " / " + course.getCategory());
         product.setStock(-1);

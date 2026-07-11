@@ -2,11 +2,13 @@ package org.csu.creditbank.ai.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.csu.creditbank.ai.assistant.LearningAssistant;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
 
+@ConditionalOnBean(LearningAssistant.class)
 @RestController
 @RequestMapping("/api/student/ai")
 public class LearningAssistantController {

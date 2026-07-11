@@ -16,6 +16,8 @@ public class JobApplication extends BaseEntity {
     private Long jobId;
     private Long learnerId;
     private String resumeSummary;
+    private String resumeUrl;
+    private String resumeFileName;
     private String applyStatus;
     private String reviewer;
     private LocalDateTime reviewedAt;

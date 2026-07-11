@@ -350,17 +350,14 @@ watch(() => props.learnerId, (newId) => { learnerId.value = newId; loadAll(); lo
 </script>
 
 <template>
-  <div class="mall-layout">
-    <!-- 顶部导航栏 -->
-    <header class="mall-header">
-      <div class="header-left">
-        <div class="brand">
-          <div class="brand-icon"><Store :size="24" /></div>
-          <div class="brand-text">
-            <h1>积分商城</h1>
-            <span>Credit Mall</span>
-          </div>
-        </div>
+  <main class="workspace student-dark-page mall-layout">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Student Portal</p>
+        <h1>积分商城</h1>
+        <p class="subtitle">兑换课程、认证、服务和学习用品</p>
+      </div>
+      <div class="top-actions mall-actions">
         <nav class="tab-nav">
           <button :class="{ active: activeTab === 'mall' }" @click="activeTab = 'mall'">
             <ShoppingBag :size="16" /> 商品
@@ -372,165 +369,128 @@ watch(() => props.learnerId, (newId) => { learnerId.value = newId; loadAll(); lo
             <Package :size="16" /> 订单
           </button>
         </nav>
-      </div>
-      <div class="header-right">
         <div v-if="showIdInput" class="learner-switch">
           <label><span>学员ID</span><input v-model="learnerId" type="number" min="1" @keyup.enter="switchLearner" /></label>
-          <button class="btn-secondary" @click="switchLearner"><UserCheck :size="14" /> 切换</button>
+          <button class="ghost-button" @click="switchLearner"><UserCheck :size="14" /> 切换</button>
         </div>
-        <button class="btn-cart" @click="toggleCart">
+        <button class="ghost-button cart-button" @click="toggleCart">
           <ShoppingCart :size="18" />
           <span class="cart-badge" v-if="cartItems.length > 0">{{ cartItems.length }}</span>
           <span>购物车</span>
         </button>
-        <button class="btn-refresh" @click="loadAll"><RefreshCw :size="16" /></button>
+        <button class="ghost-button icon-only" @click="loadAll"><RefreshCw :size="16" /></button>
       </div>
     </header>
 
-    <!-- 账户余额 -->
-    <section class="account-section">
-      <div v-if="account" class="account-cards">
-        <div class="account-card primary">
-          <div class="card-icon" style="background: #eef2ff; color: #4f7df3;"><Coins :size="22" /></div>
-          <div class="card-info">
-            <span class="card-label">可用积分</span>
-            <strong class="card-value">{{ account.availableCredits.toLocaleString() }}</strong>
-          </div>
+    <section v-if="!account" class="panel account-empty compact-empty">
+      <div class="empty-icon"><Sparkles :size="32" /></div>
+      <p>您尚未开通积分账户</p>
+      <button class="primary-button" :disabled="saving" @click="openAccount"><Sparkles :size="16" /> 立即开通账户</button>
+    </section>
+
+    <section v-if="activeTab === 'mall'" class="panel content-section">
+      <div class="toolbar mall-toolbar">
+        <div class="search-box">
+          <Search :size="16" />
+          <input v-model="searchQuery" type="text" placeholder="搜索商品名称..." />
         </div>
-        <div class="account-card">
-          <div class="card-icon" style="background: #fef3c7; color: #d97706;"><ReceiptText :size="22" /></div>
-          <div class="card-info">
-            <span class="card-label">冻结积分</span>
-            <strong class="card-value">{{ account.frozenCredits.toLocaleString() }}</strong>
-          </div>
+        <div class="filter-tabs">
+          <button :class="{ active: selectedType === 'ALL' }" @click="selectedType = 'ALL'">全部</button>
+          <button :class="{ active: selectedType === 'COURSE' }" @click="selectedType = 'COURSE'">课程</button>
+          <button :class="{ active: selectedType === 'CERTIFICATE' }" @click="selectedType = 'CERTIFICATE'">认证</button>
+          <button :class="{ active: selectedType === 'MERCHANDISE' }" @click="selectedType = 'MERCHANDISE'">实物</button>
+          <button :class="{ active: selectedType === 'SERVICE' }" @click="selectedType = 'SERVICE'">服务</button>
         </div>
-        <div class="account-card">
-          <div class="card-icon" style="background: #d1fae5; color: #059669;"><Award :size="22" /></div>
-          <div class="card-info">
-            <span class="card-label">累计积分</span>
-            <strong class="card-value">{{ account.totalCredits.toLocaleString() }}</strong>
-          </div>
-        </div>
-        <div class="account-card">
-          <div class="card-icon" style="background: #fce7f3; color: #db2777;"><Sparkles :size="22" /></div>
-          <div class="card-info">
-            <span class="card-label">账户状态</span>
-            <strong class="card-value status-active">正常</strong>
-          </div>
+        <div v-if="account" class="account-inline">
+          <span>可用 <strong>{{ account.availableCredits.toLocaleString() }}</strong></span>
+          <span>冻结 <strong>{{ account.frozenCredits.toLocaleString() }}</strong></span>
+          <span>累计 <strong>{{ account.totalCredits.toLocaleString() }}</strong></span>
         </div>
       </div>
-      <div v-else class="account-empty">
-        <div class="empty-icon"><Sparkles :size="32" /></div>
-        <p>您尚未开通积分账户</p>
-        <button class="btn-primary" :disabled="saving" @click="openAccount"><Sparkles :size="16" /> 立即开通账户</button>
+      <div v-if="loading" class="loading-state"><LoaderCircle class="spin" :size="28" /><p>正在加载商品...</p></div>
+      <div v-else-if="filteredProducts.length === 0" class="empty-state"><ShoppingBag :size="48" /><p>{{ searchQuery ? '未找到匹配的商品' : '暂无商品上架' }}</p></div>
+      <div v-else class="product-grid">
+        <article v-for="p in filteredProducts" :key="p.id" class="product-card">
+          <div class="product-image">
+            <span class="product-emoji">{{ typeIcons[p.productType] || "🎁" }}</span>
+            <span class="product-type-tag" :style="{ background: typeColors[p.productType] + '15', color: typeColors[p.productType] }">{{ typeLabels[p.productType] || p.productType }}</span>
+          </div>
+          <div class="product-content">
+            <h3>{{ p.productName }}</h3>
+            <p v-if="p.description" class="product-desc">{{ p.description }}</p>
+            <div class="product-footer">
+              <div class="product-price"><Coins :size="16" /><strong>{{ p.creditPrice.toLocaleString() }}</strong><span>积分</span></div>
+              <div class="product-stock" :class="{ low: p.stock !== -1 && p.stock <= 5 }">{{ p.stock === -1 ? '库存充足' : `剩余 ${p.stock}` }}</div>
+            </div>
+          </div>
+          <div class="product-actions">
+            <button class="btn-ghost" @click="openDetailDialog(p)">查看详情</button>
+            <button class="btn-ghost" @click="addToCart(p)"><ShoppingCart :size="14" /> 加入购物车</button>
+            <button class="btn-primary" :disabled="!account || (account && account.availableCredits < p.creditPrice) || p.stock === 0" @click="openOrderDialog(p)">
+              <ShoppingBag :size="14" />
+              {{ !account ? '请先开通' : account.availableCredits < p.creditPrice ? '积分不足' : p.stock === 0 ? '已售罄' : '立即兑换' }}
+            </button>
+          </div>
+        </article>
       </div>
     </section>
 
-    <!-- 主体内容 -->
-    <main class="mall-main">
-      <!-- 商品列表 -->
-      <section v-if="activeTab === 'mall'" class="content-section">
-        <div class="toolbar">
-          <div class="search-box">
-            <Search :size="16" />
-            <input v-model="searchQuery" type="text" placeholder="搜索商品名称..." />
-          </div>
-          <div class="filter-tabs">
-            <button :class="{ active: selectedType === 'ALL' }" @click="selectedType = 'ALL'">全部</button>
-            <button :class="{ active: selectedType === 'COURSE' }" @click="selectedType = 'COURSE'">课程</button>
-            <button :class="{ active: selectedType === 'CERTIFICATE' }" @click="selectedType = 'CERTIFICATE'">认证</button>
-            <button :class="{ active: selectedType === 'MERCHANDISE' }" @click="selectedType = 'MERCHANDISE'">实物</button>
-            <button :class="{ active: selectedType === 'SERVICE' }" @click="selectedType = 'SERVICE'">服务</button>
-          </div>
-        </div>
-        <div v-if="loading" class="loading-state"><LoaderCircle class="spin" :size="28" /><p>正在加载商品...</p></div>
-        <div v-else-if="filteredProducts.length === 0" class="empty-state"><ShoppingBag :size="48" /><p>{{ searchQuery ? '未找到匹配的商品' : '暂无商品上架' }}</p></div>
-        <div v-else class="product-grid">
-          <article v-for="p in filteredProducts" :key="p.id" class="product-card">
-            <div class="product-image">
-              <span class="product-emoji">{{ typeIcons[p.productType] || "🎁" }}</span>
-              <span class="product-type-tag" :style="{ background: typeColors[p.productType] + '15', color: typeColors[p.productType] }">{{ typeLabels[p.productType] || p.productType }}</span>
-            </div>
-            <div class="product-content">
-              <h3>{{ p.productName }}</h3>
-              <p v-if="p.description" class="product-desc">{{ p.description }}</p>
-              <div class="product-footer">
-                <div class="product-price"><Coins :size="16" /><strong>{{ p.creditPrice.toLocaleString() }}</strong><span>积分</span></div>
-                <div class="product-stock" :class="{ low: p.stock !== -1 && p.stock <= 5 }">{{ p.stock === -1 ? '库存充足' : `剩余 ${p.stock}` }}</div>
+    <section v-if="activeTab === 'flash'" class="panel content-section">
+      <div v-if="flashLoading" class="loading-state"><LoaderCircle class="spin" :size="28" /><p>加载秒杀活动中...</p></div>
+      <FlashSaleSection v-else :flash-sales="flashSales" :flash-countdowns="flashCountdowns" :saving="saving" :account="account" @seckill="doSeckill" />
+    </section>
+
+    <section v-if="activeTab === 'orders'" class="panel content-section">
+      <div class="section-header">
+        <h2><Package :size="20" /> 我的订单</h2>
+        <p>查看和管理您的所有订单</p>
+      </div>
+      <div v-if="orders.length === 0" class="empty-state"><Package :size="48" /><p>暂无订单记录</p></div>
+      <div v-else class="orders-container">
+        <div v-if="pendingOrders.length > 0" class="order-group">
+          <div class="group-title"><AlertCircle :size="16" style="color: #e8a838;" /><span>待支付</span><span class="group-count">{{ pendingOrders.length }}</span></div>
+          <div class="order-list">
+            <div v-for="o in pendingOrders" :key="o.id" class="order-item pending">
+              <div class="order-item-main">
+                <div class="order-item-info"><strong>{{ o.productName }}</strong><div class="order-meta"><span>订单号: {{ o.orderNo }}</span><span>{{ formatTime(o.createdAt) }}</span></div></div>
+                <div class="order-item-price"><strong>{{ (o.totalAmount || o.creditAmount).toLocaleString() }}</strong><span>积分</span></div>
               </div>
+              <div class="order-item-actions"><button class="btn-primary" :disabled="saving" @click="payOrder(o)">确认支付</button><button class="btn-ghost" :disabled="saving" @click="cancelOrder(o)">取消订单</button></div>
             </div>
-            <div class="product-actions">
-              <button class="btn-ghost" @click="openDetailDialog(p)">查看详情</button>
-              <button class="btn-ghost" @click="addToCart(p)"><ShoppingCart :size="14" /> 加入购物车</button>
-              <button class="btn-primary" :disabled="!account || (account && account.availableCredits < p.creditPrice) || p.stock === 0" @click="openOrderDialog(p)">
-                <ShoppingBag :size="14" />
-                {{ !account ? '请先开通' : account.availableCredits < p.creditPrice ? '积分不足' : p.stock === 0 ? '已售罄' : '立即兑换' }}
-              </button>
-            </div>
-          </article>
+          </div>
         </div>
-      </section>
-
-      <!-- 秒杀 -->
-      <section v-if="activeTab === 'flash'" class="content-section">
-        <div v-if="flashLoading" class="loading-state"><LoaderCircle class="spin" :size="28" /><p>加载秒杀活动中...</p></div>
-        <FlashSaleSection v-else :flash-sales="flashSales" :flash-countdowns="flashCountdowns" :saving="saving" :account="account" @seckill="doSeckill" />
-      </section>
-
-      <!-- 订单 -->
-      <section v-if="activeTab === 'orders'" class="content-section">
-        <div class="section-header">
-          <h2><Package :size="20" /> 我的订单</h2>
-          <p>查看和管理您的所有订单</p>
-        </div>
-        <div v-if="orders.length === 0" class="empty-state"><Package :size="48" /><p>暂无订单记录</p></div>
-        <div v-else class="orders-container">
-          <div v-if="pendingOrders.length > 0" class="order-group">
-            <div class="group-title"><AlertCircle :size="16" style="color: #e8a838;" /><span>待支付</span><span class="group-count">{{ pendingOrders.length }}</span></div>
-            <div class="order-list">
-              <div v-for="o in pendingOrders" :key="o.id" class="order-item pending">
-                <div class="order-item-main">
-                  <div class="order-item-info"><strong>{{ o.productName }}</strong><div class="order-meta"><span>订单号: {{ o.orderNo }}</span><span>{{ formatTime(o.createdAt) }}</span></div></div>
-                  <div class="order-item-price"><strong>{{ (o.totalAmount || o.creditAmount).toLocaleString() }}</strong><span>积分</span></div>
+        <div v-if="doneOrders.length > 0" class="order-group">
+          <div class="group-title done"><CheckCircle2 :size="16" style="color: #059669;" /><span>已完成</span><span class="group-count">{{ doneOrders.length }}</span></div>
+          <div class="order-list">
+            <div v-for="o in doneOrders" :key="o.id" class="order-item">
+              <div class="order-item-main">
+                <div class="order-item-info"><strong>{{ o.productName }}</strong><div class="order-meta"><span>订单号: {{ o.orderNo }}</span><span>{{ formatTime(o.createdAt) }}</span></div></div>
+                <div class="order-item-right">
+                  <span :class="['status-tag', statusMap[o.orderStatus]?.class || 'neutral']">{{ statusMap[o.orderStatus]?.label || o.orderStatus }}</span>
+                  <strong class="order-price">{{ (o.totalAmount || o.creditAmount).toLocaleString() }} 积分</strong>
                 </div>
-                <div class="order-item-actions"><button class="btn-primary" :disabled="saving" @click="payOrder(o)">确认支付</button><button class="btn-ghost" :disabled="saving" @click="cancelOrder(o)">取消订单</button></div>
+              </div>
+              <div v-if="o.orderStatus === 'DELIVERED'" class="order-timeline">
+                <div class="timeline-step completed"><span></span>已下单</div><div class="timeline-line"></div>
+                <div class="timeline-step completed"><span></span>已支付</div><div class="timeline-line"></div>
+                <div class="timeline-step completed"><span></span>已发货</div>
+              </div>
+              <div v-else-if="o.orderStatus === 'PAID'" class="order-timeline">
+                <div class="timeline-step completed"><span></span>已下单</div><div class="timeline-line"></div>
+                <div class="timeline-step completed"><span></span>已支付</div><div class="timeline-line"></div>
+                <div class="timeline-step"><span></span>待发货</div>
               </div>
             </div>
           </div>
-          <div v-if="doneOrders.length > 0" class="order-group">
-            <div class="group-title done"><CheckCircle2 :size="16" style="color: #059669;" /><span>已完成</span><span class="group-count">{{ doneOrders.length }}</span></div>
-            <div class="order-list">
-              <div v-for="o in doneOrders" :key="o.id" class="order-item">
-                <div class="order-item-main">
-                  <div class="order-item-info"><strong>{{ o.productName }}</strong><div class="order-meta"><span>订单号: {{ o.orderNo }}</span><span>{{ formatTime(o.createdAt) }}</span></div></div>
-                  <div class="order-item-right">
-                    <span :class="['status-tag', statusMap[o.orderStatus]?.class || 'neutral']">{{ statusMap[o.orderStatus]?.label || o.orderStatus }}</span>
-                    <strong class="order-price">{{ (o.totalAmount || o.creditAmount).toLocaleString() }} 积分</strong>
-                  </div>
-                </div>
-                <div v-if="o.orderStatus === 'DELIVERED'" class="order-timeline">
-                  <div class="timeline-step completed"><span></span>已下单</div><div class="timeline-line"></div>
-                  <div class="timeline-step completed"><span></span>已支付</div><div class="timeline-line"></div>
-                  <div class="timeline-step completed"><span></span>已发货</div>
-                </div>
-                <div v-else-if="o.orderStatus === 'PAID'" class="order-timeline">
-                  <div class="timeline-step completed"><span></span>已下单</div><div class="timeline-line"></div>
-                  <div class="timeline-step completed"><span></span>已支付</div><div class="timeline-line"></div>
-                  <div class="timeline-step"><span></span>待发货</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <footer v-if="orderPage.total > orderPage.size" class="pagination">
-            <button :disabled="orderPage.current <= 1" @click="orderPage.current--; loadOrders()">上一页</button>
-            <span>第 {{ orderPage.current }} / {{ Math.ceil(orderPage.total / orderPage.size) }} 页</span>
-            <button :disabled="orderPage.current >= Math.ceil(orderPage.total / orderPage.size)" @click="orderPage.current++; loadOrders()">下一页</button>
-          </footer>
         </div>
-      </section>
-    </main>
+        <footer v-if="orderPage.total > orderPage.size" class="pagination">
+          <button :disabled="orderPage.current <= 1" @click="orderPage.current--; loadOrders()">上一页</button>
+          <span>第 {{ orderPage.current }} / {{ Math.ceil(orderPage.total / orderPage.size) }} 页</span>
+          <button :disabled="orderPage.current >= Math.ceil(orderPage.total / orderPage.size)" @click="orderPage.current++; loadOrders()">下一页</button>
+        </footer>
+      </div>
+    </section>
 
-    <!-- 购物车侧边栏 -->
     <CartSidebar :show-cart="showCart" :cart-items="cartItems" :cart-checked="cartChecked" :cart-total="cartTotal" :saving="saving"
       @close="showCart = false"
       @update:cart-checked="onCartChecked"
@@ -538,23 +498,20 @@ watch(() => props.learnerId, (newId) => { learnerId.value = newId; loadAll(); lo
       @remove-cart-item="removeCartItem"
       @checkout="checkoutFromCart" />
 
-    <!-- 结算确认页 -->
     <CheckoutOverlay :checkout-view="checkoutView" :checkout-timer-text="checkoutTimerText" :checkout-timer="checkoutTimer"
       :checkout-orders="checkoutOrders" :checkout-total-amount="checkoutTotalAmount" :saving="saving" :account="account"
       @cancel="cancelCheckout" @confirm="confirmCheckout" />
 
-    <!-- 弹窗 -->
     <ProductDialogs :order-dialog="orderDialog" :detail-dialog="detailDialog" :account="account" :saving="saving"
       :type-icons="typeIcons" :type-labels="typeLabels" :type-colors="typeColors"
       @close-order="closeOrderDialog" @close-detail="closeDetailDialog" @place-order="placeOrder"
       @update:order-quantity="orderDialog.quantity = $event" @order-from-detail="orderFromDetail" />
 
-    <!-- Toast -->
     <div v-if="toast.text" :class="['toast', toast.type]">
       <component :is="toast.type === 'error' ? AlertCircle : CheckCircle2" :size="16" />
       {{ toast.text }}
     </div>
-  </div>
+  </main>
 </template>
 
 <style scoped>
@@ -803,5 +760,199 @@ button:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important
   .product-grid { grid-template-columns: 1fr; }
   .order-item-main { flex-direction: column; gap: 12px; }
   .order-item-actions { justify-content: flex-start; }
+}
+
+/* 与学生端其他功能页保持一致：页面框架交给全局 workspace/topbar/panel 控制 */
+.mall-layout {
+  min-height: 0;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+}
+
+.mall-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.mall-toolbar {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.content-section {
+  animation: none;
+}
+
+.compact-empty {
+  margin-bottom: 20px;
+}
+
+.cart-button {
+  position: relative;
+}
+
+.icon-only {
+  width: 38px;
+  padding: 0;
+}
+
+.account-inline {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.account-inline span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--bg-chart);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.account-inline strong {
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+@media (max-width: 1024px) {
+  .mall-actions {
+    justify-content: flex-start;
+  }
+
+  .account-inline {
+    margin-left: 0;
+  }
+}
+
+
+/* 学生端深色商城内容块 */
+:global([data-theme="dark"]) .mall-layout {
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .mall-layout :deep(.mall-header),
+:global([data-theme="dark"]) .mall-layout :deep(.account-section),
+:global([data-theme="dark"]) .mall-layout :deep(.account-card),
+:global([data-theme="dark"]) .mall-layout :deep(.content-section),
+:global([data-theme="dark"]) .mall-layout :deep(.product-card),
+:global([data-theme="dark"]) .mall-layout :deep(.order-item),
+:global([data-theme="dark"]) .mall-layout :deep(.empty-state),
+:global([data-theme="dark"]) .mall-layout :deep(.search-box),
+:global([data-theme="dark"]) .mall-layout :deep(.filter-tabs button),
+:global([data-theme="dark"]) .mall-layout :deep(.tab-nav),
+:global([data-theme="dark"]) .mall-layout :deep(.tab-nav button.active),
+:global([data-theme="dark"]) .mall-layout :deep(.btn-cart),
+:global([data-theme="dark"]) .mall-layout :deep(.btn-refresh),
+:global([data-theme="dark"]) .mall-layout :deep(.btn-ghost),
+:global([data-theme="dark"]) .mall-layout :deep(.btn-secondary),
+:global([data-theme="dark"]) .mall-layout :deep(.pagination button),
+:global([data-theme="dark"]) .mall-layout :deep(.flash-card),
+:global([data-theme="dark"]) .mall-layout :deep(.cart-sidebar),
+:global([data-theme="dark"]) .mall-layout :deep(.cart-item),
+:global([data-theme="dark"]) .mall-layout :deep(.cart-qty),
+:global([data-theme="dark"]) .mall-layout :deep(.modal-card),
+:global([data-theme="dark"]) .mall-layout :deep(.checkout-card),
+:global([data-theme="dark"]) .mall-layout :deep(.detail-row),
+:global([data-theme="dark"]) .mall-layout :deep(.timeline-step span),
+:global([data-theme="dark"]) .mall-layout :deep(.group-count),
+:global([data-theme="dark"]) .mall-layout :deep(.empty-icon) {
+  background: #1e293b;
+  border-color: rgba(51, 65, 85, 0.95);
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .mall-layout :deep(.product-card:hover),
+:global([data-theme="dark"]) .mall-layout :deep(.order-item:hover),
+:global([data-theme="dark"]) .mall-layout :deep(.account-card:hover),
+:global([data-theme="dark"]) .mall-layout :deep(.flash-card:hover),
+:global([data-theme="dark"]) .mall-layout :deep(.cart-item:hover),
+:global([data-theme="dark"]) .mall-layout :deep(.filter-tabs button:hover),
+:global([data-theme="dark"]) .mall-layout :deep(.btn-cart:hover),
+:global([data-theme="dark"]) .mall-layout :deep(.btn-refresh:hover),
+:global([data-theme="dark"]) .mall-layout :deep(.btn-ghost:hover),
+:global([data-theme="dark"]) .mall-layout :deep(.pagination button:hover:not(:disabled)) {
+  background: #243449;
+  border-color: rgba(71, 85, 105, 1);
+}
+
+:global([data-theme="dark"]) .mall-layout :deep(.brand-text h1),
+:global([data-theme="dark"]) .mall-layout :deep(.section-header h2),
+:global([data-theme="dark"]) .mall-layout :deep(.product-content h3),
+:global([data-theme="dark"]) .mall-layout :deep(.order-item-info strong),
+:global([data-theme="dark"]) .mall-layout :deep(.order-price),
+:global([data-theme="dark"]) .mall-layout :deep(.order-item-price strong),
+:global([data-theme="dark"]) .mall-layout :deep(.card-value),
+:global([data-theme="dark"]) .mall-layout :deep(.modal-header h3),
+:global([data-theme="dark"]) .mall-layout :deep(.detail-hero h2),
+:global([data-theme="dark"]) .mall-layout :deep(.detail-row strong),
+:global([data-theme="dark"]) .mall-layout :deep(.cart-title),
+:global([data-theme="dark"]) .mall-layout :deep(.cart-item-detail strong),
+:global([data-theme="dark"]) .mall-layout :deep(.cart-total-row strong),
+:global([data-theme="dark"]) .mall-layout :deep(.flash-body h3),
+:global([data-theme="dark"]) .mall-layout :deep(.flash-price) {
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .mall-layout :deep(.brand-text span),
+:global([data-theme="dark"]) .mall-layout :deep(.section-header p),
+:global([data-theme="dark"]) .mall-layout :deep(.product-desc),
+:global([data-theme="dark"]) .mall-layout :deep(.product-price span),
+:global([data-theme="dark"]) .mall-layout :deep(.order-meta),
+:global([data-theme="dark"]) .mall-layout :deep(.order-item-price span),
+:global([data-theme="dark"]) .mall-layout :deep(.card-label),
+:global([data-theme="dark"]) .mall-layout :deep(.account-empty p),
+:global([data-theme="dark"]) .mall-layout :deep(.loading-state),
+:global([data-theme="dark"]) .mall-layout :deep(.empty-state),
+:global([data-theme="dark"]) .mall-layout :deep(.pagination span),
+:global([data-theme="dark"]) .mall-layout :deep(.detail-row span),
+:global([data-theme="dark"]) .mall-layout :deep(.detail-row p),
+:global([data-theme="dark"]) .mall-layout :deep(.cart-count),
+:global([data-theme="dark"]) .mall-layout :deep(.cart-empty),
+:global([data-theme="dark"]) .mall-layout :deep(.cart-item-price),
+:global([data-theme="dark"]) .mall-layout :deep(.select-all span),
+:global([data-theme="dark"]) .mall-layout :deep(.flash-origin),
+:global([data-theme="dark"]) .mall-layout :deep(.flash-stock-bar span),
+:global([data-theme="dark"]) .mall-layout :deep(.group-count),
+:global([data-theme="dark"]) .mall-layout :deep(.timeline-step) {
+  color: #cbd5e1;
+}
+
+:global([data-theme="dark"]) .mall-layout :deep(input),
+:global([data-theme="dark"]) .mall-layout :deep(select),
+:global([data-theme="dark"]) .mall-layout :deep(textarea),
+:global([data-theme="dark"]) .mall-layout :deep(.search-box input),
+:global([data-theme="dark"]) .mall-layout :deep(.learner-switch input) {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(51, 65, 85, 0.95);
+  color: #e2e8f0;
+}
+
+:global([data-theme="dark"]) .mall-layout :deep(input::placeholder),
+:global([data-theme="dark"]) .mall-layout :deep(textarea::placeholder) {
+  color: #94a3b8;
+}
+
+:global([data-theme="dark"]) .mall-layout :deep(.product-image) {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+}
+
+:global([data-theme="dark"]) .mall-layout :deep(.order-item.pending) {
+  background: #243449;
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+:global([data-theme="dark"]) .mall-layout :deep(.order-timeline),
+:global([data-theme="dark"]) .mall-layout :deep(.modal-header),
+:global([data-theme="dark"]) .mall-layout :deep(.cart-sidebar-header),
+:global([data-theme="dark"]) .mall-layout :deep(.cart-sidebar-footer) {
+  border-color: rgba(51, 65, 85, 0.95);
 }
 </style>

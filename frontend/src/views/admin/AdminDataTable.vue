@@ -39,7 +39,7 @@ function formatCell(v) {
 function badgeClass(v) {
   const t = String(v || "").toLowerCase();
   if (/active|open|published|approved|passed|increase|paid|delivered/.test(t)) return "success";
-  if (/pending|learning/.test(t)) return "pending";
+  if (/pending|learning|submitted|viewed/.test(t)) return "pending";
   if (/upcoming/.test(t)) return "pending";
   if (/reject|disable|closed|ended|failed|consume|refunded|cancelled/.test(t)) return "danger";
   return "neutral";
@@ -119,9 +119,9 @@ function proofMaterialHref(value) {
               </button>
               <span v-if="row.auditStatus !== 'PENDING'" class="data-badge neutral">已处理</span>
             </div>
-            <a v-else-if="col.key === 'proofUrl' && proofMaterialHref(row[col.key])" class="resource-link"
-               :href="proofMaterialHref(row[col.key])" target="_blank" rel="noopener">查看材料</a>
-            <span v-else-if="col.key === 'proofUrl'">{{ row[col.key] ? '材料地址无效' : '-' }}</span>
+            <a v-else-if="['proofUrl', 'resumeUrl'].includes(col.key) && proofMaterialHref(row[col.key])" class="resource-link"
+               :href="proofMaterialHref(row[col.key])" target="_blank" rel="noopener">{{ col.key === 'resumeUrl' ? (row.resumeFileName || '查看简历') : '查看材料' }}</a>
+            <span v-else-if="['proofUrl', 'resumeUrl'].includes(col.key)">{{ row[col.key] ? '文件地址无效' : '-' }}</span>
             <span v-else-if="col.badge"
                   :class="['data-badge', badgeClass(row[col.key])]">{{ formatCell(row[col.key]) }}</span>
             <span v-else>{{ formatCell(row[col.key]) }}</span>
@@ -145,15 +145,18 @@ function proofMaterialHref(value) {
             <button v-if="activeModule === 'enrollments' && row.enrollStatus === 'PENDING'" type="button"
                     @click="emit('review-enrollment', row, 'REJECTED')">驳回
             </button>
-            <button v-if="activeModule === 'job-applications' && row.applyStatus === 'PENDING'" type="button"
+            <button v-if="activeModule === 'job-applications' && ['SUBMITTED', 'VIEWED', 'PENDING'].includes(row.applyStatus)" type="button"
+                    class="ghost-button" @click="emit('review-job-application', row, 'VIEWED')">已查看
+            </button>
+            <button v-if="activeModule === 'job-applications' && ['SUBMITTED', 'VIEWED', 'PENDING'].includes(row.applyStatus)" type="button"
                     class="primary-button" @click="emit('review-job-application', row, 'ACCEPTED')">接受
             </button>
-            <button v-if="activeModule === 'job-applications' && row.applyStatus === 'PENDING'" type="button"
+            <button v-if="activeModule === 'job-applications' && ['SUBMITTED', 'VIEWED', 'PENDING'].includes(row.applyStatus)" type="button"
                     @click="emit('review-job-application', row, 'REJECTED')">拒绝
             </button>
-            <span v-if="activeModule === 'job-applications' && row.applyStatus !== 'PENDING'"
+            <span v-if="activeModule === 'job-applications' && !['SUBMITTED', 'VIEWED', 'PENDING'].includes(row.applyStatus)"
                   :class="['data-badge', badgeClass(row.applyStatus)]">
-              {{ row.applyStatus === 'ACCEPTED' ? '已接受' : '已拒绝' }}
+              {{ row.applyStatus === 'ACCEPTED' ? '已接受' : row.applyStatus === 'REJECTED' ? '已拒绝' : row.applyStatus }}
             </span>
             <button v-if="activeModule === 'integrity-ratings'" type="button" class="ghost-button"
                     @click="emit('recompute-integrity', row)">重算

@@ -10,6 +10,7 @@ export function getOrders(current = 1, size = 10) { return request(`/api/student
 export function payOrder(id) { return request(`/api/student/orders/${id}/pay`, { method: 'POST' }) }
 export function cancelOrder(id) { return request(`/api/student/orders/${id}/cancel`, { method: 'POST' }) }
 export function getCourses(current = 1, size = 10) { return request(`/api/student/courses?current=${current}&size=${size}`) }
+export function getMyCourses(current = 1, size = 10) { return request(`/api/student/courses/my?current=${current}&size=${size}`) }
 export function learnCourse(courseId) { return request(`/api/student/courses/${courseId}/learn`, { method: 'POST' }) }
 export function enrollCourse(courseId) { return request(`/api/student/courses/${courseId}/enroll`, { method: 'POST' }) }
 export function getEnrollments(current = 1, size = 10) { return request(`/api/student/enrollments?current=${current}&size=${size}`) }
@@ -19,7 +20,7 @@ export function getCreditSources(current = 1, size = 20) { return request(`/api/
 export function submitAchievement(data) { return request('/api/student/achievements', { method: 'POST', body: JSON.stringify(data) }) }
 export function getAchievements(current = 1, size = 10) { return request(`/api/student/achievements?current=${current}&size=${size}`) }
 export function getJobs(current = 1, size = 10) { return request(`/api/student/jobs?current=${current}&size=${size}`) }
-export function applyJob(jobId, resumeSummary) { return request(`/api/student/jobs/${jobId}/apply`, { method: 'POST', body: JSON.stringify({ resumeSummary }) }) }
+export function applyJob(jobId, data) { return request(`/api/student/jobs/${jobId}/apply`, { method: 'POST', body: JSON.stringify(data) }) }
 export function getJobApplications(current = 1, size = 10) { return request(`/api/student/job-applications?current=${current}&size=${size}`) }
 export function getIntegrity() { return request('/api/student/integrity') }
 export function getLearningRecords(current = 1, size = 100) { return request(`/api/student/learning-records?current=${current}&size=${size}`) }

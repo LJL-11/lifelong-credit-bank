@@ -5,8 +5,8 @@ spring:
   application:
     name: credit-bank
   datasource:
-    url: jdbc:mysql://localhost:3306/credit_bank?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
-    username: root
+    url: jdbc:mysql://localhost:3306/lifelong_credit_bank?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: creditbank
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
@@ -57,16 +57,16 @@ langchain4j:
   open-ai:
     chat-model:
       base-url: https://api.deepseek.com
-      api-key: ${deepseek}
+      api-key: ${deepseek:false}
       model-name: deepseek-chat
       log-requests: true
       log-responses: true
     streaming-chat-model:
       base-url: https://api.deepseek.com
-      api-key: ${deepseek}
+      api-key: ${deepseek:false}
       model-name: deepseek-chat
   community:
     dashscope:
       embedding-model:
-        api-key: ${DASHSCOPE_API_KEY}
+        api-key: ${DASHSCOPE_API_KEY:false}
         model-name: text-embedding-v3

@@ -18,7 +18,7 @@ function badgeClass(v) {
 </script>
 
 <template>
-  <main class="workspace">
+  <main class="workspace student-dark-page">
     <header class="topbar">
       <div>
         <p class="eyebrow">Student Portal</p>
@@ -53,6 +53,7 @@ function badgeClass(v) {
           <strong>岗位 #{{ a.jobId }}</strong>
           <span :class="['data-badge', badgeClass(a.applyStatus)]">{{ a.applyStatus }}</span>
           <small>{{ a.remark || a.resumeSummary || '' }}</small>
+          <a v-if="a.resumeUrl" class="resource-link" :href="a.resumeUrl" target="_blank" rel="noopener">{{ a.resumeFileName || '查看简历' }}</a>
         </div>
         <p v-if="jobApplications.length===0" class="state-block">暂无投递记录</p>
       </div>

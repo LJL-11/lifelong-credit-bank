@@ -200,12 +200,18 @@ async function loadProfile() {
 async function loadCourses() {
   loading.value = true;
   try {
-    const [courseData, recordData] = await Promise.all([
+    const [courseData, myCourseData, recordData, enrollmentData] = await Promise.all([
       studentApi.getCourses(coursePage.value.current, coursePage.value.size),
+      studentApi.getMyCourses(1, 200),
       studentApi.getLearningRecords(1, 200),
+      studentApi.getEnrollments(1, 200),
     ]);
-    courses.value = courseData.records || [];
-    coursePage.value.total = courseData.total || 0;
+    const enrollmentMap = new Map((enrollmentData.records || []).map(e => [e.courseId, e.enrollStatus]));
+    const courseMap = new Map();
+    for (const course of (courseData.records || [])) courseMap.set(course.id, course);
+    for (const course of (myCourseData.records || [])) courseMap.set(course.id, {...courseMap.get(course.id), ...course});
+    courses.value = Array.from(courseMap.values()).map(c => ({...c, enrollStatus: c.enrollStatus || enrollmentMap.get(c.id) || ""}));
+    coursePage.value.total = Math.max(courseData.total || 0, courses.value.length);
     const completedIds = (recordData.records || [])
         .filter(r => r.result === "PASSED")
         .map(r => r.courseId);
@@ -279,7 +285,8 @@ const proofUploading = ref(false);
 const proofFileName = ref("");
 const todaySigned = computed(() => signIns.value.some(s => s.signDate === todayString()));
 const todaySignRecord = computed(() => signIns.value.find(s => s.signDate === todayString()));
-const applyDialog = ref({open: false, job: null, resumeSummary: ""});
+const applyDialog = ref({open: false, job: null, resumeSummary: "", resumeUrl: "", resumeFileName: ""});
+const resumeUploading = ref(false);
 
 function todayString() {
   const d = new Date();
@@ -293,7 +300,7 @@ async function enrollCourse(course) {
   try {
     await studentApi.enrollCourse(course.id);
     showToast("报名已提交，等待管理员审核");
-    await loadEnrollments();
+    await Promise.all([loadEnrollments(), loadCourses()]);
   } catch (err) {
     showToast(err.message, "error");
   }
@@ -404,15 +411,45 @@ async function loadJobs() {
 }
 
 function openApplyDialog(job) {
-  applyDialog.value = {open: true, job, resumeSummary: ""};
+  applyDialog.value = {open: true, job, resumeSummary: "", resumeUrl: "", resumeFileName: ""};
+}
+
+async function uploadResumeFile(event) {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+  const formData = new FormData();
+  formData.append("file", file);
+  resumeUploading.value = true;
+  try {
+    const response = await fetch("/api/files/resumes", {
+      method: "POST",
+      headers: token.value ? {Authorization: `Bearer ${token.value}`} : {},
+      body: formData,
+    });
+    const result = await response.json();
+    if (!response.ok || result.code !== 200) {
+      throw new Error(result.message || "上传失败");
+    }
+    applyDialog.value.resumeUrl = result.data.url;
+    applyDialog.value.resumeFileName = result.data.fileName || file.name;
+    showToast("简历文件已上传");
+  } catch (err) {
+    showToast(err.message, "error");
+  } finally {
+    resumeUploading.value = false;
+  }
 }
 
 async function submitJobApplication() {
   const job = applyDialog.value.job;
   if (!job) return;
   try {
-    await studentApi.applyJob(job.id, applyDialog.value.resumeSummary);
-    applyDialog.value = {open: false, job: null, resumeSummary: ""};
+    await studentApi.applyJob(job.id, {
+      resumeSummary: applyDialog.value.resumeSummary,
+      resumeUrl: applyDialog.value.resumeUrl,
+      resumeFileName: applyDialog.value.resumeFileName,
+    });
+    applyDialog.value = {open: false, job: null, resumeSummary: "", resumeUrl: "", resumeFileName: ""};
     showToast("投递成功");
     await loadJobs();
   } catch (err) {
@@ -465,12 +502,12 @@ async function reviewAchievement(row, status) {
 }
 
 async function reviewJobApplication(row, status) {
-  const remark = prompt("处理备注", row.remark || "");
+  const remark = status === "REJECTED" ? prompt("请输入拒绝原因", row.remark || "") : prompt("处理备注", row.remark || "");
   if (remark === null) return;
   try {
     const updated = await adminApi.reviewJobApplication(row.id, status, remark);
     Object.assign(row, updated);
-    showToast(status === "ACCEPTED" ? "投递已接受" : "投递已拒绝");
+    showToast(status === "ACCEPTED" ? "投递已接受" : status === "REJECTED" ? "投递已拒绝" : "投递状态已更新");
     await loadTable();
   } catch (err) {
     showToast(err.message, "error");
@@ -751,7 +788,7 @@ onMounted(() => {
     />
 
     <!-- 管理员后台 -->
-    <main v-else class="workspace">
+    <main v-else class="workspace admin-dark-page">
       <header class="topbar">
         <div>
           <p class="eyebrow">Lifelong Credit Bank</p>
@@ -816,8 +853,8 @@ onMounted(() => {
     />
 
     <JobApplyDialog
-        :loading="loading" :token="token" :apply-dialog="applyDialog"
-        @close="applyDialog.open = false" @submit="submitJobApplication"
+        :loading="loading" :token="token" :apply-dialog="applyDialog" :resume-uploading="resumeUploading"
+        @close="applyDialog.open = false" @submit="submitJobApplication" @upload-resume-file="uploadResumeFile"
     />
 
     <ToastMessage :toast="toast"/>

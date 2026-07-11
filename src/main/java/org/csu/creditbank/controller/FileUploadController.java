@@ -31,21 +31,30 @@ public class FileUploadController {
 
     @PostMapping("/proofs")
     public ApiResult<Map<String, String>> uploadProof(@RequestParam("file") MultipartFile file) {
+        return uploadFile(file, "proofs", "证明文件");
+    }
+
+    @PostMapping("/resumes")
+    public ApiResult<Map<String, String>> uploadResume(@RequestParam("file") MultipartFile file) {
+        return uploadFile(file, "resumes", "简历文件");
+    }
+
+    private ApiResult<Map<String, String>> uploadFile(MultipartFile file, String dirName, String label) {
         if (file == null || file.isEmpty()) {
-            throw new BusinessException("请选择要上传的证明文件");
+            throw new BusinessException("请选择要上传的" + label);
         }
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new BusinessException("证明文件不能超过10MB");
+            throw new BusinessException(label + "不能超过10MB");
         }
 
-        String original = file.getOriginalFilename() == null ? "proof" : file.getOriginalFilename();
+        String original = file.getOriginalFilename() == null ? dirName : file.getOriginalFilename();
         String ext = extensionOf(original);
         if (!ALLOWED_EXTENSIONS.contains(ext)) {
             throw new BusinessException("仅支持图片、PDF、Word 文件");
         }
 
         try {
-            Path proofDir = uploadRoot.resolve("proofs");
+            Path proofDir = uploadRoot.resolve(dirName);
             Files.createDirectories(proofDir);
             String fileName = UUID.randomUUID() + "." + ext;
             Path target = proofDir.resolve(fileName).normalize();
@@ -53,12 +62,12 @@ public class FileUploadController {
                 throw new BusinessException("文件名非法");
             }
             file.transferTo(target);
-            String url = "/uploads/proofs/" + fileName;
+            String url = "/uploads/" + dirName + "/" + fileName;
             return ApiResult.ok(Map.of("url", url, "fileName", original));
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            throw new BusinessException("证明文件上传失败");
+            throw new BusinessException(label + "上传失败");
         }
     }
 

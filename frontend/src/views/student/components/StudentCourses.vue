@@ -10,10 +10,24 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["open-learning", "enroll-course", "load-courses", "show-toast"]);
+
+function enrollmentLabel(status) {
+  if (status === "APPROVED") return "已购买";
+  if (status === "PENDING") return "待审核";
+  if (status === "REJECTED") return "已驳回";
+  return "未报名";
+}
+
+function enrollmentClass(status) {
+  if (status === "APPROVED") return "success";
+  if (status === "PENDING") return "pending";
+  if (status === "REJECTED") return "danger";
+  return "neutral";
+}
 </script>
 
 <template>
-  <main class="workspace">
+  <main class="workspace student-dark-page">
     <header class="topbar">
       <div>
         <p class="eyebrow">Student Portal</p>
@@ -34,9 +48,12 @@ const emit = defineEmits(["open-learning", "enroll-course", "load-courses", "sho
               <span class="course-code">{{ c.courseCode }}</span>
               <h2>{{ c.courseName }}</h2>
             </div>
-            <span :class="['data-badge', learnedCourseIds.has(c.id) ? 'success' : 'neutral']">
-              {{ learnedCourseIds.has(c.id) ? '已学完' : '未完成' }}
-            </span>
+            <div class="course-status-stack">
+              <span :class="['data-badge', learnedCourseIds.has(c.id) ? 'success' : 'neutral']">
+                {{ learnedCourseIds.has(c.id) ? '已学完' : '未完成' }}
+              </span>
+              <span :class="['data-badge', enrollmentClass(c.enrollStatus)]">{{ enrollmentLabel(c.enrollStatus) }}</span>
+            </div>
           </div>
           <p class="course-summary">{{ c.resourceSummary || `${c.provider} / ${c.category}` }}</p>
           <div class="course-meta">
@@ -57,7 +74,8 @@ const emit = defineEmits(["open-learning", "enroll-course", "load-courses", "sho
             <button class="primary-button small" type="button" :disabled="loading || learnedCourseIds.has(c.id)"
                     @click="emit('open-learning', c)">进入学习
             </button>
-            <button class="ghost-button small" type="button" :disabled="loading" @click="emit('enroll-course', c)">报名课程
+            <button class="ghost-button small" type="button" :disabled="loading || c.enrollStatus === 'APPROVED' || c.enrollStatus === 'PENDING'" @click="emit('enroll-course', c)">
+              {{ c.enrollStatus === 'APPROVED' ? '已开通' : c.enrollStatus === 'PENDING' ? '审核中' : '报名课程' }}
             </button>
           </div>
           <span v-else class="complete-note"><CheckCircle2 :size="16"/> 已完成并获得积分</span>

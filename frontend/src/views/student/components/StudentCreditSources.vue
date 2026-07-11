@@ -44,7 +44,7 @@ function formatCell(v) {
 </script>
 
 <template>
-  <main class="workspace">
+  <main class="workspace student-dark-page credit-sources-page">
     <header class="topbar">
       <div>
         <p class="eyebrow">Student Portal</p>
@@ -131,6 +131,5 @@ function formatCell(v) {
 </template>
 
 <style scoped>
-/* All stats-grid, stat-card, split-grid, source-breakdown, transaction-list, etc. styles are in base.css */
-/* .credit-source-stats is a semantic modifier class with no additional scoped rules */
+/* Styles are inherited from base.css via student-dark-page. */
 </style>

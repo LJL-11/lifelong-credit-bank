@@ -11,7 +11,7 @@ const emit = defineEmits(["show-toast"]);
 </script>
 
 <template>
-  <main class="workspace">
+  <main class="workspace student-dark-page">
     <header class="topbar">
       <div>
         <p class="eyebrow">Student Portal</p>

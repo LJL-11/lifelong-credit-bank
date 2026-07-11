@@ -5,10 +5,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.csu.creditbank.common.ApiResult;
 import org.csu.creditbank.common.BusinessException;
 import org.csu.creditbank.entity.ForumPost;
+import org.csu.creditbank.entity.ForumPostLike;
+import org.csu.creditbank.entity.ForumReply;
 import org.csu.creditbank.entity.Learner;
 import org.csu.creditbank.service.ForumPostLikeService;
 import org.csu.creditbank.service.ForumPostService;
+import org.csu.creditbank.service.ForumReplyService;
 import org.csu.creditbank.service.LearnerService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,13 +24,16 @@ public class ForumPostController {
 
     private final ForumPostService forumPostService;
     private final ForumPostLikeService forumPostLikeService;
+    private final ForumReplyService forumReplyService;
     private final LearnerService learnerService;
 
     public ForumPostController(ForumPostService forumPostService,
                                ForumPostLikeService forumPostLikeService,
+                               ForumReplyService forumReplyService,
                                LearnerService learnerService) {
         this.forumPostService = forumPostService;
         this.forumPostLikeService = forumPostLikeService;
+        this.forumReplyService = forumReplyService;
         this.learnerService = learnerService;
     }
 
@@ -72,7 +79,12 @@ public class ForumPostController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ApiResult<Void> delete(@PathVariable Long id) {
+        ForumPost post = forumPostService.getById(id);
+        if (post == null) throw new BusinessException("帖子不存在");
+        forumReplyService.lambdaUpdate().eq(ForumReply::getPostId, id).remove();
+        forumPostLikeService.lambdaUpdate().eq(ForumPostLike::getPostId, id).remove();
         forumPostService.removeById(id);
         return ApiResult.ok();
     }

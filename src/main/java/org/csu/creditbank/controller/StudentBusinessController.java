@@ -1,6 +1,8 @@
 package org.csu.creditbank.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import java.util.List;
+import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
 import org.csu.creditbank.common.ApiResult;
 import org.csu.creditbank.common.BusinessException;
@@ -11,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/student")
@@ -61,6 +62,29 @@ public class StudentBusinessController {
         enrollment.setInstitutionId((Long) request.getAttribute("institutionId"));
         enrollmentService.save(enrollment);
         return ApiResult.ok(enrollment);
+    }
+
+    @GetMapping("/courses/my")
+    public ApiResult<Page<Course>> myCourses(@RequestParam(defaultValue = "1") long current,
+                                             @RequestParam(defaultValue = "10") long size,
+                                             HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        List<CourseEnrollment> enrollments = enrollmentService.lambdaQuery()
+                .eq(CourseEnrollment::getLearnerId, userId)
+                .orderByDesc(CourseEnrollment::getCreatedAt)
+                .list();
+        if (enrollments.isEmpty()) {
+            return ApiResult.ok(Page.of(current, size));
+        }
+        Map<Long, String> statusByCourse = enrollments.stream()
+                .collect(java.util.stream.Collectors.toMap(CourseEnrollment::getCourseId, CourseEnrollment::getEnrollStatus, (a, b) -> a));
+        List<Long> courseIds = enrollments.stream().map(CourseEnrollment::getCourseId).distinct().toList();
+        Page<Course> page = courseService.lambdaQuery()
+                .in(Course::getId, courseIds)
+                .orderByDesc(Course::getCreatedAt)
+                .page(Page.of(current, size));
+        page.getRecords().forEach(course -> course.setEnrollStatus(statusByCourse.get(course.getId())));
+        return ApiResult.ok(page);
     }
 
     @GetMapping("/enrollments")
@@ -160,6 +184,8 @@ public class StudentBusinessController {
         application.setJobId(jobId);
         application.setLearnerId(userId);
         application.setResumeSummary(body.get("resumeSummary"));
+        application.setResumeUrl(body.get("resumeUrl"));
+        application.setResumeFileName(body.get("resumeFileName"));
         application.setApplyStatus("SUBMITTED");
         application.setInstitutionId((Long) request.getAttribute("institutionId"));
         jobApplicationService.save(application);

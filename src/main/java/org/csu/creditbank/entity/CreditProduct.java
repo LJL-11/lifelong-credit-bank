@@ -26,4 +26,7 @@ public class CreditProduct extends BaseEntity {
 
     /** 评论数 */
     private Integer commentCount;
+
+    /** 课程类商品关联的课程ID */
+    private Long courseId;
 }

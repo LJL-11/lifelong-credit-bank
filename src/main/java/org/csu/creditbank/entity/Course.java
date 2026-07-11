@@ -1,5 +1,6 @@
 package org.csu.creditbank.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -27,4 +28,7 @@ public class Course extends BaseEntity {
     private String resourceSummary;
     private Integer estimatedMinutes;
     private String learningStages;
+
+    @TableField(exist = false)
+    private String enrollStatus;
 }
