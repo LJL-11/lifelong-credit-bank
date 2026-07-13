@@ -1,5 +1,5 @@
 <script setup>
-import {computed, onMounted, ref, watch} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {
   Award, BookOpen, Bot, BriefcaseBusiness, ClipboardList, FileText,
   LayoutDashboard, MessagesSquare, ReceiptText, RefreshCw,
@@ -27,38 +27,6 @@ import JobApplyDialog from "@/views/student/components/JobApplyDialog.vue";
 import { useAuthStore } from "@/store/auth.js";
 import * as adminApi from "@/api/admin.js";
 import * as studentApi from "@/api/student.js";
-
-// ==================== 主题切换 ====================
-const isDark = ref(false);
-
-function initTheme() {
-  const saved = localStorage.getItem("theme");
-  if (saved === "dark") {
-    isDark.value = true;
-  } else if (saved === "light") {
-    isDark.value = false;
-  } else {
-    isDark.value = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  }
-  applyTheme();
-}
-
-function applyTheme() {
-  const root = document.documentElement;
-  if (isDark.value) {
-    root.setAttribute("data-theme", "dark");
-  } else {
-    root.removeAttribute("data-theme");
-  }
-}
-
-function toggleTheme() {
-  isDark.value = !isDark.value;
-  localStorage.setItem("theme", isDark.value ? "dark" : "light");
-  applyTheme();
-}
-
-watch(isDark, applyTheme);
 
 // ==================== 认证状态 ====================
 const authStore = useAuthStore();
@@ -701,7 +669,6 @@ function showToast(text, type = "ok") {
 }
 
 onMounted(() => {
-  initTheme();
   if (!loggedIn.value) return;
   if (isAdmin.value) {
     currentView.value = "admin";
@@ -719,9 +686,9 @@ onMounted(() => {
 
   <div v-else class="app-layout">
     <Sidebar
-        :is-admin="isAdmin" :is-dark="isDark" :user-info="userInfo"
+        :is-admin="isAdmin" :user-info="userInfo"
         :active-module="activeModule" :current-menu="currentMenu" :icons="icons"
-        @switch-module="switchModule" @toggle-theme="toggleTheme" @logout="logout"
+        @switch-module="switchModule" @logout="logout"
     />
 
     <CreditMall
