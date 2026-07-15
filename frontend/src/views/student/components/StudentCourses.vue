@@ -32,7 +32,7 @@ function enrollmentClass(status) {
       <div>
         <p class="eyebrow">Student Portal</p>
         <h1>我的课程</h1>
-        <p class="subtitle">本机构发布的课程资源</p>
+        <p class="subtitle">已报名通过或商城购买开通的课程</p>
       </div>
     </header>
     <section class="panel">
@@ -64,15 +64,15 @@ function enrollmentClass(status) {
             <span>{{ c.estimatedMinutes || 90 }} 分钟</span>
           </div>
           <div class="course-resource-row">
-            <a v-if="c.resourceUrl" :href="c.resourceUrl" target="_blank" rel="noopener" class="resource-link">
+            <a v-if="c.enrollStatus === 'APPROVED' && c.resourceUrl" :href="c.resourceUrl" target="_blank" rel="noopener" class="resource-link">
               <ExternalLink :size="15"/>
               {{ c.resourceTitle || '学习资源' }}
             </a>
-            <span v-else class="resource-missing">暂无外部资源</span>
+            <span v-else class="resource-missing">{{ c.enrollStatus === 'APPROVED' ? '暂无外部资源' : '报名审核通过后开放学习资源' }}</span>
           </div>
           <div v-if="!learnedCourseIds.has(c.id)" class="course-actions">
-            <button class="primary-button small" type="button" :disabled="loading || learnedCourseIds.has(c.id)"
-                    @click="emit('open-learning', c)">进入学习
+            <button class="primary-button small" type="button" :disabled="loading || learnedCourseIds.has(c.id) || c.enrollStatus !== 'APPROVED'"
+                    @click="emit('open-learning', c)">{{ c.enrollStatus === 'APPROVED' ? '进入学习' : '审核通过后学习' }}
             </button>
             <button class="ghost-button small" type="button" :disabled="loading || c.enrollStatus === 'APPROVED' || c.enrollStatus === 'PENDING'" @click="emit('enroll-course', c)">
               {{ c.enrollStatus === 'APPROVED' ? '已开通' : c.enrollStatus === 'PENDING' ? '审核中' : '报名课程' }}

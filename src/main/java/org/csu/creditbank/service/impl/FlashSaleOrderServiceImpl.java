@@ -32,6 +32,8 @@ public class FlashSaleOrderServiceImpl extends ServiceImpl<FlashSaleRecordMapper
     private final CreditOrderService orderService;
     private final CreditProductService productService;
     private final CreditTransactionService transactionService;
+    private final CreditOrderDetailService detailService;
+    private final CourseEnrollmentService enrollmentService;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedisIdWorker redisIdWorker;
     private final RedissonClient redissonClient;
@@ -42,6 +44,8 @@ public class FlashSaleOrderServiceImpl extends ServiceImpl<FlashSaleRecordMapper
                                       CreditOrderService orderService,
                                       CreditProductService productService,
                                       CreditTransactionService transactionService,
+                                      CreditOrderDetailService detailService,
+                                      CourseEnrollmentService enrollmentService,
                                       StringRedisTemplate stringRedisTemplate,
                                       RedisIdWorker redisIdWorker,
                                       RedissonClient redissonClient,
@@ -51,6 +55,8 @@ public class FlashSaleOrderServiceImpl extends ServiceImpl<FlashSaleRecordMapper
         this.orderService = orderService;
         this.productService = productService;
         this.transactionService = transactionService;
+        this.detailService = detailService;
+        this.enrollmentService = enrollmentService;
         this.stringRedisTemplate = stringRedisTemplate;
         this.redisIdWorker = redisIdWorker;
         this.redissonClient = redissonClient;
@@ -167,6 +173,20 @@ public class FlashSaleOrderServiceImpl extends ServiceImpl<FlashSaleRecordMapper
         order.setPaidAt(LocalDateTime.now());
         order.setRemark("秒杀: " + flashSale.getProductName());
         orderService.save(order);
+
+        CreditProduct product = productService.getById(flashSale.getProductId());
+        CreditOrderDetail detail = new CreditOrderDetail();
+        detail.setOrderId(order.getId());
+        detail.setOrderNo(order.getOrderNo());
+        detail.setProductId(flashSale.getProductId());
+        detail.setProductName(flashSale.getProductName());
+        detail.setCreditPrice(flashSale.getFlashPrice());
+        detail.setNum(1);
+        detail.setAmount(flashSale.getFlashPrice());
+        detail.setImageUrl(product != null ? product.getImageUrl() : null);
+        detailService.save(detail);
+
+        enrollmentService.grantPurchasedCourse(learnerId, flashSale.getProductId(), "秒杀购买课程商品自动开通");
 
         // 6. 记录秒杀记录
         FlashSaleRecord record = new FlashSaleRecord();

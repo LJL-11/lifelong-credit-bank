@@ -57,8 +57,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
                 .eq(CreditProduct::getProductCode, productCode).one();
 
         if (product == null) {
-            product = new CreditProduct();
-            product.setProductCode(productCode);
+            return;
         }
 
         product.setProductName(course.getCourseName());
@@ -69,10 +68,6 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         product.setStock(-1);
         product.setIsActive("PUBLISHED".equals(course.getStatus()) ? 1 : 0);
 
-        if (product.getId() == null) {
-            productService.save(product);
-        } else {
-            productService.updateById(product);
-        }
+        productService.updateById(product);
     }
 }

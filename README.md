@@ -93,19 +93,19 @@ CREATE DATABASE credit_bank DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicod
 ```yaml
 spring:
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/credit_bank
-    username: root
-    password: 123456
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/credit_bank}
+    username: ${DB_USERNAME:creditbank}
+    password: ${DB_PASSWORD:}
   data:
     redis:
-      host: 127.0.0.1
-      port: 6379
-      database: 4
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      database: ${REDIS_DATABASE:4}
   rabbitmq:
-    host: 127.0.0.1
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST:127.0.0.1}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:}
 ```
 
 ### 3. 启动后端

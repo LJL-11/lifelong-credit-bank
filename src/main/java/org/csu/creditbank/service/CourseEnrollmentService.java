@@ -4,4 +4,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.csu.creditbank.entity.CourseEnrollment;
 
 public interface CourseEnrollmentService extends IService<CourseEnrollment> {
+
+    CourseEnrollment grantPurchasedCourse(Long learnerId, Long productId, String remark);
 }

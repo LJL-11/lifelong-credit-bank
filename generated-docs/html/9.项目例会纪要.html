@@ -1,0 +1,111 @@
+<!doctype html><html><head><meta charset='utf-8'><style>
+body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", SimSun, sans-serif; line-height: 1.55; font-size: 11pt; color: #111; }
+h1 { text-align: center; font-size: 22pt; margin: 28px 0; }
+h2 { font-size: 17pt; margin-top: 26px; border-bottom: 1px solid #888; padding-bottom: 4px; }
+h3 { font-size: 14pt; margin-top: 20px; }
+h4 { font-size: 12pt; margin-top: 14px; }
+p { text-indent: 2em; margin: 6px 0; }
+.cover p { text-indent: 0; text-align: center; }
+.cover table { margin: 24px auto; width: 82%; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; }
+th, td { border: 1px solid #555; padding: 6px 8px; vertical-align: top; }
+th { background: #f2f2f2; font-weight: bold; text-align: center; }
+pre { border: 1px solid #999; background: #f8f8f8; padding: 10px; white-space: pre-wrap; font-family: Consolas, monospace; }
+ul { margin-top: 4px; }
+li { margin: 4px 0; }
+</style><title>项目例会纪要</title></head><body>
+<div class="cover">
+  <p>项目编号：HD20260713SR005</p>
+  <h1>终身学习学分银行平台</h1>
+  <h2>项目例会纪要</h2>
+  <p>Version: 1.0</p>
+  <table>
+    <tr><td>项目承担部门</td><td>智慧教育研教部</td></tr>
+    <tr><td>撰写人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>完成日期</td><td>2026年07月13日</td></tr>
+    <tr><td>本文档使用部门</td><td>■主管领导  ■项目组  □客户（市场）  ■维护人员  □用户</td></tr>
+    <tr><td>评审负责人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>评审日期</td><td>2026年07月13日</td></tr>
+    <tr><td>文档编号</td><td>HD-MOM-20260713-009</td></tr>
+  </table>
+</div>
+<h2>文档信息</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>标题</td><td>终身学习学分银行平台-项目例会纪要</td></tr>
+<tr><td>作者</td><td>付嘉一</td></tr>
+<tr><td>创建日期</td><td>2026年07月13日</td></tr>
+<tr><td>上次更新日期</td><td>2026年07月13日</td></tr>
+<tr><td>版本</td><td>1.0</td></tr>
+<tr><td>部门名称</td><td>智慧教育研教部</td></tr>
+</table><h2>修订文档历史记录</h2><table>
+<tr><th>日期</th><th>版本</th><th>说明</th><th>作者</th></tr>
+<tr><td>2026年07月08日</td><td>0.1</td><td>完成初稿，建立章节结构</td><td>付嘉一</td></tr>
+<tr><td>2026年07月11日</td><td>0.9</td><td>结合项目源码、数据库脚本和前端页面补充内容</td><td>付嘉一</td></tr>
+<tr><td>2026年07月13日</td><td>1.0</td><td>评审后正式发布</td><td>付嘉一</td></tr>
+</table><h1>例会纪要</h1><h2>会议记录：2026年07月08日</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>日期 Date</td><td>2026年07月08日</td></tr>
+<tr><td>时间 Time</td><td>17:00</td></tr>
+<tr><td>地点 ADD.</td><td>实训教室/线上会议</td></tr>
+<tr><td>主题</td><td>项目启动与需求拆分</td></tr>
+<tr><td>主持人</td><td>付嘉一</td></tr>
+<tr><td>出席者</td><td>付嘉一、项目组成员</td></tr>
+</table><table>
+<tr><th>工作计划</th><th>完成情况</th><th>问题及解决方案</th></tr>
+<tr><td>明确项目选题、技术栈、角色分工和文档清单。</td><td>完成项目范围确认；后端负责认证、学员、课程和积分；前端负责登录、管理端和学员端；测试人员准备测试计划。</td><td>问题：模块范围较大。解决：优先保障登录、课程、积分、商城和论坛主流程。</td></tr>
+</table><h2>会议记录：2026年07月09日</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>日期 Date</td><td>2026年07月09日</td></tr>
+<tr><td>时间 Time</td><td>15:00</td></tr>
+<tr><td>地点 ADD.</td><td>实训教室/线上会议</td></tr>
+<tr><td>主题</td><td>需求评审与数据库设计</td></tr>
+<tr><td>主持人</td><td>付嘉一</td></tr>
+<tr><td>出席者</td><td>付嘉一、项目组成员</td></tr>
+</table><table>
+<tr><th>工作计划</th><th>完成情况</th><th>问题及解决方案</th></tr>
+<tr><td>梳理多机构、管理员/学员权限、积分账户、商城订单和成果审核。</td><td>完成需求规约初稿；确定 MySQL + Flyway；列出核心表和租户字段。</td><td>问题：共享表与机构隔离容易混淆。解决：隔离表使用 institution_id，共享表通过 learner_id 控制归属。</td></tr>
+</table><h2>会议记录：2026年07月10日</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>日期 Date</td><td>2026年07月10日</td></tr>
+<tr><td>时间 Time</td><td>15:00</td></tr>
+<tr><td>地点 ADD.</td><td>实训教室/线上会议</td></tr>
+<tr><td>主题</td><td>架构设计与基础功能联调</td></tr>
+<tr><td>主持人</td><td>付嘉一</td></tr>
+<tr><td>出席者</td><td>付嘉一、项目组成员</td></tr>
+</table><table>
+<tr><th>工作计划</th><th>完成情况</th><th>问题及解决方案</th></tr>
+<tr><td>检查 Spring Boot 分层、Token 拦截、Vue 页面结构和接口分组。</td><td>完成登录、学员档案、课程列表、积分账户基础接口联调。</td><td>问题：前后端字段命名不一致。解决：以接口返回 DTO 和实体字段为准统一命名。</td></tr>
+</table><h2>会议记录：2026年07月11日</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>日期 Date</td><td>2026年07月11日</td></tr>
+<tr><td>时间 Time</td><td>16:00</td></tr>
+<tr><td>地点 ADD.</td><td>实训教室/线上会议</td></tr>
+<tr><td>主题</td><td>商城、订单和论坛完善</td></tr>
+<tr><td>主持人</td><td>付嘉一</td></tr>
+<tr><td>出席者</td><td>付嘉一、项目组成员</td></tr>
+</table><table>
+<tr><th>工作计划</th><th>完成情况</th><th>问题及解决方案</th></tr>
+<tr><td>推进积分商城、购物车、订单支付、论坛发帖和点赞。</td><td>完成商品上架、购物车结算、订单支付/取消、帖子管理和点赞取消。</td><td>问题：订单支付涉及积分扣减和库存。解决：Service 内统一事务处理并写入积分流水。</td></tr>
+</table><h2>会议记录：2026年07月12日</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>日期 Date</td><td>2026年07月12日</td></tr>
+<tr><td>时间 Time</td><td>15:30</td></tr>
+<tr><td>地点 ADD.</td><td>实训教室/线上会议</td></tr>
+<tr><td>主题</td><td>秒杀与核心业务测试</td></tr>
+<tr><td>主持人</td><td>付嘉一</td></tr>
+<tr><td>出席者</td><td>付嘉一、项目组成员</td></tr>
+</table><table>
+<tr><th>工作计划</th><th>完成情况</th><th>问题及解决方案</th></tr>
+<tr><td>检查 Redis Lua、RabbitMQ、Redisson、JMeter 压测脚本和缺陷修复。</td><td>完成秒杀预扣库存、异步下单、防重复和订单超时处理测试。</td><td>问题：本地中间件启动顺序影响测试。解决：测试前先检查 MySQL、Redis、RabbitMQ，再启动后端。</td></tr>
+</table><h2>会议记录：2026年07月13日</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>日期 Date</td><td>2026年07月13日</td></tr>
+<tr><td>时间 Time</td><td>10:00</td></tr>
+<tr><td>地点 ADD.</td><td>实训教室/线上会议</td></tr>
+<tr><td>主题</td><td>文档整理与项目交付</td></tr>
+<tr><td>主持人</td><td>付嘉一</td></tr>
+<tr><td>出席者</td><td>付嘉一、项目组成员</td></tr>
+</table><table>
+<tr><th>工作计划</th><th>完成情况</th><th>问题及解决方案</th></tr>
+<tr><td>整理 9 份工程文档，核对 README、接口、数据库脚本和演示账号。</td><td>完成配置管理计划、需求规约、开发计划、数据库设计、架构设计、测试计划、测试用例、测试日志和例会纪要。</td><td>问题：文档需要贴合源码。解决：依据项目目录、Controller、Entity、迁移脚本和 README 补充内容。</td></tr>
+</table></body></html>

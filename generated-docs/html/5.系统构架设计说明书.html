@@ -1,0 +1,141 @@
+<!doctype html><html><head><meta charset='utf-8'><style>
+body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", SimSun, sans-serif; line-height: 1.55; font-size: 11pt; color: #111; }
+h1 { text-align: center; font-size: 22pt; margin: 28px 0; }
+h2 { font-size: 17pt; margin-top: 26px; border-bottom: 1px solid #888; padding-bottom: 4px; }
+h3 { font-size: 14pt; margin-top: 20px; }
+h4 { font-size: 12pt; margin-top: 14px; }
+p { text-indent: 2em; margin: 6px 0; }
+.cover p { text-indent: 0; text-align: center; }
+.cover table { margin: 24px auto; width: 82%; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; }
+th, td { border: 1px solid #555; padding: 6px 8px; vertical-align: top; }
+th { background: #f2f2f2; font-weight: bold; text-align: center; }
+pre { border: 1px solid #999; background: #f8f8f8; padding: 10px; white-space: pre-wrap; font-family: Consolas, monospace; }
+ul { margin-top: 4px; }
+li { margin: 4px 0; }
+</style><title>系统构架设计说明书</title></head><body>
+<div class="cover">
+  <p>项目编号：HD20260713SR005</p>
+  <h1>终身学习学分银行平台</h1>
+  <h2>系统构架设计说明书</h2>
+  <p>Version: 1.0</p>
+  <table>
+    <tr><td>项目承担部门</td><td>智慧教育研教部</td></tr>
+    <tr><td>撰写人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>完成日期</td><td>2026年07月13日</td></tr>
+    <tr><td>本文档使用部门</td><td>■主管领导  ■项目组  □客户（市场）  ■维护人员  □用户</td></tr>
+    <tr><td>评审负责人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>评审日期</td><td>2026年07月13日</td></tr>
+    <tr><td>文档编号</td><td>HD-ARCH-20260713-005</td></tr>
+  </table>
+</div>
+<h2>文档信息</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>标题</td><td>终身学习学分银行平台-系统构架设计说明书</td></tr>
+<tr><td>作者</td><td>付嘉一</td></tr>
+<tr><td>创建日期</td><td>2026年07月13日</td></tr>
+<tr><td>上次更新日期</td><td>2026年07月13日</td></tr>
+<tr><td>版本</td><td>1.0</td></tr>
+<tr><td>部门名称</td><td>智慧教育研教部</td></tr>
+</table><h2>修订文档历史记录</h2><table>
+<tr><th>日期</th><th>版本</th><th>说明</th><th>作者</th></tr>
+<tr><td>2026年07月08日</td><td>0.1</td><td>完成初稿，建立章节结构</td><td>付嘉一</td></tr>
+<tr><td>2026年07月11日</td><td>0.9</td><td>结合项目源码、数据库脚本和前端页面补充内容</td><td>付嘉一</td></tr>
+<tr><td>2026年07月13日</td><td>1.0</td><td>评审后正式发布</td><td>付嘉一</td></tr>
+</table><h2>目录</h2><ul><li>1. 简介</li><li>2. 构架表示方式</li><li>3. 构架目标和约束</li><li>4. 关键用例视图</li><li>5. 层次结构</li><li>6. 逻辑视图</li><li>7. 部署视图</li><li>8. 接口设计</li></ul><h2>1. 简介</h2><p>本文档从架构角度描述终身学习学分银行平台的整体结构、关键技术决策、核心用例、分层设计、部署关系和接口组织方式。</p><h3>1.1 目的</h3><p>记录系统架构设计，帮助开发、测试和维护人员理解系统边界、模块职责、数据流和关键非功能机制。</p><h3>1.2 参考资料</h3><ul><li>《终身学习学分银行平台软件需求规约》</li><li>《终身学习学分银行平台项目开发计划》</li><li>《终身学习学分银行平台数据库设计说明书》</li><li>Spring Boot 3.3、Vue 3、MyBatis-Plus、MySQL 8、Redis、RabbitMQ 官方文档</li><li>项目源码：/home/fjy/IdeaProjects/lifelong-credit-bank</li></ul><h2>2. 构架表示方式</h2><p>本文档采用用例视图、逻辑视图、部署视图和接口视图描述系统。由于项目规模适中，进程视图重点放在秒杀异步订单和前后端 HTTP 交互。</p><h2>3. 构架目标和约束</h2><table>
+<tr><th>目标</th><th>设计措施</th></tr>
+<tr><td>易用性</td><td>Vue 单页应用区分管理员端和学员端，表单和列表集中展示</td></tr>
+<tr><td>可维护性</td><td>后端按 Controller、Service、Mapper、Entity、DTO 分层</td></tr>
+<tr><td>安全性</td><td>Token 拦截、角色判断、机构隔离、密码哈希</td></tr>
+<tr><td>一致性</td><td>积分变更同时写账户和流水，订单保留商品价格快照</td></tr>
+<tr><td>高并发</td><td>秒杀链路采用 Redis Lua、RabbitMQ、Redisson 和 MySQL CAS</td></tr>
+<tr><td>可扩展</td><td>模块配置、Flyway 迁移、共享表与隔离表策略分离</td></tr>
+</table><h2>4. 关键用例视图</h2><table>
+<tr><th>用例</th><th>参与者</th><th>主要流程</th></tr>
+<tr><td>登录认证</td><td>管理员/学员</td><td>输入账号密码，系统校验哈希，生成 Token，写入 Redis</td></tr>
+<tr><td>一键学习</td><td>学员</td><td>选择课程，系统检查重复学习，生成学习记录并发放积分</td></tr>
+<tr><td>积分兑换</td><td>学员</td><td>浏览商品，加购物车或直接下单，确认支付后扣减积分</td></tr>
+<tr><td>秒杀下单</td><td>学员</td><td>Redis 预扣库存，消息队列异步创建订单，超时取消回补库存</td></tr>
+<tr><td>成果认定</td><td>学员/管理员</td><td>上传证明，提交审核，管理员通过或驳回</td></tr>
+<tr><td>论坛交流</td><td>学员/管理员</td><td>发帖、回复、点赞，管理员隐藏违规内容</td></tr>
+<tr><td>招聘申请</td><td>学员/管理员</td><td>查看岗位，上传简历并投递，管理员审核处理</td></tr>
+<tr><td>多机构管理</td><td>管理员</td><td>登录后仅管理本机构数据</td></tr>
+</table><h2>5. 层次结构</h2><pre>浏览器 Vue 3 前端
+        |
+        | HTTP/JSON/SSE
+        v
+Spring Boot Controller 层
+        |
+        v
+Service 业务层：权限、积分、订单、秒杀、审核、学习
+        |
+        v
+Mapper 数据访问层：MyBatis-Plus
+        |
+        +--&gt; MySQL 8：业务数据与 Flyway 迁移
+        +--&gt; Redis：Token、库存、去重、锁辅助
+        +--&gt; RabbitMQ：秒杀订单与超时消息
+        +--&gt; 文件目录：证明材料、简历文件</pre><h2>6. 逻辑视图</h2><h3>6.1 用户服务层（Controller）</h3><table>
+<tr><th>包/类</th><th>职责</th></tr>
+<tr><td>/api/auth</td><td>登录、登出、获取当前用户</td></tr>
+<tr><td>/api/student</td><td>学员资料、账户、课程、订单、学习记录、成果、岗位、签到</td></tr>
+<tr><td>/api/student/cart</td><td>购物车新增、列表、数量修改、删除、批量删除、结算计算</td></tr>
+<tr><td>/api/student/forum</td><td>帖子列表、详情、我的帖子、回复、点赞、板块</td></tr>
+<tr><td>/api/student/ai</td><td>AI 学习助手流式问答</td></tr>
+<tr><td>/api/admin/learners</td><td>学员档案增删改查、状态启停</td></tr>
+<tr><td>/api/admin/courses</td><td>课程资源增删改查</td></tr>
+<tr><td>/api/admin/credit-accounts</td><td>积分账户开户、增加、消费、冻结、解冻</td></tr>
+<tr><td>/api/admin/credit-transactions</td><td>积分流水查询</td></tr>
+<tr><td>/api/admin/products</td><td>积分商品查询、上架、下架、编辑</td></tr>
+<tr><td>/api/admin/orders</td><td>订单查询、代下单、支付、发货、取消、退款</td></tr>
+<tr><td>/api/admin/flash-sales</td><td>秒杀活动增删改查</td></tr>
+<tr><td>/api/admin/forum-posts</td><td>论坛管理、隐藏/显示、删除</td></tr>
+<tr><td>/api/admin/core</td><td>报名审核、成果审核、求职审核、诚信评分</td></tr>
+<tr><td>/api/files</td><td>证明材料与简历文件上传</td></tr>
+</table><h3>6.2 业务逻辑层（Service）</h3><table>
+<tr><th>服务</th><th>职责</th></tr>
+<tr><td>LearnerService</td><td>学员档案、状态和机构归属</td></tr>
+<tr><td>CourseService</td><td>课程资源和课程商品同步</td></tr>
+<tr><td>LearningRecordService</td><td>学习记录、一键学习和积分奖励</td></tr>
+<tr><td>CreditAccountService</td><td>积分账户、增加、消费、冻结和解冻</td></tr>
+<tr><td>CreditOrderService</td><td>订单创建、支付、发货、取消、退款</td></tr>
+<tr><td>FlashSaleService/FlashSaleOrderService</td><td>秒杀活动、库存同步、异步下单</td></tr>
+<tr><td>ForumPostService/ForumReplyService</td><td>论坛帖子、回复和状态管理</td></tr>
+<tr><td>JobPostingService/JobApplicationService</td><td>岗位和投递申请</td></tr>
+<tr><td>IntegrityRatingService</td><td>诚信评分计算</td></tr>
+<tr><td>BlockchainCredentialService</td><td>存证查询与校验</td></tr>
+</table><h3>6.3 数据服务层（Mapper/Entity）</h3><p>每张核心表对应 Entity 和 Mapper，MyBatis-Plus 负责基础 CRUD、分页、逻辑删除和驼峰映射。BaseEntity 统一维护创建时间、更新时间和删除标记。</p><h3>6.4 公共支撑层</h3><table>
+<tr><th>组件</th><th>职责</th></tr>
+<tr><td>AuthInterceptor</td><td>解析 Token、设置当前用户和机构上下文</td></tr>
+<tr><td>InstitutionContext</td><td>ThreadLocal 保存当前机构 ID</td></tr>
+<tr><td>MybatisPlusConfig</td><td>分页、租户插件和共享表规则</td></tr>
+<tr><td>PasswordUtil</td><td>盐值哈希密码</td></tr>
+<tr><td>TokenUtil</td><td>Token 生成</td></tr>
+<tr><td>GlobalExceptionHandler</td><td>统一异常响应</td></tr>
+<tr><td>OrderMqConfig/FlashSaleMqConfig</td><td>消息队列、死信队列和 TTL 配置</td></tr>
+</table><h2>7. 部署视图</h2><table>
+<tr><th>节点</th><th>组件</th><th>端口/说明</th></tr>
+<tr><td>浏览器</td><td>Vue 页面</td><td>访问 http://localhost:8080</td></tr>
+<tr><td>应用服务器</td><td>Spring Boot</td><td>8080，提供 REST API 和静态资源</td></tr>
+<tr><td>数据库服务器</td><td>MySQL</td><td>3306，lifelong_credit_bank</td></tr>
+<tr><td>缓存服务器</td><td>Redis</td><td>6379，database 4</td></tr>
+<tr><td>消息服务器</td><td>RabbitMQ</td><td>5672，管理后台 15672</td></tr>
+<tr><td>文件存储</td><td>uploads/proofs、uploads/resumes</td><td>证明和简历文件</td></tr>
+</table><h2>8. 接口设计</h2><p>系统接口统一返回 ApiResult，成功 code 为 200，失败由全局异常处理器返回错误信息。前端通过 Token 访问受保护接口，AI 学习助手接口使用 text/stream 进行 SSE 风格流式输出。</p><table>
+<tr><th>接口分组</th><th>说明</th></tr>
+<tr><td>/api/auth</td><td>登录、登出、获取当前用户</td></tr>
+<tr><td>/api/student</td><td>学员资料、账户、课程、订单、学习记录、成果、岗位、签到</td></tr>
+<tr><td>/api/student/cart</td><td>购物车新增、列表、数量修改、删除、批量删除、结算计算</td></tr>
+<tr><td>/api/student/forum</td><td>帖子列表、详情、我的帖子、回复、点赞、板块</td></tr>
+<tr><td>/api/student/ai</td><td>AI 学习助手流式问答</td></tr>
+<tr><td>/api/admin/learners</td><td>学员档案增删改查、状态启停</td></tr>
+<tr><td>/api/admin/courses</td><td>课程资源增删改查</td></tr>
+<tr><td>/api/admin/credit-accounts</td><td>积分账户开户、增加、消费、冻结、解冻</td></tr>
+<tr><td>/api/admin/credit-transactions</td><td>积分流水查询</td></tr>
+<tr><td>/api/admin/products</td><td>积分商品查询、上架、下架、编辑</td></tr>
+<tr><td>/api/admin/orders</td><td>订单查询、代下单、支付、发货、取消、退款</td></tr>
+<tr><td>/api/admin/flash-sales</td><td>秒杀活动增删改查</td></tr>
+<tr><td>/api/admin/forum-posts</td><td>论坛管理、隐藏/显示、删除</td></tr>
+<tr><td>/api/admin/core</td><td>报名审核、成果审核、求职审核、诚信评分</td></tr>
+<tr><td>/api/files</td><td>证明材料与简历文件上传</td></tr>
+</table></body></html>

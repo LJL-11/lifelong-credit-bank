@@ -1,0 +1,188 @@
+<!doctype html><html><head><meta charset='utf-8'><style>
+body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", SimSun, sans-serif; line-height: 1.55; font-size: 11pt; color: #111; }
+h1 { text-align: center; font-size: 22pt; margin: 28px 0; }
+h2 { font-size: 17pt; margin-top: 26px; border-bottom: 1px solid #888; padding-bottom: 4px; }
+h3 { font-size: 14pt; margin-top: 20px; }
+h4 { font-size: 12pt; margin-top: 14px; }
+p { text-indent: 2em; margin: 6px 0; }
+.cover p { text-indent: 0; text-align: center; }
+.cover table { margin: 24px auto; width: 82%; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; }
+th, td { border: 1px solid #555; padding: 6px 8px; vertical-align: top; }
+th { background: #f2f2f2; font-weight: bold; text-align: center; }
+pre { border: 1px solid #999; background: #f8f8f8; padding: 10px; white-space: pre-wrap; font-family: Consolas, monospace; }
+ul { margin-top: 4px; }
+li { margin: 4px 0; }
+</style><title>软件需求规约</title></head><body>
+<div class="cover">
+  <p>项目编号：HD20260713SR005</p>
+  <h1>终身学习学分银行平台</h1>
+  <h2>软件需求规约</h2>
+  <p>Version: 1.0</p>
+  <table>
+    <tr><td>项目承担部门</td><td>智慧教育研教部</td></tr>
+    <tr><td>撰写人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>完成日期</td><td>2026年07月13日</td></tr>
+    <tr><td>本文档使用部门</td><td>■主管领导  ■项目组  □客户（市场）  ■维护人员  □用户</td></tr>
+    <tr><td>评审负责人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>评审日期</td><td>2026年07月13日</td></tr>
+    <tr><td>文档编号</td><td>HD-SRS-20260713-002</td></tr>
+  </table>
+</div>
+<h2>文档信息</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>标题</td><td>终身学习学分银行平台-软件需求规约</td></tr>
+<tr><td>作者</td><td>付嘉一</td></tr>
+<tr><td>创建日期</td><td>2026年07月13日</td></tr>
+<tr><td>上次更新日期</td><td>2026年07月13日</td></tr>
+<tr><td>版本</td><td>1.0</td></tr>
+<tr><td>部门名称</td><td>智慧教育研教部</td></tr>
+</table><h2>修订文档历史记录</h2><table>
+<tr><th>日期</th><th>版本</th><th>说明</th><th>作者</th></tr>
+<tr><td>2026年07月08日</td><td>0.1</td><td>完成初稿，建立章节结构</td><td>付嘉一</td></tr>
+<tr><td>2026年07月11日</td><td>0.9</td><td>结合项目源码、数据库脚本和前端页面补充内容</td><td>付嘉一</td></tr>
+<tr><td>2026年07月13日</td><td>1.0</td><td>评审后正式发布</td><td>付嘉一</td></tr>
+</table><h2>目录</h2><ul><li>1. 引言</li><li>2. 软件总体概述</li><li>3. 具体需求</li><li>4. 性能</li><li>5. 接口</li><li>6. 数据字典</li></ul><h2>1. 引言</h2><h3>1.1 目的</h3><p>本文档定义终身学习学分银行平台的业务需求、功能边界、角色权限、接口约束和质量要求，是项目设计、编码、测试和验收的依据。</p><h3>1.2 范围</h3><p>系统面向多机构继续教育场景，支持管理员进行课程、学员、积分、商城、论坛、招聘和成果认定管理，支持学员完成学习、积分兑换、论坛交流、成果申报和岗位申请。</p><h3>1.3 定义</h3><table>
+<tr><th>术语</th><th>说明</th></tr>
+<tr><td>学分银行</td><td>对学习成果、课程学习和积分变化进行记录、累计、转换和消费的管理平台</td></tr>
+<tr><td>机构隔离</td><td>不同机构管理员只能查看和处理本机构业务数据</td></tr>
+<tr><td>积分</td><td>平台内用于课程激励、商城兑换和秒杀消费的虚拟权益</td></tr>
+<tr><td>秒杀</td><td>在指定时间内以优惠积分兑换商品或课程的高并发活动</td></tr>
+</table><h3>1.4 参考资料</h3><ul><li>《终身学习学分银行平台软件需求规约》</li><li>《终身学习学分银行平台项目开发计划》</li><li>《终身学习学分银行平台数据库设计说明书》</li><li>Spring Boot 3.3、Vue 3、MyBatis-Plus、MySQL 8、Redis、RabbitMQ 官方文档</li><li>项目源码：/home/fjy/IdeaProjects/lifelong-credit-bank</li></ul><h2>2. 软件总体概述</h2><h3>2.1 软件标识</h3><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>软件全称</td><td>终身学习学分银行平台</td></tr>
+<tr><td>软件简称</td><td>LLCBP</td></tr>
+<tr><td>版本号</td><td>V1.0</td></tr>
+<tr><td>运行方式</td><td>浏览器访问 Web 系统，后端提供 REST API</td></tr>
+</table><h3>2.2 系统属性</h3><p>本系统是基于 Java 21、Spring Boot 3、Vue 3 和 MySQL 8 的全栈 Web 应用，采用前后端分离开发方式，生产构建后可由 Spring Boot 静态资源目录统一托管前端页面。</p><h3>2.3 用户特点</h3><table>
+<tr><th>用户</th><th>特点</th><th>关注点</th></tr>
+<tr><td>平台管理员</td><td>熟悉后台管理操作</td><td>数据隔离、统计准确、审核效率</td></tr>
+<tr><td>学员</td><td>通过浏览器完成学习和兑换</td><td>流程简单、反馈及时、积分透明</td></tr>
+<tr><td>测试/维护人员</td><td>具备基础 Web 系统维护能力</td><td>日志清晰、接口稳定、部署可重复</td></tr>
+<tr><td>指导老师/评审人员</td><td>关注项目完整度和工程规范</td><td>文档齐全、功能可演示、技术路线合理</td></tr>
+</table><h3>2.4 限制与约束</h3><table>
+<tr><th>类别</th><th>要求</th></tr>
+<tr><td>后端环境</td><td>JDK 21、Maven、Spring Boot 3.3.6</td></tr>
+<tr><td>数据库</td><td>MySQL 8，数据库名 lifelong_credit_bank，Flyway 自动迁移</td></tr>
+<tr><td>缓存和消息</td><td>Redis 127.0.0.1:6379 database 4，RabbitMQ 127.0.0.1:5672</td></tr>
+<tr><td>前端环境</td><td>Node.js 18+、Vue 3、Vite</td></tr>
+<tr><td>浏览器</td><td>Chrome、Edge、Firefox 等现代浏览器</td></tr>
+</table><h2>3. 具体需求</h2><h3>3.1 登录认证与权限</h3><p>Token 登录、登出、当前用户、ADMIN/STUDENT 角色分离、Redis Token 存储</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>登录认证与权限查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>登录认证与权限新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>登录认证与权限异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.2 多机构管理</h3><p>机构维度数据隔离，管理员仅操作本机构学员、课程、论坛、成果、招聘数据</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>多机构管理查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>多机构管理新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>多机构管理异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.3 学员档案</h3><p>学员基本信息维护、状态启停、教育层次、所属机构</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>学员档案查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>学员档案新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>学员档案异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.4 课程资源</h3><p>课程发布、课程学习资源、一键学习、课程报名及审核</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>课程资源查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>课程资源新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>课程资源异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.5 学习记录</h3><p>学习进度、成绩、完成结果、完成时间、课程积分奖励</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>学习记录查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>学习记录新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>学习记录异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.6 积分账户</h3><p>开户、积分增加、消费、冻结、解冻、流水追踪</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>积分账户查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>积分账户新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>积分账户异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.7 积分商城</h3><p>商品管理、购物车、订单、支付、发货、取消、退款</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>积分商城查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>积分商城新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>积分商城异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.8 秒杀专区</h3><p>Redis Lua 预扣库存、RabbitMQ 异步下单、Redisson 锁、MySQL CAS 防超卖</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>秒杀专区查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>秒杀专区新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>秒杀专区异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.9 学习论坛</h3><p>板块、发帖、回复、点赞、隐藏/显示、我的帖子</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>学习论坛查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>学习论坛新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>学习论坛异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.10 成果认定</h3><p>成果提交、证明材料、管理员审核、通过后积分奖励</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>成果认定查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>成果认定新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>成果认定异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.11 签到与诚信</h3><p>每日签到、签到积分、诚信评分重新计算</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>签到与诚信查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>签到与诚信新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>签到与诚信异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.12 招聘求职</h3><p>岗位发布、简历投递、申请审核、简历文件上传</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>招聘求职查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>招聘求职新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>招聘求职异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.13 区块链存证</h3><p>业务编号查询、凭证校验、哈希与链上状态记录</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>区块链存证查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>区块链存证新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>区块链存证异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h3>3.14 AI 学习助手</h3><p>基于 LangChain4j 的学习问答、SSE 流式输出、可选 DeepSeek 与通义千问 Embedding</p><table>
+<tr><th>需求项</th><th>说明</th><th>优先级</th></tr>
+<tr><td>AI 学习助手查询/展示</td><td>用户进入对应页面后，系统应按角色和机构展示相关数据。</td><td>高</td></tr>
+<tr><td>AI 学习助手新增/处理</td><td>在满足权限与数据校验条件下，系统应保存业务数据并返回统一结果。</td><td>高</td></tr>
+<tr><td>AI 学习助手异常处理</td><td>对非法参数、权限不足、重复提交、资源不存在等情况给出明确提示。</td><td>中</td></tr>
+</table><h2>4. 性能</h2><table>
+<tr><th>指标</th><th>要求</th></tr>
+<tr><td>普通查询响应</td><td>单页列表查询在常规数据量下 3 秒内返回</td></tr>
+<tr><td>页面交互</td><td>前端路由切换和表单操作应保持流畅</td></tr>
+<tr><td>秒杀请求</td><td>库存校验必须在 Redis Lua 中原子完成，禁止超卖</td></tr>
+<tr><td>并发一致性</td><td>秒杀下单采用 Redis 去重、Redisson 锁、RabbitMQ 异步消费和 MySQL CAS 多层保护</td></tr>
+<tr><td>安全</td><td>密码采用盐值哈希存储，Token 存储于 Redis 并设置 24 小时有效期</td></tr>
+</table><h2>5. 接口</h2><table>
+<tr><th>接口分组</th><th>说明</th></tr>
+<tr><td>/api/auth</td><td>登录、登出、获取当前用户</td></tr>
+<tr><td>/api/student</td><td>学员资料、账户、课程、订单、学习记录、成果、岗位、签到</td></tr>
+<tr><td>/api/student/cart</td><td>购物车新增、列表、数量修改、删除、批量删除、结算计算</td></tr>
+<tr><td>/api/student/forum</td><td>帖子列表、详情、我的帖子、回复、点赞、板块</td></tr>
+<tr><td>/api/student/ai</td><td>AI 学习助手流式问答</td></tr>
+<tr><td>/api/admin/learners</td><td>学员档案增删改查、状态启停</td></tr>
+<tr><td>/api/admin/courses</td><td>课程资源增删改查</td></tr>
+<tr><td>/api/admin/credit-accounts</td><td>积分账户开户、增加、消费、冻结、解冻</td></tr>
+<tr><td>/api/admin/credit-transactions</td><td>积分流水查询</td></tr>
+<tr><td>/api/admin/products</td><td>积分商品查询、上架、下架、编辑</td></tr>
+<tr><td>/api/admin/orders</td><td>订单查询、代下单、支付、发货、取消、退款</td></tr>
+<tr><td>/api/admin/flash-sales</td><td>秒杀活动增删改查</td></tr>
+<tr><td>/api/admin/forum-posts</td><td>论坛管理、隐藏/显示、删除</td></tr>
+<tr><td>/api/admin/core</td><td>报名审核、成果审核、求职审核、诚信评分</td></tr>
+<tr><td>/api/files</td><td>证明材料与简历文件上传</td></tr>
+</table><h2>6. 数据字典</h2><table>
+<tr><th>表名</th><th>业务含义</th><th>租户策略</th><th>关键字段</th></tr>
+<tr><td>institution</td><td>机构信息</td><td>共享</td><td>id、name、code、contact、phone、status</td></tr>
+<tr><td>learner</td><td>用户/学员</td><td>机构隔离</td><td>username、real_name、phone、email、education_level、status、password、role、institution_id</td></tr>
+<tr><td>course</td><td>课程资源</td><td>机构隔离</td><td>course_code、course_name、provider、category、credit_value、credit_point、resource_url、learning_stages</td></tr>
+<tr><td>course_enrollment</td><td>课程报名</td><td>机构隔离</td><td>learner_id、course_id、enroll_status、reviewer、reviewed_at</td></tr>
+<tr><td>learning_record</td><td>学习记录</td><td>机构隔离</td><td>learner_id、course_id、progress、score、result、completed_at</td></tr>
+<tr><td>credit_account</td><td>积分账户</td><td>共享/按学员归属</td><td>learner_id、total_credits、available_credits、frozen_credits、account_status</td></tr>
+<tr><td>credit_transaction</td><td>积分流水</td><td>共享/按学员归属</td><td>transaction_type、amount、balance_before、balance_after、source_type、source_no</td></tr>
+<tr><td>credit_product</td><td>积分商品</td><td>共享</td><td>product_code、product_name、product_type、credit_price、stock、sold、course_id</td></tr>
+<tr><td>cart</td><td>购物车</td><td>共享/按学员归属</td><td>learner_id、product_id、product_name、credit_price、num</td></tr>
+<tr><td>credit_order</td><td>订单主表</td><td>共享/按学员归属</td><td>order_no、learner_id、account_id、total_amount、item_count、batch_no、close_time、order_status</td></tr>
+<tr><td>credit_order_detail</td><td>订单明细</td><td>共享</td><td>order_id、order_no、product_id、product_name、credit_price、num、amount</td></tr>
+<tr><td>flash_sale</td><td>秒杀活动</td><td>共享</td><td>product_id、product_name、origin_price、flash_price、stock、begin_time、end_time、status</td></tr>
+<tr><td>flash_sale_record</td><td>秒杀记录</td><td>共享</td><td>flash_sale_id、product_id、learner_id、order_id</td></tr>
+<tr><td>forum_post</td><td>论坛帖子</td><td>机构隔离</td><td>learner_id、title、content、section、reply_count、status、institution_id</td></tr>
+<tr><td>forum_reply</td><td>论坛回复</td><td>机构隔离</td><td>post_id、learner_id、content、status、institution_id</td></tr>
+<tr><td>forum_post_like</td><td>论坛点赞</td><td>共享</td><td>post_id、learner_id、created_at</td></tr>
+<tr><td>achievement</td><td>成果认定</td><td>机构隔离</td><td>learner_id、achievement_name、achievement_type、suggested_credits、audit_status、proof_url</td></tr>
+<tr><td>sign_in_record</td><td>签到记录</td><td>机构隔离</td><td>learner_id、sign_date、reward_credits、sign_type</td></tr>
+<tr><td>job_posting</td><td>招聘岗位</td><td>机构隔离</td><td>company_name、position_name、city、requirement、contact、status</td></tr>
+<tr><td>job_application</td><td>求职申请</td><td>机构隔离</td><td>job_id、learner_id、resume_summary、resume_url、apply_status、reviewer</td></tr>
+<tr><td>integrity_rating</td><td>诚信评分</td><td>机构隔离</td><td>learner_id、score、level_name、learning_score、forum_score、signin_score、achievement_score、job_score</td></tr>
+<tr><td>blockchain_credential</td><td>区块链存证</td><td>机构隔离</td><td>learner_id、credential_type、business_no、hash_value、chain_status、source_payload</td></tr>
+</table></body></html>

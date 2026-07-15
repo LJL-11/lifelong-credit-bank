@@ -14,6 +14,7 @@ import org.csu.creditbank.entity.CreditProduct;
 import org.csu.creditbank.entity.CreditTransaction;
 import org.csu.creditbank.entity.Learner;
 import org.csu.creditbank.entity.LearningRecord;
+import org.csu.creditbank.entity.CourseEnrollment;
 import org.csu.creditbank.service.CreditAccountService;
 import org.csu.creditbank.service.CourseService;
 import org.csu.creditbank.entity.Course;
@@ -22,11 +23,14 @@ import org.csu.creditbank.service.CreditProductService;
 import org.csu.creditbank.service.CreditTransactionService;
 import org.csu.creditbank.service.LearnerService;
 import org.csu.creditbank.service.LearningRecordService;
+import org.csu.creditbank.service.CourseEnrollmentService;
+import org.csu.creditbank.util.InstitutionContext;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/student")
@@ -39,6 +43,7 @@ public class StudentController {
     private final CreditTransactionService transactionService;
     private final CourseService courseService;
     private final LearningRecordService learningRecordService;
+    private final CourseEnrollmentService enrollmentService;
 
     public StudentController(LearnerService learnerService,
                              CourseService courseService,
@@ -46,7 +51,8 @@ public class StudentController {
                              CreditProductService productService,
                              CreditOrderService orderService,
                              CreditTransactionService transactionService,
-                             LearningRecordService learningRecordService) {
+                             LearningRecordService learningRecordService,
+                             CourseEnrollmentService enrollmentService) {
         this.learnerService = learnerService;
         this.accountService = accountService;
         this.productService = productService;
@@ -54,6 +60,7 @@ public class StudentController {
         this.transactionService = transactionService;
         this.courseService = courseService;
         this.learningRecordService = learningRecordService;
+        this.enrollmentService = enrollmentService;
     }
 
     /** 获取当前学员个人信息 */
@@ -171,10 +178,26 @@ public class StudentController {
     @GetMapping("/courses")
     public ApiResult<Page<Course>> courses(@RequestParam(defaultValue = "1") long current,
                                             @RequestParam(defaultValue = "10") long size) {
-        Page<Course> page = courseService.lambdaQuery()
-                .eq(Course::getStatus, "PUBLISHED")
-                .orderByDesc(Course::getCreatedAt)
-                .page(Page.of(current, size));
+        List<Long> mallCourseIds = productService.lambdaQuery()
+                .eq(CreditProduct::getProductType, "COURSE")
+                .isNotNull(CreditProduct::getCourseId)
+                .list()
+                .stream()
+                .map(CreditProduct::getCourseId)
+                .distinct()
+                .toList();
+        Long tenantId = InstitutionContext.get();
+        Page<Course> page;
+        try {
+            InstitutionContext.clear();
+            page = courseService.lambdaQuery()
+                    .eq(Course::getStatus, "PUBLISHED")
+                    .notIn(!mallCourseIds.isEmpty(), Course::getId, mallCourseIds)
+                    .orderByAsc(Course::getId)
+                    .page(Page.of(current, size));
+        } finally {
+            if (tenantId != null) InstitutionContext.set(tenantId);
+        }
         return ApiResult.ok(page);
     }
 
@@ -211,8 +234,25 @@ public class StudentController {
                                                        HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
 
-        // 1. 检查课程存在且已发布
-        Course course = courseService.getById(courseId);
+        CourseEnrollment enrollment = enrollmentService.lambdaQuery()
+                .eq(CourseEnrollment::getLearnerId, userId)
+                .eq(CourseEnrollment::getCourseId, courseId)
+                .one();
+        if (enrollment == null) {
+            throw new BusinessException("请先报名或购买该课程，审核通过后才能开始学习");
+        }
+        if (!"APPROVED".equals(enrollment.getEnrollStatus())) {
+            throw new BusinessException("课程报名尚未审核通过，暂不能开始学习");
+        }
+
+        Long tenantId = InstitutionContext.get();
+        Course course;
+        try {
+            InstitutionContext.clear();
+            course = courseService.getById(courseId);
+        } finally {
+            if (tenantId != null) InstitutionContext.set(tenantId);
+        }
         if (course == null || !"PUBLISHED".equals(course.getStatus())) {
             throw new BusinessException("课程不存在或已下架");
         }
@@ -234,7 +274,7 @@ public class StudentController {
         record.setCourseId(courseId);
         record.setInstitutionId(institutionId);
         record.setProgress(new BigDecimal("100"));
-        record.setScore(new BigDecimal("100"));
+        record.setScore(null);
         record.setResult("PASSED");
         record.setCompletedAt(LocalDateTime.now());
         learningRecordService.save(record);

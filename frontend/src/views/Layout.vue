@@ -168,18 +168,12 @@ async function loadProfile() {
 async function loadCourses() {
   loading.value = true;
   try {
-    const [courseData, myCourseData, recordData, enrollmentData] = await Promise.all([
-      studentApi.getCourses(coursePage.value.current, coursePage.value.size),
-      studentApi.getMyCourses(1, 200),
+    const [myCourseData, recordData] = await Promise.all([
+      studentApi.getMyCourses(coursePage.value.current, coursePage.value.size),
       studentApi.getLearningRecords(1, 200),
-      studentApi.getEnrollments(1, 200),
     ]);
-    const enrollmentMap = new Map((enrollmentData.records || []).map(e => [e.courseId, e.enrollStatus]));
-    const courseMap = new Map();
-    for (const course of (courseData.records || [])) courseMap.set(course.id, course);
-    for (const course of (myCourseData.records || [])) courseMap.set(course.id, {...courseMap.get(course.id), ...course});
-    courses.value = Array.from(courseMap.values()).map(c => ({...c, enrollStatus: c.enrollStatus || enrollmentMap.get(c.id) || ""}));
-    coursePage.value.total = Math.max(courseData.total || 0, courses.value.length);
+    courses.value = myCourseData.records || [];
+    coursePage.value.total = myCourseData.total || courses.value.length;
     const completedIds = (recordData.records || [])
         .filter(r => r.result === "PASSED")
         .map(r => r.courseId);

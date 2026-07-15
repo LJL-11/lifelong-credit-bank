@@ -1,0 +1,101 @@
+<!doctype html><html><head><meta charset='utf-8'><style>
+body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", SimSun, sans-serif; line-height: 1.55; font-size: 11pt; color: #111; }
+h1 { text-align: center; font-size: 22pt; margin: 28px 0; }
+h2 { font-size: 17pt; margin-top: 26px; border-bottom: 1px solid #888; padding-bottom: 4px; }
+h3 { font-size: 14pt; margin-top: 20px; }
+h4 { font-size: 12pt; margin-top: 14px; }
+p { text-indent: 2em; margin: 6px 0; }
+.cover p { text-indent: 0; text-align: center; }
+.cover table { margin: 24px auto; width: 82%; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; }
+th, td { border: 1px solid #555; padding: 6px 8px; vertical-align: top; }
+th { background: #f2f2f2; font-weight: bold; text-align: center; }
+pre { border: 1px solid #999; background: #f8f8f8; padding: 10px; white-space: pre-wrap; font-family: Consolas, monospace; }
+ul { margin-top: 4px; }
+li { margin: 4px 0; }
+</style><title>配置管理计划书</title></head><body>
+<div class="cover">
+  <p>项目编号：HD20260713SR005</p>
+  <h1>终身学习学分银行平台</h1>
+  <h2>配置管理计划书</h2>
+  <p>Version: 1.0</p>
+  <table>
+    <tr><td>项目承担部门</td><td>智慧教育研教部</td></tr>
+    <tr><td>撰写人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>完成日期</td><td>2026年07月13日</td></tr>
+    <tr><td>本文档使用部门</td><td>■主管领导  ■项目组  □客户（市场）  ■维护人员  □用户</td></tr>
+    <tr><td>评审负责人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>评审日期</td><td>2026年07月13日</td></tr>
+    <tr><td>文档编号</td><td>HD-CM-20260713-001</td></tr>
+  </table>
+</div>
+<h2>文档信息</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>标题</td><td>终身学习学分银行平台-配置管理计划书</td></tr>
+<tr><td>作者</td><td>付嘉一</td></tr>
+<tr><td>创建日期</td><td>2026年07月13日</td></tr>
+<tr><td>上次更新日期</td><td>2026年07月13日</td></tr>
+<tr><td>版本</td><td>1.0</td></tr>
+<tr><td>部门名称</td><td>智慧教育研教部</td></tr>
+</table><h2>修订文档历史记录</h2><table>
+<tr><th>日期</th><th>版本</th><th>说明</th><th>作者</th></tr>
+<tr><td>2026年07月08日</td><td>0.1</td><td>完成初稿，建立章节结构</td><td>付嘉一</td></tr>
+<tr><td>2026年07月11日</td><td>0.9</td><td>结合项目源码、数据库脚本和前端页面补充内容</td><td>付嘉一</td></tr>
+<tr><td>2026年07月13日</td><td>1.0</td><td>评审后正式发布</td><td>付嘉一</td></tr>
+</table><h2>目录</h2><ul><li>1. 简介</li><li>2. 管理</li><li>3. 配置管理活动</li><li>4. 文件归档</li><li>5. 里程碑</li></ul><h2>1. 简介</h2><p>本文档说明 终身学习学分银行平台 在实习项目开发、测试、部署和交付全过程中的配置管理活动。配置管理对象覆盖需求文档、设计文档、数据库脚本、后端源码、前端源码、测试用例、构建产物、运行配置和发布包。</p><h3>1.1 目的</h3><p>建立统一的配置项识别、版本控制、变更审批、基线发布和归档机制，确保项目交付物一致、可追溯、可恢复，避免多人协作过程中出现版本混乱、代码覆盖、数据库脚本丢失等问题。</p><h3>1.2 范围</h3><p>适用于项目策划、需求分析、架构设计、数据库设计、编码实现、系统测试、缺陷修复、部署演示和最终上交等阶段。</p><h3>1.3 缩略语</h3><table>
+<tr><th>缩略语</th><th>含义</th></tr>
+<tr><td>CM</td><td>Configuration Management，配置管理</td></tr>
+<tr><td>CI</td><td>Configuration Item，配置项</td></tr>
+<tr><td>CCB</td><td>Change Control Board，变更控制委员会</td></tr>
+<tr><td>LLCBP</td><td>终身学习学分银行平台</td></tr>
+<tr><td>SRS</td><td>Software Requirement Specification，软件需求规约</td></tr>
+</table><h3>1.4 参考资料</h3><ul><li>《终身学习学分银行平台软件需求规约》</li><li>《终身学习学分银行平台项目开发计划》</li><li>《终身学习学分银行平台数据库设计说明书》</li><li>Spring Boot 3.3、Vue 3、MyBatis-Plus、MySQL 8、Redis、RabbitMQ 官方文档</li><li>项目源码：/home/fjy/IdeaProjects/lifelong-credit-bank</li></ul><h2>2. 管理</h2><h3>2.1 组织结构</h3><table>
+<tr><th>角色</th><th>人员</th><th>职责</th></tr>
+<tr><td>项目负责人</td><td>付嘉一</td><td>统筹开发计划、评审文档、协调风险</td></tr>
+<tr><td>配置管理员</td><td>付嘉一</td><td>维护 Git 仓库、分支、标签、发布包和归档目录</td></tr>
+<tr><td>开发人员</td><td>项目组成员</td><td>提交源码、数据库脚本、前端页面和接口实现</td></tr>
+<tr><td>测试人员</td><td>项目组成员</td><td>编写测试用例、执行测试、记录缺陷并回测</td></tr>
+<tr><td>评审人员</td><td>指导老师/项目负责人</td><td>对需求、设计、测试和发布物进行检查确认</td></tr>
+</table><h3>2.2 工具、环境和基础设施</h3><table>
+<tr><th>类别</th><th>工具</th><th>用途</th></tr>
+<tr><td>版本控制</td><td>Git</td><td>源码、文档、SQL 脚本版本管理</td></tr>
+<tr><td>后端开发</td><td>IntelliJ IDEA、JDK 21、Maven</td><td>Spring Boot 后端开发与构建</td></tr>
+<tr><td>前端开发</td><td>Node.js、Vite、Vue 3</td><td>学员端和管理端页面开发</td></tr>
+<tr><td>数据库</td><td>MySQL 8、Flyway</td><td>数据模型管理和版本迁移</td></tr>
+<tr><td>缓存/消息</td><td>Redis、RabbitMQ、Redisson</td><td>Token、秒杀库存、分布式锁、异步订单</td></tr>
+<tr><td>测试</td><td>JUnit、Spring Boot Test、JMeter、浏览器</td><td>单元测试、接口测试、性能测试、兼容性测试</td></tr>
+</table><h2>3. 配置管理活动</h2><h3>3.1 配置库结构</h3><pre>lifelong-credit-bank/
+├── src/main/java/org/csu/creditbank/      后端源码
+├── src/main/resources/db/migration/       Flyway 数据库迁移脚本
+├── src/main/resources/application.yml     运行配置
+├── frontend/                              Vue 3 前端工程
+├── docs/                                  项目说明与接口草稿
+├── jmeter/                                秒杀压测脚本
+└── generated-docs/                        本次生成的工程文档中间产物</pre><h3>3.2 权限划分</h3><table>
+<tr><th>配置区</th><th>权限</th><th>说明</th></tr>
+<tr><td>主分支</td><td>配置管理员合并</td><td>只保存可运行、可演示的稳定版本</td></tr>
+<tr><td>开发分支</td><td>开发人员提交</td><td>用于功能开发和问题修复</td></tr>
+<tr><td>文档目录</td><td>项目组维护</td><td>需求、设计、测试文档统一编号</td></tr>
+<tr><td>发布目录</td><td>配置管理员维护</td><td>仅保存通过测试的发布包和数据库版本</td></tr>
+</table><h3>3.3 配置标识</h3><table>
+<tr><th>配置项</th><th>命名规则</th><th>示例</th></tr>
+<tr><td>需求文档</td><td>项目名_文档名_版本</td><td>终身学习学分银行平台_软件需求规约_V1.0.docx</td></tr>
+<tr><td>数据库脚本</td><td>V序号__说明.sql</td><td>V17__backfill_course_product_course_id.sql</td></tr>
+<tr><td>后端版本</td><td>major.minor.patch</td><td>1.0.0</td></tr>
+<tr><td>发布包</td><td>项目名_日期_版本</td><td>lifelong-credit-bank_20260713_V1.0</td></tr>
+</table><h3>3.4 基线管理</h3><table>
+<tr><th>基线</th><th>形成时间</th><th>包含内容</th></tr>
+<tr><td>需求基线</td><td>需求评审通过后</td><td>软件需求规约、用例说明、接口清单</td></tr>
+<tr><td>设计基线</td><td>架构与数据库设计完成后</td><td>系统构架设计说明书、数据库设计说明书</td></tr>
+<tr><td>编码基线</td><td>核心功能开发完成后</td><td>后端源码、前端源码、数据库迁移脚本</td></tr>
+<tr><td>测试基线</td><td>系统测试执行前</td><td>测试计划、测试用例、测试环境</td></tr>
+<tr><td>发布基线</td><td>缺陷回归通过后</td><td>发布包、部署说明、测试日志、例会纪要</td></tr>
+</table><h3>3.5 变更控制</h3><p>任意成员发现需求变化、缺陷修复、接口调整或数据库结构变更时，应提出变更申请，说明变更原因、影响范围、回退方案和预计完成时间。项目负责人评估后安排开发和测试，配置管理员在合并前检查是否同步更新文档、SQL 和测试记录。</p><h3>3.6 状态统计与审计</h3><p>每个阶段至少进行一次配置状态统计，检查代码是否可构建、数据库脚本是否连续、文档版本是否一致、测试缺陷是否关闭。发布前对 Git 提交记录、Maven 构建、前端构建、数据库迁移和核心接口进行审计。</p><h2>4. 文件归档</h2><p>最终归档内容包括 9 份工程文档、项目源码、数据库迁移脚本、前端构建产物、JMeter 脚本、README、接口说明和演示账号。归档介质采用本地磁盘与 Git 仓库双重保存。</p><h2>5. 里程碑</h2><table>
+<tr><th>里程碑</th><th>输出物</th><th>完成标准</th></tr>
+<tr><td>项目启动</td><td>项目开发计划</td><td>明确范围、角色、进度</td></tr>
+<tr><td>需求完成</td><td>软件需求规约</td><td>功能需求和非功能需求可测试</td></tr>
+<tr><td>设计完成</td><td>架构设计、数据库设计</td><td>核心技术方案和表结构明确</td></tr>
+<tr><td>编码完成</td><td>源码、SQL、前端页面</td><td>核心业务可运行</td></tr>
+<tr><td>测试完成</td><td>测试计划、用例、日志</td><td>主要缺陷已关闭</td></tr>
+<tr><td>项目交付</td><td>9 份文档和发布工程</td><td>满足实习上交要求</td></tr>
+</table></body></html>

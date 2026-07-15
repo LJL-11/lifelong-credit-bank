@@ -1,0 +1,62 @@
+<!doctype html><html><head><meta charset='utf-8'><style>
+body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", SimSun, sans-serif; line-height: 1.55; font-size: 11pt; color: #111; }
+h1 { text-align: center; font-size: 22pt; margin: 28px 0; }
+h2 { font-size: 17pt; margin-top: 26px; border-bottom: 1px solid #888; padding-bottom: 4px; }
+h3 { font-size: 14pt; margin-top: 20px; }
+h4 { font-size: 12pt; margin-top: 14px; }
+p { text-indent: 2em; margin: 6px 0; }
+.cover p { text-indent: 0; text-align: center; }
+.cover table { margin: 24px auto; width: 82%; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; }
+th, td { border: 1px solid #555; padding: 6px 8px; vertical-align: top; }
+th { background: #f2f2f2; font-weight: bold; text-align: center; }
+pre { border: 1px solid #999; background: #f8f8f8; padding: 10px; white-space: pre-wrap; font-family: Consolas, monospace; }
+ul { margin-top: 4px; }
+li { margin: 4px 0; }
+</style><title>测试日志</title></head><body>
+<div class="cover">
+  <p>项目编号：HD20260713SR005</p>
+  <h1>终身学习学分银行平台</h1>
+  <h2>测试日志</h2>
+  <p>Version: 1.0</p>
+  <table>
+    <tr><td>项目承担部门</td><td>智慧教育研教部</td></tr>
+    <tr><td>撰写人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>完成日期</td><td>2026年07月13日</td></tr>
+    <tr><td>本文档使用部门</td><td>■主管领导  ■项目组  □客户（市场）  ■维护人员  □用户</td></tr>
+    <tr><td>评审负责人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>评审日期</td><td>2026年07月13日</td></tr>
+    <tr><td>文档编号</td><td>HD-TL-20260713-008</td></tr>
+  </table>
+</div>
+<h2>文档信息</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>标题</td><td>终身学习学分银行平台-测试日志</td></tr>
+<tr><td>作者</td><td>付嘉一</td></tr>
+<tr><td>创建日期</td><td>2026年07月13日</td></tr>
+<tr><td>上次更新日期</td><td>2026年07月13日</td></tr>
+<tr><td>版本</td><td>1.0</td></tr>
+<tr><td>部门名称</td><td>智慧教育研教部</td></tr>
+</table><h2>修订文档历史记录</h2><table>
+<tr><th>日期</th><th>版本</th><th>说明</th><th>作者</th></tr>
+<tr><td>2026年07月08日</td><td>0.1</td><td>完成初稿，建立章节结构</td><td>付嘉一</td></tr>
+<tr><td>2026年07月11日</td><td>0.9</td><td>结合项目源码、数据库脚本和前端页面补充内容</td><td>付嘉一</td></tr>
+<tr><td>2026年07月13日</td><td>1.0</td><td>评审后正式发布</td><td>付嘉一</td></tr>
+</table><h1>测试日志</h1><table>
+<tr><th>日期</th><th>测试人员</th><th>编号</th><th>所属项目</th></tr>
+<tr><td>2026年07月13日</td><td>付嘉一</td><td>TL-SUMMARY-001</td><td>终身学习学分银行平台</td></tr>
+</table><h2>一、缺陷记录</h2><table>
+<tr><th>日期</th><th>编号</th><th>测试对象名称</th><th>错误级别</th><th>优先级</th><th>操作步骤及现象</th><th>错误修改及原因简述</th><th>回测</th></tr>
+<tr><td>2026-07-10</td><td>TL-001</td><td>用户登录</td><td>二</td><td>A</td><td>错误密码登录时提示不明确</td><td>统一异常处理返回“用户名或密码错误”，前端展示消息</td><td>合格</td></tr>
+<tr><td>2026-07-10</td><td>TL-002</td><td>权限拦截</td><td>一</td><td>A</td><td>无 Token 访问部分接口时未统一返回未登录</td><td>补充拦截器路径和前端跳转处理</td><td>合格</td></tr>
+<tr><td>2026-07-10</td><td>TL-003</td><td>机构隔离</td><td>一</td><td>A</td><td>管理员列表可能看到非本机构学习记录</td><td>检查 TenantLineInnerInterceptor 和共享表过滤逻辑</td><td>合格</td></tr>
+<tr><td>2026-07-11</td><td>TL-004</td><td>课程学习</td><td>二</td><td>A</td><td>重复点击一键学习可能重复发放积分</td><td>Service 增加学习记录存在性判断</td><td>合格</td></tr>
+<tr><td>2026-07-11</td><td>TL-005</td><td>积分流水</td><td>二</td><td>A</td><td>积分消费后流水缺少变动前余额</td><td>保存流水时补充 balanceBefore 和 balanceAfter</td><td>合格</td></tr>
+<tr><td>2026-07-11</td><td>TL-006</td><td>购物车</td><td>三</td><td>B</td><td>批量删除后页面数量未刷新</td><td>前端删除成功后重新加载购物车</td><td>合格</td></tr>
+<tr><td>2026-07-11</td><td>TL-007</td><td>订单支付</td><td>二</td><td>A</td><td>积分不足时订单状态提示不清晰</td><td>后端返回业务异常，前端保留待支付状态</td><td>合格</td></tr>
+<tr><td>2026-07-12</td><td>TL-008</td><td>秒杀</td><td>一</td><td>A</td><td>并发场景下存在重复请求进入 MQ 的风险</td><td>增加 Redis 去重集合和 Redisson 一人一单锁</td><td>合格</td></tr>
+<tr><td>2026-07-12</td><td>TL-009</td><td>论坛点赞</td><td>三</td><td>B</td><td>取消点赞后列表点赞数未立即同步</td><td>前端更新本地状态并重新请求详情</td><td>合格</td></tr>
+<tr><td>2026-07-12</td><td>TL-010</td><td>成果上传</td><td>二</td><td>A</td><td>大文件上传无明确限制提示</td><td>配置 multipart 限制并补充错误提示</td><td>合格</td></tr>
+<tr><td>2026-07-12</td><td>TL-011</td><td>招聘投递</td><td>三</td><td>B</td><td>简历文件名未在申请列表展示</td><td>数据库增加 resume_file_name 字段并回显</td><td>合格</td></tr>
+<tr><td>2026-07-13</td><td>TL-012</td><td>AI 助手</td><td>四</td><td>C</td><td>未配置 API Key 时启动存在风险</td><td>配置默认 false 并按 Bean 条件加载</td><td>合格</td></tr>
+</table><h2>二、测试结论</h2><p>本轮测试覆盖登录认证、权限隔离、课程学习、积分账户、商城订单、秒杀、论坛、成果、签到、招聘投递、文件上传和 AI 助手等核心模块。已记录缺陷均完成修改并通过回测，系统达到实习项目演示和文档上交要求。</p><h2>三、备注</h2><ul><li>错误类型按照失效等级划分为一、二、三、四、五级。</li><li>优先级划分为 A 高、B 中、C 低。</li><li>回测栏根据缺陷修复后的复测结果填写合格或不合格。</li><li>确认人：付嘉一</li></ul></body></html>

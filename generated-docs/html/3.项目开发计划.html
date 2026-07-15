@@ -1,0 +1,111 @@
+<!doctype html><html><head><meta charset='utf-8'><style>
+body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", SimSun, sans-serif; line-height: 1.55; font-size: 11pt; color: #111; }
+h1 { text-align: center; font-size: 22pt; margin: 28px 0; }
+h2 { font-size: 17pt; margin-top: 26px; border-bottom: 1px solid #888; padding-bottom: 4px; }
+h3 { font-size: 14pt; margin-top: 20px; }
+h4 { font-size: 12pt; margin-top: 14px; }
+p { text-indent: 2em; margin: 6px 0; }
+.cover p { text-indent: 0; text-align: center; }
+.cover table { margin: 24px auto; width: 82%; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; }
+th, td { border: 1px solid #555; padding: 6px 8px; vertical-align: top; }
+th { background: #f2f2f2; font-weight: bold; text-align: center; }
+pre { border: 1px solid #999; background: #f8f8f8; padding: 10px; white-space: pre-wrap; font-family: Consolas, monospace; }
+ul { margin-top: 4px; }
+li { margin: 4px 0; }
+</style><title>项目开发计划</title></head><body>
+<div class="cover">
+  <p>项目编号：HD20260713SR005</p>
+  <h1>终身学习学分银行平台</h1>
+  <h2>项目开发计划</h2>
+  <p>Version: 1.0</p>
+  <table>
+    <tr><td>项目承担部门</td><td>智慧教育研教部</td></tr>
+    <tr><td>撰写人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>完成日期</td><td>2026年07月13日</td></tr>
+    <tr><td>本文档使用部门</td><td>■主管领导  ■项目组  □客户（市场）  ■维护人员  □用户</td></tr>
+    <tr><td>评审负责人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>评审日期</td><td>2026年07月13日</td></tr>
+    <tr><td>文档编号</td><td>HD-PP-20260713-003</td></tr>
+  </table>
+</div>
+<h2>文档信息</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>标题</td><td>终身学习学分银行平台-项目开发计划</td></tr>
+<tr><td>作者</td><td>付嘉一</td></tr>
+<tr><td>创建日期</td><td>2026年07月13日</td></tr>
+<tr><td>上次更新日期</td><td>2026年07月13日</td></tr>
+<tr><td>版本</td><td>1.0</td></tr>
+<tr><td>部门名称</td><td>智慧教育研教部</td></tr>
+</table><h2>修订文档历史记录</h2><table>
+<tr><th>日期</th><th>版本</th><th>说明</th><th>作者</th></tr>
+<tr><td>2026年07月08日</td><td>0.1</td><td>完成初稿，建立章节结构</td><td>付嘉一</td></tr>
+<tr><td>2026年07月11日</td><td>0.9</td><td>结合项目源码、数据库脚本和前端页面补充内容</td><td>付嘉一</td></tr>
+<tr><td>2026年07月13日</td><td>1.0</td><td>评审后正式发布</td><td>付嘉一</td></tr>
+</table><h2>目录</h2><ul><li>1. 前言</li><li>2. 项目概述</li><li>3. 角色和职责</li><li>4. 项目过程</li><li>5. 工作任务分解</li><li>6. 项目估计</li><li>7. 培训计划</li><li>8. 相关计划</li><li>9. 工作环境</li></ul><h2>1. 前言</h2><p>本计划用于指导终身学习学分银行平台从需求分析到最终交付的全过程管理，明确项目目标、范围、进度、人员职责、风险控制和质量保证措施。</p><h3>1.1 术语与缩略语</h3><table>
+<tr><th>缩略语</th><th>说明</th></tr>
+<tr><td>LLCBP</td><td>终身学习学分银行平台</td></tr>
+<tr><td>PM</td><td>项目经理</td></tr>
+<tr><td>PPQA</td><td>过程与产品质量保证</td></tr>
+<tr><td>CM</td><td>配置管理</td></tr>
+<tr><td>API</td><td>应用程序接口</td></tr>
+</table><h2>2. 项目概述</h2><h3>2.1 背景和目标</h3><p>继续教育、职业培训和学习成果认定场景中，课程学习、积分激励、成果审核和跨机构管理常常分散在不同系统。本项目通过统一平台实现学习资源管理、积分账户、商城兑换、论坛交流、招聘求职与成果认定，提高管理效率和学员参与度。</p><h3>2.2 项目范围</h3><p>本项目范围包括后端 REST API、Vue 前端页面、MySQL 数据库、Redis/RabbitMQ 中间件集成、秒杀高并发链路、AI 学习助手接口、测试脚本和工程文档。不包括真实区块链节点接入、生产级短信服务、线上支付网关和复杂组织架构审批流。</p><h3>2.3 交付产品</h3><table>
+<tr><th>阶段</th><th>交付工件</th><th>类型</th><th>计划日期</th></tr>
+<tr><td>项目策划</td><td>项目开发计划、配置管理计划</td><td>Word 文档</td><td>2026-07-08</td></tr>
+<tr><td>需求分析</td><td>软件需求规约</td><td>Word 文档</td><td>2026-07-09</td></tr>
+<tr><td>设计</td><td>系统构架设计说明书、数据库设计说明书</td><td>Word 文档</td><td>2026-07-10</td></tr>
+<tr><td>编码</td><td>后端源码、前端源码、数据库迁移脚本</td><td>工程源码</td><td>2026-07-11</td></tr>
+<tr><td>测试</td><td>测试计划、测试用例、测试日志</td><td>Word 文档</td><td>2026-07-12</td></tr>
+<tr><td>交付</td><td>9 份工程文档、可运行项目</td><td>归档包</td><td>2026-07-13</td></tr>
+</table><h2>3. 角色和职责</h2><table>
+<tr><th>角色</th><th>人员</th><th>职责</th></tr>
+<tr><td>项目负责人</td><td>付嘉一</td><td>范围控制、任务分配、评审确认</td></tr>
+<tr><td>后端开发</td><td>项目组成员</td><td>Controller、Service、Mapper、Redis、RabbitMQ、权限和数据库迁移实现</td></tr>
+<tr><td>前端开发</td><td>项目组成员</td><td>Vue 页面、路由、表单、列表、商城、论坛和管理端界面实现</td></tr>
+<tr><td>测试人员</td><td>项目组成员</td><td>测试计划、测试用例、缺陷记录和回归测试</td></tr>
+<tr><td>配置管理员</td><td>付嘉一</td><td>版本管理、构建归档、文档编号和发布基线维护</td></tr>
+</table><h2>4. 项目过程</h2><table>
+<tr><th>阶段</th><th>主要活动</th><th>输出物</th></tr>
+<tr><td>启动</td><td>明确题目、技术栈、演示目标</td><td>项目计划</td></tr>
+<tr><td>需求</td><td>梳理角色、业务模块、接口需求</td><td>需求规约</td></tr>
+<tr><td>设计</td><td>确定分层架构、多租户、秒杀、数据库结构</td><td>架构和数据库设计</td></tr>
+<tr><td>实现</td><td>后端接口、前端页面、迁移脚本、测试数据</td><td>源码和构建产物</td></tr>
+<tr><td>测试</td><td>功能测试、异常测试、性能测试、兼容性测试</td><td>测试计划、用例、日志</td></tr>
+<tr><td>交付</td><td>整理文档、检查项目运行和归档</td><td>最终交付包</td></tr>
+</table><h2>5. 工作任务分解</h2><table>
+<tr><th>编号</th><th>任务</th><th>说明</th></tr>
+<tr><td>WBS-01</td><td>认证与权限</td><td>登录、登出、Token、角色拦截、机构上下文</td></tr>
+<tr><td>WBS-02</td><td>学员与课程</td><td>档案、课程、报名、一键学习、记录</td></tr>
+<tr><td>WBS-03</td><td>积分与商城</td><td>账户、流水、商品、购物车、订单</td></tr>
+<tr><td>WBS-04</td><td>秒杀</td><td>Redis Lua、MQ、Redisson、订单超时</td></tr>
+<tr><td>WBS-05</td><td>论坛</td><td>帖子、回复、点赞、后台审核</td></tr>
+<tr><td>WBS-06</td><td>成果与签到</td><td>证明上传、审核、签到奖励、诚信评分</td></tr>
+<tr><td>WBS-07</td><td>招聘求职</td><td>岗位、简历上传、投递、审核</td></tr>
+<tr><td>WBS-08</td><td>前端页面</td><td>登录页、管理端、学员端、商城、论坛、AI 助手</td></tr>
+<tr><td>WBS-09</td><td>测试与文档</td><td>用例、日志、工程文档、归档</td></tr>
+</table><h2>6. 项目估计</h2><table>
+<tr><th>类别</th><th>估计</th></tr>
+<tr><td>代码规模</td><td>后端约 100 个 Java 文件，前端 Vue/Vite 工程，数据库迁移 V1-V17</td></tr>
+<tr><td>数据库规模</td><td>22 张核心业务表，覆盖机构、学员、课程、积分、商城、论坛、招聘、存证</td></tr>
+<tr><td>开发周期</td><td>约 1 周集中开发与整理</td></tr>
+<tr><td>风险储备</td><td>预留 15% 时间处理数据库迁移、前后端接口联调和中间件环境问题</td></tr>
+</table><h2>7. 技能和培训计划</h2><table>
+<tr><th>技能</th><th>掌握要求</th><th>培训方式</th></tr>
+<tr><td>Spring Boot 3</td><td>能够编写 Controller、Service、异常处理和配置类</td><td>源码讲解与接口调试</td></tr>
+<tr><td>Vue 3</td><td>能够维护页面组件、状态和 API 调用</td><td>页面走查</td></tr>
+<tr><td>MySQL/Flyway</td><td>能够编写迁移脚本和理解表关系</td><td>数据库设计评审</td></tr>
+<tr><td>Redis/RabbitMQ</td><td>理解 Token、锁、库存和异步消费</td><td>秒杀链路演示</td></tr>
+<tr><td>测试</td><td>掌握功能用例、缺陷记录和回归方法</td><td>测试用例评审</td></tr>
+</table><h2>8. 相关计划</h2><p>项目相关计划包括配置管理计划、质量保证计划、系统测试计划、风险管理计划、数据管理计划和需求管理计划。各计划互相引用，变更时同步更新版本号。</p><h3>8.1 风险管理</h3><table>
+<tr><th>风险</th><th>影响</th><th>应对</th></tr>
+<tr><td>Redis/RabbitMQ 未启动</td><td>秒杀、Token 或异步订单不可用</td><td>启动前检查服务状态，提供普通功能演示路径</td></tr>
+<tr><td>数据库迁移失败</td><td>系统无法启动</td><td>按 Flyway 版本顺序检查 SQL，保留初始化脚本</td></tr>
+<tr><td>前后端字段不一致</td><td>页面保存或展示异常</td><td>以接口返回和 DTO 为准进行联调</td></tr>
+<tr><td>AI Key 缺失</td><td>AI 助手不可用</td><td>配置默认 false，保证主系统不受影响</td></tr>
+</table><h2>9. 工作环境</h2><table>
+<tr><th>环境</th><th>配置</th></tr>
+<tr><td>开发环境</td><td>Ubuntu/Linux、IntelliJ IDEA、JDK 21、Maven、Node.js 18+</td></tr>
+<tr><td>运行环境</td><td>Spring Boot 8080、MySQL 8、Redis、RabbitMQ</td></tr>
+<tr><td>测试环境</td><td>Chrome/Edge 浏览器、JMeter、Maven Test</td></tr>
+<tr><td>配置文件</td><td>src/main/resources/application.yml，frontend/vite.config.js</td></tr>
+</table></body></html>

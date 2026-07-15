@@ -1,0 +1,112 @@
+<!doctype html><html><head><meta charset='utf-8'><style>
+body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", SimSun, sans-serif; line-height: 1.55; font-size: 11pt; color: #111; }
+h1 { text-align: center; font-size: 22pt; margin: 28px 0; }
+h2 { font-size: 17pt; margin-top: 26px; border-bottom: 1px solid #888; padding-bottom: 4px; }
+h3 { font-size: 14pt; margin-top: 20px; }
+h4 { font-size: 12pt; margin-top: 14px; }
+p { text-indent: 2em; margin: 6px 0; }
+.cover p { text-indent: 0; text-align: center; }
+.cover table { margin: 24px auto; width: 82%; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; }
+th, td { border: 1px solid #555; padding: 6px 8px; vertical-align: top; }
+th { background: #f2f2f2; font-weight: bold; text-align: center; }
+pre { border: 1px solid #999; background: #f8f8f8; padding: 10px; white-space: pre-wrap; font-family: Consolas, monospace; }
+ul { margin-top: 4px; }
+li { margin: 4px 0; }
+</style><title>数据库设计说明书</title></head><body>
+<div class="cover">
+  <p>项目编号：HD20260713SR005</p>
+  <h1>终身学习学分银行平台</h1>
+  <h2>数据库设计说明书</h2>
+  <p>Version: 1.0</p>
+  <table>
+    <tr><td>项目承担部门</td><td>智慧教育研教部</td></tr>
+    <tr><td>撰写人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>完成日期</td><td>2026年07月13日</td></tr>
+    <tr><td>本文档使用部门</td><td>■主管领导  ■项目组  □客户（市场）  ■维护人员  □用户</td></tr>
+    <tr><td>评审负责人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>评审日期</td><td>2026年07月13日</td></tr>
+    <tr><td>文档编号</td><td>HD-DB-20260713-004</td></tr>
+  </table>
+</div>
+<h2>文档信息</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>标题</td><td>终身学习学分银行平台-数据库设计说明书</td></tr>
+<tr><td>作者</td><td>付嘉一</td></tr>
+<tr><td>创建日期</td><td>2026年07月13日</td></tr>
+<tr><td>上次更新日期</td><td>2026年07月13日</td></tr>
+<tr><td>版本</td><td>1.0</td></tr>
+<tr><td>部门名称</td><td>智慧教育研教部</td></tr>
+</table><h2>修订文档历史记录</h2><table>
+<tr><th>日期</th><th>版本</th><th>说明</th><th>作者</th></tr>
+<tr><td>2026年07月08日</td><td>0.1</td><td>完成初稿，建立章节结构</td><td>付嘉一</td></tr>
+<tr><td>2026年07月11日</td><td>0.9</td><td>结合项目源码、数据库脚本和前端页面补充内容</td><td>付嘉一</td></tr>
+<tr><td>2026年07月13日</td><td>1.0</td><td>评审后正式发布</td><td>付嘉一</td></tr>
+</table><h2>目录</h2><ul><li>1. 引言</li><li>2. 外部设计</li><li>3. 结构设计</li><li>4. 运用设计</li><li>5. 安全保密设计</li></ul><h2>1. 引言</h2><h3>1.1 编写目的</h3><p>本文档描述终身学习学分银行平台的数据库设计方案，包括命名规则、表结构、核心关系、数据隔离策略、迁移管理和安全设计，为后续开发、测试、部署和维护提供依据。</p><h3>1.2 背景</h3><p>系统使用 MySQL 8 作为主数据库，Flyway 管理数据库版本。业务覆盖学员、课程、积分、商城、秒杀、论坛、成果认定、签到、招聘、存证等模块，对数据一致性和多机构隔离有较高要求。</p><h3>1.3 定义</h3><table>
+<tr><th>术语</th><th>说明</th></tr>
+<tr><td>PDM</td><td>物理数据模型</td></tr>
+<tr><td>多租户</td><td>通过 institution_id 区分机构数据</td></tr>
+<tr><td>共享表</td><td>跨机构共用或通过 learner_id 间接归属的数据表</td></tr>
+<tr><td>逻辑删除</td><td>使用 deleted 字段标记删除状态</td></tr>
+</table><h2>2. 外部设计</h2><h3>2.1 类型划分</h3><table>
+<tr><th>数据库区域</th><th>表</th><th>说明</th></tr>
+<tr><td>基础数据</td><td>institution、learner</td><td>机构和用户基础信息</td></tr>
+<tr><td>学习业务</td><td>course、course_enrollment、learning_record、achievement、sign_in_record</td><td>课程、学习、成果和签到</td></tr>
+<tr><td>积分业务</td><td>credit_account、credit_transaction</td><td>积分账户和流水</td></tr>
+<tr><td>商城业务</td><td>credit_product、cart、credit_order、credit_order_detail、flash_sale、flash_sale_record</td><td>兑换、订单和秒杀</td></tr>
+<tr><td>互动与就业</td><td>forum_post、forum_reply、forum_post_like、job_posting、job_application</td><td>论坛交流和岗位申请</td></tr>
+<tr><td>扩展能力</td><td>integrity_rating、blockchain_credential</td><td>诚信评分和存证</td></tr>
+</table><h3>2.2 标识符和约定</h3><ul><li>表名和字段名使用小写字母加下划线，例如 credit_transaction。</li><li>实体类使用驼峰命名并通过 MyBatis-Plus 自动映射。</li><li>主键统一使用 BIGINT 自增 id。</li><li>通用字段 created_at、updated_at、deleted 由 BaseEntity 和自动填充处理。</li><li>机构隔离表包含 institution_id 字段，共享表由配置跳过租户插件或通过 learner_id 关联过滤。</li></ul><h3>2.3 支持软件</h3><table>
+<tr><th>软件</th><th>版本/说明</th></tr>
+<tr><td>MySQL</td><td>8.x</td></tr>
+<tr><td>Flyway</td><td>Spring Boot 集成，迁移目录 classpath:db/migration</td></tr>
+<tr><td>MyBatis-Plus</td><td>3.5.9，多租户、分页、逻辑删除</td></tr>
+<tr><td>Redis</td><td>Token、秒杀库存、去重集合</td></tr>
+<tr><td>RabbitMQ</td><td>秒杀订单异步处理和订单超时</td></tr>
+</table><h2>3. 结构设计</h2><table>
+<tr><th>表名</th><th>业务含义</th><th>租户策略</th><th>关键字段</th></tr>
+<tr><td>institution</td><td>机构信息</td><td>共享</td><td>id、name、code、contact、phone、status</td></tr>
+<tr><td>learner</td><td>用户/学员</td><td>机构隔离</td><td>username、real_name、phone、email、education_level、status、password、role、institution_id</td></tr>
+<tr><td>course</td><td>课程资源</td><td>机构隔离</td><td>course_code、course_name、provider、category、credit_value、credit_point、resource_url、learning_stages</td></tr>
+<tr><td>course_enrollment</td><td>课程报名</td><td>机构隔离</td><td>learner_id、course_id、enroll_status、reviewer、reviewed_at</td></tr>
+<tr><td>learning_record</td><td>学习记录</td><td>机构隔离</td><td>learner_id、course_id、progress、score、result、completed_at</td></tr>
+<tr><td>credit_account</td><td>积分账户</td><td>共享/按学员归属</td><td>learner_id、total_credits、available_credits、frozen_credits、account_status</td></tr>
+<tr><td>credit_transaction</td><td>积分流水</td><td>共享/按学员归属</td><td>transaction_type、amount、balance_before、balance_after、source_type、source_no</td></tr>
+<tr><td>credit_product</td><td>积分商品</td><td>共享</td><td>product_code、product_name、product_type、credit_price、stock、sold、course_id</td></tr>
+<tr><td>cart</td><td>购物车</td><td>共享/按学员归属</td><td>learner_id、product_id、product_name、credit_price、num</td></tr>
+<tr><td>credit_order</td><td>订单主表</td><td>共享/按学员归属</td><td>order_no、learner_id、account_id、total_amount、item_count、batch_no、close_time、order_status</td></tr>
+<tr><td>credit_order_detail</td><td>订单明细</td><td>共享</td><td>order_id、order_no、product_id、product_name、credit_price、num、amount</td></tr>
+<tr><td>flash_sale</td><td>秒杀活动</td><td>共享</td><td>product_id、product_name、origin_price、flash_price、stock、begin_time、end_time、status</td></tr>
+<tr><td>flash_sale_record</td><td>秒杀记录</td><td>共享</td><td>flash_sale_id、product_id、learner_id、order_id</td></tr>
+<tr><td>forum_post</td><td>论坛帖子</td><td>机构隔离</td><td>learner_id、title、content、section、reply_count、status、institution_id</td></tr>
+<tr><td>forum_reply</td><td>论坛回复</td><td>机构隔离</td><td>post_id、learner_id、content、status、institution_id</td></tr>
+<tr><td>forum_post_like</td><td>论坛点赞</td><td>共享</td><td>post_id、learner_id、created_at</td></tr>
+<tr><td>achievement</td><td>成果认定</td><td>机构隔离</td><td>learner_id、achievement_name、achievement_type、suggested_credits、audit_status、proof_url</td></tr>
+<tr><td>sign_in_record</td><td>签到记录</td><td>机构隔离</td><td>learner_id、sign_date、reward_credits、sign_type</td></tr>
+<tr><td>job_posting</td><td>招聘岗位</td><td>机构隔离</td><td>company_name、position_name、city、requirement、contact、status</td></tr>
+<tr><td>job_application</td><td>求职申请</td><td>机构隔离</td><td>job_id、learner_id、resume_summary、resume_url、apply_status、reviewer</td></tr>
+<tr><td>integrity_rating</td><td>诚信评分</td><td>机构隔离</td><td>learner_id、score、level_name、learning_score、forum_score、signin_score、achievement_score、job_score</td></tr>
+<tr><td>blockchain_credential</td><td>区块链存证</td><td>机构隔离</td><td>learner_id、credential_type、business_no、hash_value、chain_status、source_payload</td></tr>
+</table><h3>3.1 主要关系</h3><table>
+<tr><th>关系</th><th>说明</th></tr>
+<tr><td>institution 1 - N learner/course/forum_post</td><td>机构拥有学员、课程和论坛内容</td></tr>
+<tr><td>learner 1 - 1 credit_account</td><td>每个学员对应一个积分账户</td></tr>
+<tr><td>learner 1 - N credit_transaction</td><td>学员积分变更形成流水</td></tr>
+<tr><td>course 1 - N learning_record</td><td>课程学习产生学习记录</td></tr>
+<tr><td>course 1 - N course_enrollment</td><td>课程报名记录审核状态</td></tr>
+<tr><td>credit_order 1 - N credit_order_detail</td><td>订单主表保存汇总，明细保存商品快照</td></tr>
+<tr><td>credit_product 1 - N flash_sale</td><td>商品可配置秒杀活动</td></tr>
+<tr><td>forum_post 1 - N forum_reply/forum_post_like</td><td>帖子包含回复和点赞记录</td></tr>
+<tr><td>job_posting 1 - N job_application</td><td>岗位对应多个投递申请</td></tr>
+<tr><td>achievement 1 - N blockchain_credential</td><td>成果或业务编号可生成存证记录</td></tr>
+</table><h3>3.2 迁移脚本</h3><table>
+<tr><th>版本</th><th>说明</th></tr>
+<tr><td>V1</td><td>初始化学员、课程、学习记录、积分账户、成果、论坛、签到、招聘、存证基础表</td></tr>
+<tr><td>V2</td><td>新增积分商品、订单和积分交易扩展字段</td></tr>
+<tr><td>V3-V4</td><td>新增认证字段和种子用户</td></tr>
+<tr><td>V5-V8</td><td>购物车、商城增强、秒杀、论坛点赞</td></tr>
+<tr><td>V9-V10</td><td>机构表和多租户字段、修复 student001 角色</td></tr>
+<tr><td>V11-V12</td><td>课程学习资源、报名、论坛回复、求职申请、诚信评分</td></tr>
+<tr><td>V13-V14</td><td>多机构管理员账号和演示学员编号整理</td></tr>
+<tr><td>V15-V17</td><td>课程商品关联、简历文件、已购课程报名补齐</td></tr>
+</table><h2>4. 运用设计</h2><h3>4.1 数据访问</h3><p>后端使用 Mapper、Service、Controller 三层访问数据库。MyBatis-Plus 根据实体类与表名映射生成常用 CRUD，复杂业务在 ServiceImpl 中组合事务、积分流水、库存更新和状态检查。</p><h3>4.2 多租户过滤</h3><p>登录成功后 AuthInterceptor 将用户机构写入 InstitutionContext，MyBatis-Plus TenantLineInnerInterceptor 自动向隔离表追加 institution_id 条件。积分商城、订单、购物车、秒杀等共享表按业务规则跳过租户插件，并在 Controller 或 Service 中根据 learner_id 进行归属控制。</p><h3>4.3 秒杀一致性</h3><p>秒杀库存先由 Redis Lua 原子判断库存和重复购买，成功后发送 RabbitMQ 消息；消费者使用 Redis 防重、Redisson 分布式锁和 MySQL stock &gt; 0 条件更新，保证高并发下不超卖、不重复下单。</p><h2>5. 安全保密设计</h2><ul><li>密码字段只保存盐值哈希，不保存明文密码。</li><li>Token 存储于 Redis 并设置有效期，退出登录时删除。</li><li>文件上传按 proofs 和 resumes 分目录保存，接口限制大小。</li><li>逻辑删除保留历史数据，便于审计和恢复。</li><li>管理员查询学员、课程、论坛、成果和招聘数据时必须受机构上下文限制。</li></ul></body></html>

@@ -5,20 +5,20 @@ spring:
   application:
     name: credit-bank
   datasource:
-    url: jdbc:mysql://localhost:3306/credit_bank?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
-    username: root
-    password: 123456
+    url: ${DB_URL:jdbc:mysql://localhost:3306/lifelong_credit_bank?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false}
+    username: ${DB_USERNAME:creditbank}
+    password: ${DB_PASSWORD:123456}
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
-      host: 192.168.116.130
-      port: 6379
-      database: 4
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      database: ${REDIS_DATABASE:4}
   rabbitmq:
-    host: 127.0.0.1
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST:127.0.0.1}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
     listener:
       simple:
         acknowledge-mode: manual
@@ -57,16 +57,16 @@ langchain4j:
   open-ai:
     chat-model:
       base-url: https://api.deepseek.com
-      api-key: ${DEEPSEEK_API_KEY}
+      api-key: ${deepseek:false}
       model-name: deepseek-chat
       log-requests: true
       log-responses: true
     streaming-chat-model:
       base-url: https://api.deepseek.com
-      api-key: ${DEEPSEEK_API_KEY}
+      api-key: ${deepseek:false}
       model-name: deepseek-chat
   community:
     dashscope:
       embedding-model:
-        api-key: ${DASHSCOPE_API_KEY}
+        api-key: ${DASHSCOPE_API_KEY:false}
         model-name: text-embedding-v3

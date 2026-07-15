@@ -1,0 +1,84 @@
+<!doctype html><html><head><meta charset='utf-8'><style>
+body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", SimSun, sans-serif; line-height: 1.55; font-size: 11pt; color: #111; }
+h1 { text-align: center; font-size: 22pt; margin: 28px 0; }
+h2 { font-size: 17pt; margin-top: 26px; border-bottom: 1px solid #888; padding-bottom: 4px; }
+h3 { font-size: 14pt; margin-top: 20px; }
+h4 { font-size: 12pt; margin-top: 14px; }
+p { text-indent: 2em; margin: 6px 0; }
+.cover p { text-indent: 0; text-align: center; }
+.cover table { margin: 24px auto; width: 82%; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; }
+th, td { border: 1px solid #555; padding: 6px 8px; vertical-align: top; }
+th { background: #f2f2f2; font-weight: bold; text-align: center; }
+pre { border: 1px solid #999; background: #f8f8f8; padding: 10px; white-space: pre-wrap; font-family: Consolas, monospace; }
+ul { margin-top: 4px; }
+li { margin: 4px 0; }
+</style><title>测试用例</title></head><body>
+<div class="cover">
+  <p>项目编号：HD20260713SR005</p>
+  <h1>终身学习学分银行平台</h1>
+  <h2>测试用例</h2>
+  <p>Version: 1.0</p>
+  <table>
+    <tr><td>项目承担部门</td><td>智慧教育研教部</td></tr>
+    <tr><td>撰写人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>完成日期</td><td>2026年07月13日</td></tr>
+    <tr><td>本文档使用部门</td><td>■主管领导  ■项目组  □客户（市场）  ■维护人员  □用户</td></tr>
+    <tr><td>评审负责人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>评审日期</td><td>2026年07月13日</td></tr>
+    <tr><td>文档编号</td><td>HD-TC-20260713-007</td></tr>
+  </table>
+</div>
+<h2>文档信息</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>标题</td><td>终身学习学分银行平台-测试用例</td></tr>
+<tr><td>作者</td><td>付嘉一</td></tr>
+<tr><td>创建日期</td><td>2026年07月13日</td></tr>
+<tr><td>上次更新日期</td><td>2026年07月13日</td></tr>
+<tr><td>版本</td><td>1.0</td></tr>
+<tr><td>部门名称</td><td>智慧教育研教部</td></tr>
+</table><h2>修订文档历史记录</h2><table>
+<tr><th>日期</th><th>版本</th><th>说明</th><th>作者</th></tr>
+<tr><td>2026年07月08日</td><td>0.1</td><td>完成初稿，建立章节结构</td><td>付嘉一</td></tr>
+<tr><td>2026年07月11日</td><td>0.9</td><td>结合项目源码、数据库脚本和前端页面补充内容</td><td>付嘉一</td></tr>
+<tr><td>2026年07月13日</td><td>1.0</td><td>评审后正式发布</td><td>付嘉一</td></tr>
+</table><h2>一、测试环境</h2><table>
+<tr><th>项目</th><th>配置</th></tr>
+<tr><td>操作系统</td><td>Windows 11 / Linux</td></tr>
+<tr><td>浏览器</td><td>Chrome、Edge、Firefox</td></tr>
+<tr><td>后端</td><td>JDK 21、Spring Boot 3.3.6、Maven</td></tr>
+<tr><td>数据库</td><td>MySQL 8、Redis、RabbitMQ</td></tr>
+<tr><td>前端</td><td>Vue 3、Vite</td></tr>
+</table><h2>二、测试用例</h2><table>
+<tr><th>序号</th><th>测试用例</th><th>前提条件</th><th>测试步骤</th><th>预期输出</th></tr>
+<tr><td>TC-001</td><td>合法账号登录</td><td>已存在 admin001 或 student001，密码 123456</td><td>输入账号密码并点击登录</td><td>登录成功并进入对应角色首页</td></tr>
+<tr><td>TC-002</td><td>错误密码登录</td><td>用户进入登录页</td><td>输入正确账号和错误密码</td><td>提示用户名或密码错误，不生成 Token</td></tr>
+<tr><td>TC-003</td><td>无 Token 访问后台</td><td>未登录</td><td>直接请求 /api/admin/learners</td><td>系统拒绝访问</td></tr>
+<tr><td>TC-004</td><td>管理员查看本机构学员</td><td>admin001 登录</td><td>进入学员档案列表</td><td>仅展示本机构 STUDENT 学员</td></tr>
+<tr><td>TC-005</td><td>新增课程资源</td><td>管理员登录</td><td>填写课程编码、名称、积分、资源链接并保存</td><td>课程创建成功并出现在列表</td></tr>
+<tr><td>TC-006</td><td>学员一键学习</td><td>student001 登录且课程已发布</td><td>进入我的课程，点击学习</td><td>生成学习记录并增加积分</td></tr>
+<tr><td>TC-007</td><td>重复学习检测</td><td>学员已完成某课程</td><td>再次点击同一课程学习</td><td>系统提示不能重复学习或不重复发放积分</td></tr>
+<tr><td>TC-008</td><td>积分账户开户</td><td>学员无账户</td><td>调用开户功能</td><td>生成可用积分为 0 的账户</td></tr>
+<tr><td>TC-009</td><td>管理员增加积分</td><td>管理员登录</td><td>选择学员、输入积分和来源</td><td>账户余额增加，流水记录正确</td></tr>
+<tr><td>TC-010</td><td>积分不足支付订单</td><td>学员积分低于订单金额</td><td>提交支付</td><td>支付失败并提示积分不足</td></tr>
+<tr><td>TC-011</td><td>商品加入购物车</td><td>商品上架且库存充足</td><td>点击加入购物车</td><td>购物车出现对应商品，数量正确</td></tr>
+<tr><td>TC-012</td><td>购物车数量修改</td><td>购物车已有商品</td><td>增加或减少数量</td><td>小计和总计同步更新</td></tr>
+<tr><td>TC-013</td><td>单商品下单支付</td><td>商品上架且账户积分充足</td><td>立即兑换并确认支付</td><td>订单状态变为已支付，扣减积分和库存</td></tr>
+<tr><td>TC-014</td><td>订单取消</td><td>存在待支付订单</td><td>点击取消订单</td><td>订单状态变为已取消，库存不异常</td></tr>
+<tr><td>TC-015</td><td>秒杀活动列表</td><td>存在进行中的活动</td><td>进入秒杀专区</td><td>展示活动、秒杀价、库存和时间</td></tr>
+<tr><td>TC-016</td><td>秒杀成功</td><td>活动有效、库存大于 0、学员未购买</td><td>点击秒杀</td><td>返回排队/成功结果，异步生成订单</td></tr>
+<tr><td>TC-017</td><td>秒杀重复购买</td><td>同一学员已参与同一活动</td><td>再次点击秒杀</td><td>系统提示不能重复购买</td></tr>
+<tr><td>TC-018</td><td>秒杀超卖检查</td><td>库存有限，并发请求</td><td>使用 JMeter 并发压测</td><td>成功订单数不超过库存，库存不为负</td></tr>
+<tr><td>TC-019</td><td>发帖</td><td>学员登录</td><td>填写标题、板块和内容后发布</td><td>帖子发布成功并在列表可见</td></tr>
+<tr><td>TC-020</td><td>帖子点赞取消</td><td>帖子存在</td><td>点击点赞，再取消点赞</td><td>点赞数先增加后减少，用户状态正确</td></tr>
+<tr><td>TC-021</td><td>管理员隐藏帖子</td><td>管理员登录且帖子存在</td><td>修改帖子状态为隐藏</td><td>学员端不再展示该帖子</td></tr>
+<tr><td>TC-022</td><td>成果提交</td><td>学员登录</td><td>上传证明文件并提交成果认定</td><td>成果状态为待审核</td></tr>
+<tr><td>TC-023</td><td>成果审核通过</td><td>管理员登录且有待审核成果</td><td>审核通过并填写意见</td><td>成果状态更新，通过后可产生积分记录</td></tr>
+<tr><td>TC-024</td><td>每日签到</td><td>学员当天未签到</td><td>点击今日签到</td><td>生成签到记录并发放签到积分</td></tr>
+<tr><td>TC-025</td><td>重复签到</td><td>学员当天已签到</td><td>再次签到</td><td>系统提示今日已签到</td></tr>
+<tr><td>TC-026</td><td>岗位发布</td><td>管理员登录</td><td>新增岗位公司、职位、城市和要求</td><td>岗位发布成功</td></tr>
+<tr><td>TC-027</td><td>简历投递</td><td>学员登录且岗位有效</td><td>上传简历并投递</td><td>生成求职申请，状态为待处理</td></tr>
+<tr><td>TC-028</td><td>求职审核</td><td>管理员登录且有投递记录</td><td>审核通过或驳回</td><td>申请状态和审核人更新</td></tr>
+<tr><td>TC-029</td><td>区块链凭证查询</td><td>存在 businessNo</td><td>请求凭证查询接口</td><td>返回哈希、状态和校验时间</td></tr>
+<tr><td>TC-030</td><td>AI 学习助手</td><td>配置 AI Key 或服务可用</td><td>发送学习问题</td><td>接口返回流式文本；未配置时主系统不受影响</td></tr>
+</table><h2>三、说明</h2><ul><li>测试用例覆盖登录权限、机构隔离、课程学习、积分账户、商城订单、秒杀、论坛、成果、签到、招聘、存证和 AI 助手。</li><li>执行过程中若实际输出与预期不一致，应记录到测试日志并标明缺陷级别、优先级和回测结果。</li><li>涉及秒杀并发的用例可结合 jmeter/seckill-stress-test.jmx 执行。</li></ul></body></html>

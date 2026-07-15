@@ -25,7 +25,6 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
     private final CreditTransactionService transactionService;
     private final CartService cartService;
     private final CreditOrderDetailService detailService;
-    private final CourseService courseService;
     private final CourseEnrollmentService enrollmentService;
     private final RabbitTemplate rabbitTemplate;
 
@@ -34,7 +33,6 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
                                   CreditTransactionService transactionService,
                                   CartService cartService,
                                   CreditOrderDetailService detailService,
-                                  CourseService courseService,
                                   CourseEnrollmentService enrollmentService,
                                   RabbitTemplate rabbitTemplate) {
         this.productService = productService;
@@ -42,7 +40,6 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
         this.transactionService = transactionService;
         this.cartService = cartService;
         this.detailService = detailService;
-        this.courseService = courseService;
         this.enrollmentService = enrollmentService;
         this.rabbitTemplate = rabbitTemplate;
     }
@@ -276,57 +273,8 @@ public class CreditOrderServiceImpl extends ServiceImpl<CreditOrderMapper, Credi
 
     private void grantPurchasedCourses(CreditOrder order, List<CreditOrderDetail> details) {
         for (CreditOrderDetail detail : details) {
-            CreditProduct product = productService.getById(detail.getProductId());
-            Course course = findPurchasedCourse(product);
-            if (course == null) continue;
-            CourseEnrollment existing = enrollmentService.lambdaQuery()
-                    .eq(CourseEnrollment::getLearnerId, order.getLearnerId())
-                    .eq(CourseEnrollment::getCourseId, course.getId())
-                    .one();
-            if (existing != null) {
-                if (!"APPROVED".equals(existing.getEnrollStatus())) {
-                    existing.setEnrollStatus("APPROVED");
-                    existing.setReviewedAt(LocalDateTime.now());
-                    existing.setReviewer("SYSTEM");
-                    existing.setRemark("购买课程商品自动通过");
-                    enrollmentService.updateById(existing);
-                }
-                continue;
-            }
-            CourseEnrollment enrollment = new CourseEnrollment();
-            enrollment.setLearnerId(order.getLearnerId());
-            enrollment.setCourseId(course.getId());
-            enrollment.setEnrollStatus("APPROVED");
-            enrollment.setReviewer("SYSTEM");
-            enrollment.setReviewedAt(LocalDateTime.now());
-            enrollment.setRemark("购买课程商品自动开通");
-            enrollment.setInstitutionId(course.getInstitutionId());
-            enrollmentService.save(enrollment);
+            enrollmentService.grantPurchasedCourse(order.getLearnerId(), detail.getProductId(), "购买课程商品自动开通");
         }
-    }
-
-    private Course findPurchasedCourse(CreditProduct product) {
-        if (product == null || !"COURSE".equals(product.getProductType())) return null;
-        if (product.getCourseId() != null) {
-            Course course = courseService.getById(product.getCourseId());
-            if (course != null && "PUBLISHED".equals(course.getStatus())) return course;
-        }
-        String courseCode = switch (product.getProductCode() == null ? "" : product.getProductCode()) {
-            case "COURSE-JAVA-ADV" -> "JAVA-BASE";
-            case "COURSE-AI" -> "AI-INTRO";
-            default -> null;
-        };
-        if (courseCode != null) {
-            return courseService.lambdaQuery()
-                    .eq(Course::getCourseCode, courseCode)
-                    .eq(Course::getStatus, "PUBLISHED")
-                    .one();
-        }
-        return courseService.lambdaQuery()
-                .like(Course::getCourseName, product.getProductName())
-                .eq(Course::getStatus, "PUBLISHED")
-                .last("LIMIT 1")
-                .one();
     }
 
     private CreditOrder buildOrder(Long learnerId, Long accountId, int amount, int count, String batchNo, String remark) {

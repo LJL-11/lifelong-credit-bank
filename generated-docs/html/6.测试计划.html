@@ -1,0 +1,101 @@
+<!doctype html><html><head><meta charset='utf-8'><style>
+body { font-family: "Noto Sans CJK SC", "Microsoft YaHei", SimSun, sans-serif; line-height: 1.55; font-size: 11pt; color: #111; }
+h1 { text-align: center; font-size: 22pt; margin: 28px 0; }
+h2 { font-size: 17pt; margin-top: 26px; border-bottom: 1px solid #888; padding-bottom: 4px; }
+h3 { font-size: 14pt; margin-top: 20px; }
+h4 { font-size: 12pt; margin-top: 14px; }
+p { text-indent: 2em; margin: 6px 0; }
+.cover p { text-indent: 0; text-align: center; }
+.cover table { margin: 24px auto; width: 82%; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; }
+th, td { border: 1px solid #555; padding: 6px 8px; vertical-align: top; }
+th { background: #f2f2f2; font-weight: bold; text-align: center; }
+pre { border: 1px solid #999; background: #f8f8f8; padding: 10px; white-space: pre-wrap; font-family: Consolas, monospace; }
+ul { margin-top: 4px; }
+li { margin: 4px 0; }
+</style><title>测试计划</title></head><body>
+<div class="cover">
+  <p>项目编号：HD20260713SR005</p>
+  <h1>终身学习学分银行平台</h1>
+  <h2>测试计划</h2>
+  <p>Version: 1.0</p>
+  <table>
+    <tr><td>项目承担部门</td><td>智慧教育研教部</td></tr>
+    <tr><td>撰写人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>完成日期</td><td>2026年07月13日</td></tr>
+    <tr><td>本文档使用部门</td><td>■主管领导  ■项目组  □客户（市场）  ■维护人员  □用户</td></tr>
+    <tr><td>评审负责人（签名）</td><td>付嘉一</td></tr>
+    <tr><td>评审日期</td><td>2026年07月13日</td></tr>
+    <tr><td>文档编号</td><td>HD-TP-20260713-006</td></tr>
+  </table>
+</div>
+<h2>文档信息</h2><table>
+<tr><th>项目</th><th>内容</th></tr>
+<tr><td>标题</td><td>终身学习学分银行平台-测试计划</td></tr>
+<tr><td>作者</td><td>付嘉一</td></tr>
+<tr><td>创建日期</td><td>2026年07月13日</td></tr>
+<tr><td>上次更新日期</td><td>2026年07月13日</td></tr>
+<tr><td>版本</td><td>1.0</td></tr>
+<tr><td>部门名称</td><td>智慧教育研教部</td></tr>
+</table><h2>修订文档历史记录</h2><table>
+<tr><th>日期</th><th>版本</th><th>说明</th><th>作者</th></tr>
+<tr><td>2026年07月08日</td><td>0.1</td><td>完成初稿，建立章节结构</td><td>付嘉一</td></tr>
+<tr><td>2026年07月11日</td><td>0.9</td><td>结合项目源码、数据库脚本和前端页面补充内容</td><td>付嘉一</td></tr>
+<tr><td>2026年07月13日</td><td>1.0</td><td>评审后正式发布</td><td>付嘉一</td></tr>
+</table><h2>目录</h2><ul><li>1. 简介</li><li>2. 测试需求</li><li>3. 测试策略</li><li>4. 资源</li><li>5. 项目测试活动</li><li>6. 附录</li></ul><h2>1. 简介</h2><h3>1.1 目的</h3><p>本测试计划用于确定终身学习学分银行平台需要测试的功能、质量指标、测试策略、测试工具、资源安排和通过准则，指导测试人员有序完成系统测试。</p><h3>1.2 背景</h3><p>平台集成多机构、积分账户、商城订单、秒杀、论坛、成果审核、招聘和 AI 学习助手等模块，既需要验证常规业务流程，也需要重点检查权限隔离、积分一致性和秒杀并发安全。</p><h3>1.3 范围</h3><p>测试范围包括后端 API、前端页面、数据库迁移、登录权限、核心业务流程、异常提示、浏览器兼容性和秒杀压测。不测试真实第三方 AI 服务稳定性、真实区块链节点和生产环境网络安全攻防。</p><h3>1.4 缺陷级别</h3><table>
+<tr><th>级别</th><th>说明</th></tr>
+<tr><td>一级</td><td>系统无法启动、核心数据损坏、严重安全问题或主流程完全不可用</td></tr>
+<tr><td>二级</td><td>核心功能严重异常但存在临时绕行方式</td></tr>
+<tr><td>三级</td><td>普通功能错误、数据展示不准确或局部流程中断</td></tr>
+<tr><td>四级</td><td>界面、提示、兼容性等影响使用体验的问题</td></tr>
+<tr><td>五级</td><td>文字、样式、文档类轻微问题</td></tr>
+</table><h3>1.5 文档引用</h3><ul><li>《终身学习学分银行平台软件需求规约》</li><li>《终身学习学分银行平台项目开发计划》</li><li>《终身学习学分银行平台数据库设计说明书》</li><li>Spring Boot 3.3、Vue 3、MyBatis-Plus、MySQL 8、Redis、RabbitMQ 官方文档</li><li>项目源码：/home/fjy/IdeaProjects/lifelong-credit-bank</li></ul><h2>2. 测试需求</h2><h3>2.1 功能测试需求</h3><table>
+<tr><th>测试需求</th><th>测试简介</th><th>优先级</th></tr>
+<tr><td>登录认证与权限</td><td>Token 登录、登出、当前用户、ADMIN/STUDENT 角色分离、Redis Token 存储</td><td>1</td></tr>
+<tr><td>多机构管理</td><td>机构维度数据隔离，管理员仅操作本机构学员、课程、论坛、成果、招聘数据</td><td>1</td></tr>
+<tr><td>学员档案</td><td>学员基本信息维护、状态启停、教育层次、所属机构</td><td>1</td></tr>
+<tr><td>课程资源</td><td>课程发布、课程学习资源、一键学习、课程报名及审核</td><td>1</td></tr>
+<tr><td>学习记录</td><td>学习进度、成绩、完成结果、完成时间、课程积分奖励</td><td>1</td></tr>
+<tr><td>积分账户</td><td>开户、积分增加、消费、冻结、解冻、流水追踪</td><td>1</td></tr>
+<tr><td>积分商城</td><td>商品管理、购物车、订单、支付、发货、取消、退款</td><td>1</td></tr>
+<tr><td>秒杀专区</td><td>Redis Lua 预扣库存、RabbitMQ 异步下单、Redisson 锁、MySQL CAS 防超卖</td><td>1</td></tr>
+<tr><td>学习论坛</td><td>板块、发帖、回复、点赞、隐藏/显示、我的帖子</td><td>1</td></tr>
+<tr><td>成果认定</td><td>成果提交、证明材料、管理员审核、通过后积分奖励</td><td>1</td></tr>
+<tr><td>签到与诚信</td><td>每日签到、签到积分、诚信评分重新计算</td><td>2</td></tr>
+<tr><td>招聘求职</td><td>岗位发布、简历投递、申请审核、简历文件上传</td><td>2</td></tr>
+<tr><td>区块链存证</td><td>业务编号查询、凭证校验、哈希与链上状态记录</td><td>2</td></tr>
+<tr><td>AI 学习助手</td><td>基于 LangChain4j 的学习问答、SSE 流式输出、可选 DeepSeek 与通义千问 Embedding</td><td>2</td></tr>
+</table><h3>2.2 非功能测试需求</h3><table>
+<tr><th>测试项</th><th>条件</th><th>指标</th></tr>
+<tr><td>性能</td><td>普通列表和详情查询</td><td>3 秒内返回结果</td></tr>
+<tr><td>秒杀一致性</td><td>多用户并发请求同一活动</td><td>不超卖、不重复下单</td></tr>
+<tr><td>兼容性</td><td>Chrome、Edge、Firefox</td><td>页面正常显示，主要流程可操作</td></tr>
+<tr><td>安全性</td><td>无 Token、错误角色、跨机构访问</td><td>拒绝访问或仅返回授权数据</td></tr>
+<tr><td>可靠性</td><td>Redis/RabbitMQ 可用时</td><td>订单异步处理可完成，异常可记录</td></tr>
+</table><h2>3. 测试策略</h2><table>
+<tr><th>测试类型</th><th>方法</th><th>完成标准</th></tr>
+<tr><td>功能测试</td><td>按测试用例执行黑盒测试，覆盖合法、非法、边界和权限场景</td><td>计划用例全部执行，一级/二级缺陷关闭</td></tr>
+<tr><td>接口测试</td><td>使用浏览器开发者工具、Swagger 或 HTTP 客户端检查 API</td><td>统一响应格式正确，参数校验有效</td></tr>
+<tr><td>性能测试</td><td>使用 jmeter/seckill-stress-test.jmx 对秒杀接口压测</td><td>库存不为负，记录不重复，系统不崩溃</td></tr>
+<tr><td>兼容性测试</td><td>在主流浏览器中执行登录、学习、商城和后台流程</td><td>页面无明显错位，功能可用</td></tr>
+<tr><td>回归测试</td><td>缺陷修复后重测相关模块和相邻流程</td><td>缺陷状态为合格</td></tr>
+</table><h3>3.2 测试工具</h3><table>
+<tr><th>名称</th><th>工具</th><th>用途</th></tr>
+<tr><td>浏览器</td><td>Chrome/Edge/Firefox</td><td>页面和接口联调</td></tr>
+<tr><td>接口文档</td><td>Swagger UI</td><td>接口查看和手工调用</td></tr>
+<tr><td>构建测试</td><td>Maven Test</td><td>后端单元/集成测试</td></tr>
+<tr><td>性能测试</td><td>JMeter</td><td>秒杀压测</td></tr>
+<tr><td>数据库</td><td>MySQL 客户端</td><td>检查表结构、迁移和数据状态</td></tr>
+</table><h3>3.3 通过准则</h3><ul><li>系统能够完成管理员和学员登录。</li><li>管理员只能查看和操作本机构数据。</li><li>学员能够完成课程学习、积分获取、商城下单、订单支付和论坛发帖。</li><li>成果审核、招聘申请和签到流程可执行。</li><li>秒杀活动不发生超卖和重复下单。</li><li>一级、二级缺陷关闭率 100%，三级缺陷关闭率不低于 90%。</li></ul><h2>4. 资源</h2><table>
+<tr><th>角色</th><th>人员</th><th>工作</th></tr>
+<tr><td>测试负责人</td><td>付嘉一</td><td>制定计划、分配任务、汇总缺陷</td></tr>
+<tr><td>功能测试</td><td>项目组成员</td><td>执行业务流程和异常用例</td></tr>
+<tr><td>性能测试</td><td>项目组成员</td><td>执行 JMeter 脚本并观察库存和订单</td></tr>
+<tr><td>开发支持</td><td>项目组成员</td><td>定位并修复缺陷</td></tr>
+</table><h2>5. 项目测试活动</h2><table>
+<tr><th>活动</th><th>输入</th><th>输出</th></tr>
+<tr><td>计划测试</td><td>需求规约、开发计划</td><td>测试计划</td></tr>
+<tr><td>设计测试</td><td>接口和页面</td><td>测试用例</td></tr>
+<tr><td>执行测试</td><td>可运行系统</td><td>测试日志和缺陷记录</td></tr>
+<tr><td>评估测试</td><td>缺陷回归结果</td><td>测试结论</td></tr>
+</table><h2>6. 附录A：项目任务</h2><p>测试执行顺序建议为：环境启动检查、数据库迁移检查、登录权限测试、管理员端主流程、学员端主流程、积分商城、秒杀压测、论坛与招聘、成果与签到、兼容性检查、缺陷回归。</p></body></html>

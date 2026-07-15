@@ -3,12 +3,14 @@ package org.csu.creditbank.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashSet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.csu.creditbank.common.ApiResult;
 import org.csu.creditbank.common.BusinessException;
 import org.csu.creditbank.dto.CreditChangeRequest;
 import org.csu.creditbank.entity.*;
 import org.csu.creditbank.service.*;
+import org.csu.creditbank.util.InstitutionContext;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +22,7 @@ public class StudentBusinessController {
 
     private final CourseService courseService;
     private final CourseEnrollmentService enrollmentService;
+    private final CreditProductService productService;
     private final SignInRecordService signInRecordService;
     private final CreditAccountService accountService;
     private final AchievementService achievementService;
@@ -29,6 +32,7 @@ public class StudentBusinessController {
 
     public StudentBusinessController(CourseService courseService,
                                      CourseEnrollmentService enrollmentService,
+                                     CreditProductService productService,
                                      SignInRecordService signInRecordService,
                                      CreditAccountService accountService,
                                      AchievementService achievementService,
@@ -37,6 +41,7 @@ public class StudentBusinessController {
                                      IntegrityRatingService integrityRatingService) {
         this.courseService = courseService;
         this.enrollmentService = enrollmentService;
+        this.productService = productService;
         this.signInRecordService = signInRecordService;
         this.accountService = accountService;
         this.achievementService = achievementService;
@@ -48,7 +53,14 @@ public class StudentBusinessController {
     @PostMapping("/courses/{courseId}/enroll")
     public ApiResult<CourseEnrollment> enrollCourse(@PathVariable Long courseId, HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
-        Course course = courseService.getById(courseId);
+        Long tenantId = InstitutionContext.get();
+        Course course;
+        try {
+            InstitutionContext.clear();
+            course = courseService.getById(courseId);
+        } finally {
+            if (tenantId != null) InstitutionContext.set(tenantId);
+        }
         if (course == null || !"PUBLISHED".equals(course.getStatus())) throw new BusinessException("课程不存在或未发布");
         CourseEnrollment existing = enrollmentService.lambdaQuery()
                 .eq(CourseEnrollment::getLearnerId, userId)
@@ -69,20 +81,61 @@ public class StudentBusinessController {
                                              @RequestParam(defaultValue = "10") long size,
                                              HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
+
+        List<Long> mallCourseIds = productService.lambdaQuery()
+                .eq(CreditProduct::getProductType, "COURSE")
+                .isNotNull(CreditProduct::getCourseId)
+                .list()
+                .stream()
+                .map(CreditProduct::getCourseId)
+                .distinct()
+                .toList();
+
         List<CourseEnrollment> enrollments = enrollmentService.lambdaQuery()
                 .eq(CourseEnrollment::getLearnerId, userId)
-                .orderByDesc(CourseEnrollment::getCreatedAt)
                 .list();
-        if (enrollments.isEmpty()) {
-            return ApiResult.ok(Page.of(current, size));
-        }
         Map<Long, String> statusByCourse = enrollments.stream()
                 .collect(java.util.stream.Collectors.toMap(CourseEnrollment::getCourseId, CourseEnrollment::getEnrollStatus, (a, b) -> a));
-        List<Long> courseIds = enrollments.stream().map(CourseEnrollment::getCourseId).distinct().toList();
-        Page<Course> page = courseService.lambdaQuery()
-                .in(Course::getId, courseIds)
-                .orderByDesc(Course::getCreatedAt)
-                .page(Page.of(current, size));
+        List<Long> approvedCourseIds = enrollments.stream()
+                .filter(e -> "APPROVED".equals(e.getEnrollStatus()))
+                .map(CourseEnrollment::getCourseId)
+                .distinct()
+                .toList();
+
+        Long tenantId = InstitutionContext.get();
+        List<Long> publicCourseIds;
+        try {
+            InstitutionContext.clear();
+            publicCourseIds = courseService.lambdaQuery()
+                    .eq(Course::getStatus, "PUBLISHED")
+                    .notIn(!mallCourseIds.isEmpty(), Course::getId, mallCourseIds)
+                    .list()
+                    .stream()
+                    .map(Course::getId)
+                    .toList();
+        } finally {
+            if (tenantId != null) InstitutionContext.set(tenantId);
+        }
+
+        LinkedHashSet<Long> visibleIds = new LinkedHashSet<>(publicCourseIds);
+        visibleIds.addAll(approvedCourseIds.stream()
+                .filter(mallCourseIds::contains)
+                .toList());
+        if (visibleIds.isEmpty()) {
+            return ApiResult.ok(Page.of(current, size));
+        }
+
+        tenantId = InstitutionContext.get();
+        Page<Course> page;
+        try {
+            InstitutionContext.clear();
+            page = courseService.lambdaQuery()
+                    .in(Course::getId, visibleIds)
+                    .orderByAsc(Course::getId)
+                    .page(Page.of(current, size));
+        } finally {
+            if (tenantId != null) InstitutionContext.set(tenantId);
+        }
         page.getRecords().forEach(course -> course.setEnrollStatus(statusByCourse.get(course.getId())));
         return ApiResult.ok(page);
     }

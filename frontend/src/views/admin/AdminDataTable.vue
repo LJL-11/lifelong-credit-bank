@@ -32,7 +32,9 @@ const emit = defineEmits([
 
 function formatCell(v) {
   if (v === null || v === undefined || v === "") return "-";
-  if (typeof v === "string" && v.includes("T")) return v.replace("T", " ").slice(0, 16);
+  if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(v)) {
+    return v.replace("T", " ").slice(0, 16);
+  }
   return v;
 }
 
