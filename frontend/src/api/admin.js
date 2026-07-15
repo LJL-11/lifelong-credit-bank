@@ -1,6 +1,9 @@
 import { request } from '@/utils/request.js'
 
 export function getDashboardStats() { return request('/api/admin/dashboard/stats') }
+export function getRevenueTrend() { return request('/api/admin/dashboard/revenue') }
+export function getIntegrityDist() { return request('/api/admin/dashboard/integrity') }
+export function getCourseRanking() { return request('/api/admin/dashboard/course-ranking') }
 export function getTableData(url, current = 1, size = 20) { return request(`${url}?current=${current}&size=${size}`) }
 export function createRecord(url, data) { return request(url, { method: 'POST', body: JSON.stringify(data) }) }
 export function updateRecord(url, id, data) { return request(`${url}/${id}`, { method: 'PUT', body: JSON.stringify(data) }) }
