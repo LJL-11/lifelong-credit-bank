@@ -1,5 +1,6 @@
 <script setup>
 import { RefreshCw } from "@lucide/vue";
+import { displayLabel } from "@/utils/displayLabels.js";
 
 const props = defineProps({
   loading: Boolean,
@@ -21,11 +22,11 @@ function sourceTypeText(v) {
     ADMIN_GRANT: "管理员发放",
     MANUAL: "人工调整",
   };
-  return map[v] || v || "其他来源";
+  return map[v] || displayLabel(v) || "其他来源";
 }
 
 function transactionTypeText(v) {
-  return v === "INCREASE" ? "收入" : v === "CONSUME" ? "支出" : v || "变动";
+  return v === "INCREASE" ? "收入" : v === "CONSUME" ? "支出" : displayLabel(v) || "变动";
 }
 
 function badgeClass(v) {
@@ -47,7 +48,7 @@ function formatCell(v) {
   <main class="workspace student-dark-page credit-sources-page">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Student Portal</p>
+        <p class="eyebrow">学生端</p>
         <h1>积分来源</h1>
         <p class="subtitle">查看积分收入、消费来源和余额变化明细</p>
       </div>
@@ -70,7 +71,7 @@ function formatCell(v) {
       <article class="stat-card">
         <span>冻结积分</span>
         <strong>{{ creditSourceAccount?.frozenCredits ?? 0 }}</strong>
-        <small>{{ creditSourceAccount?.accountStatus || '账户状态' }}</small>
+        <small>{{ displayLabel(creditSourceAccount?.accountStatus) }}</small>
       </article>
       <article class="stat-card">
         <span>当前页收入</span>

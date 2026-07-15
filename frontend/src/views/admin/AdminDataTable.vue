@@ -1,5 +1,6 @@
 <script setup>
 import { LoaderCircle, Plus, ReceiptText, WalletCards, Save, Trash2 } from "@lucide/vue";
+import { displayLabel } from "@/utils/displayLabels.js";
 
 const props = defineProps({
   currentModule: { type: Object, default: () => ({}) },
@@ -35,7 +36,7 @@ function formatCell(v) {
   if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(v)) {
     return v.replace("T", " ").slice(0, 16);
   }
-  return v;
+  return displayLabel(v);
 }
 
 function badgeClass(v) {
@@ -158,7 +159,7 @@ function proofMaterialHref(value) {
             </button>
             <span v-if="activeModule === 'job-applications' && !['SUBMITTED', 'VIEWED', 'PENDING'].includes(row.applyStatus)"
                   :class="['data-badge', badgeClass(row.applyStatus)]">
-              {{ row.applyStatus === 'ACCEPTED' ? '已接受' : row.applyStatus === 'REJECTED' ? '已拒绝' : row.applyStatus }}
+              {{ displayLabel(row.applyStatus) }}
             </span>
             <button v-if="activeModule === 'integrity-ratings'" type="button" class="ghost-button"
                     @click="emit('recompute-integrity', row)">重算

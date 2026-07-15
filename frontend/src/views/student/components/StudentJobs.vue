@@ -1,4 +1,5 @@
 <script setup>
+import { displayLabel } from "@/utils/displayLabels.js";
 const props = defineProps({
   loading: Boolean,
   token: String,
@@ -21,7 +22,7 @@ function badgeClass(v) {
   <main class="workspace student-dark-page">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Student Portal</p>
+        <p class="eyebrow">学生端</p>
         <h1>招聘求职</h1>
         <p class="subtitle">查看岗位并投递简历摘要</p>
       </div>
@@ -34,7 +35,7 @@ function badgeClass(v) {
               <span class="course-code">{{ j.companyName }}</span>
               <h2>{{ j.positionName }}</h2>
             </div>
-            <span class="data-badge success">{{ j.status }}</span>
+            <span class="data-badge success">{{ displayLabel(j.status) }}</span>
           </div>
           <p class="course-summary">{{ j.requirement }}</p>
           <div class="course-meta">
@@ -51,7 +52,7 @@ function badgeClass(v) {
       <div class="simple-list">
         <div v-for="a in jobApplications" :key="a.id">
           <strong>岗位 #{{ a.jobId }}</strong>
-          <span :class="['data-badge', badgeClass(a.applyStatus)]">{{ a.applyStatus }}</span>
+          <span :class="['data-badge', badgeClass(a.applyStatus)]">{{ displayLabel(a.applyStatus) }}</span>
           <small>{{ a.remark || a.resumeSummary || '' }}</small>
           <a v-if="a.resumeUrl" class="resource-link" :href="a.resumeUrl" target="_blank" rel="noopener">{{ a.resumeFileName || '查看简历' }}</a>
         </div>

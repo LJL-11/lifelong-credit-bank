@@ -1,5 +1,6 @@
 <script setup>
 import { X, Save } from "@lucide/vue";
+import { displayLabel } from "@/utils/displayLabels.js";
 
 defineProps({
   editor: { type: Object, default: () => ({ open: false, row: null, form: {} }) },
@@ -41,7 +42,7 @@ const emit = defineEmits([
           <div v-else-if="f.type === 'radio'" class="radio-group">
             <label v-for="option in f.options" :key="option" class="radio-option">
               <input v-model="editor.form[f.key]" type="radio" :value="option"/>
-              <span>{{ option }}</span>
+              <span>{{ displayLabel(option) }}</span>
             </label>
           </div>
           <input v-else v-model="editor.form[f.key]" :type="f.type || 'text'"
@@ -73,7 +74,7 @@ const emit = defineEmits([
         <label><span>积分数量</span><input v-model="creditDialog.form.amount" type="number" min="1"
                                            required/></label>
         <label><span>来源类型</span><input v-model="creditDialog.form.sourceType"
-                                           placeholder="COURSE / MANUAL"/></label>
+                                           placeholder="课程 / 手动处理"/></label>
         <label><span>来源编号</span><input v-model="creditDialog.form.sourceNo" placeholder="业务编号"/></label>
         <label><span>备注</span><textarea v-model="creditDialog.form.remark"
                                           placeholder="操作说明"></textarea></label>

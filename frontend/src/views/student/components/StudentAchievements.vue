@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import { displayLabel } from "@/utils/displayLabels.js";
 
 const props = defineProps({
   loading: Boolean,
@@ -31,7 +32,7 @@ function updateForm(key, value) {
   <main class="workspace student-dark-page">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Student Portal</p>
+        <p class="eyebrow">学生端</p>
         <h1>成果认定</h1>
         <p class="subtitle">提交证书、竞赛、实践等学习成果，审核通过后获得积分和存证</p>
       </div>
@@ -64,7 +65,7 @@ function updateForm(key, value) {
         <div class="simple-list">
           <div v-for="a in myAchievements" :key="a.id">
             <strong>{{ a.achievementName }}</strong>
-            <span :class="['data-badge', badgeClass(a.auditStatus)]">{{ a.auditStatus }}</span>
+            <span :class="['data-badge', badgeClass(a.auditStatus)]">{{ displayLabel(a.auditStatus) }}</span>
             <small>{{ a.achievementType }} / {{ a.suggestedCredits }} 积分 {{ a.rejectReason || '' }}</small>
           </div>
           <p v-if="myAchievements.length===0" class="state-block">暂无成果</p>

@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
+import { displayLabel } from "@/utils/displayLabels.js";
 import {
   Award, Coins, LoaderCircle, Package, ReceiptText, RefreshCw,
   ShoppingBag, ShoppingCart, Store, UserCheck, Sparkles,
@@ -353,7 +354,7 @@ watch(() => props.learnerId, (newId) => { learnerId.value = newId; loadAll(); lo
   <main class="workspace student-dark-page mall-layout">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Student Portal</p>
+        <p class="eyebrow">学生端</p>
         <h1>积分商城</h1>
         <p class="subtitle">兑换课程、认证、服务和学习用品</p>
       </div>
@@ -413,7 +414,7 @@ watch(() => props.learnerId, (newId) => { learnerId.value = newId; loadAll(); lo
         <article v-for="p in filteredProducts" :key="p.id" class="product-card">
           <div class="product-image">
             <span class="product-emoji">{{ typeIcons[p.productType] || "🎁" }}</span>
-            <span class="product-type-tag" :style="{ background: typeColors[p.productType] + '15', color: typeColors[p.productType] }">{{ typeLabels[p.productType] || p.productType }}</span>
+            <span class="product-type-tag" :style="{ background: typeColors[p.productType] + '15', color: typeColors[p.productType] }">{{ typeLabels[p.productType] || displayLabel(p.productType) }}</span>
           </div>
           <div class="product-content">
             <h3>{{ p.productName }}</h3>
@@ -466,7 +467,7 @@ watch(() => props.learnerId, (newId) => { learnerId.value = newId; loadAll(); lo
               <div class="order-item-main">
                 <div class="order-item-info"><strong>{{ o.productName }}</strong><div class="order-meta"><span>订单号: {{ o.orderNo }}</span><span>{{ formatTime(o.createdAt) }}</span></div></div>
                 <div class="order-item-right">
-                  <span :class="['status-tag', statusMap[o.orderStatus]?.class || 'neutral']">{{ statusMap[o.orderStatus]?.label || o.orderStatus }}</span>
+                  <span :class="['status-tag', statusMap[o.orderStatus]?.class || 'neutral']">{{ statusMap[o.orderStatus]?.label || displayLabel(o.orderStatus) }}</span>
                   <strong class="order-price">{{ (o.totalAmount || o.creditAmount).toLocaleString() }} 积分</strong>
                 </div>
               </div>

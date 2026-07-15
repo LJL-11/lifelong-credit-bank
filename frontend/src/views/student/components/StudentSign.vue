@@ -1,4 +1,5 @@
 <script setup>
+import { displayLabel } from "@/utils/displayLabels.js";
 const props = defineProps({
   loading: Boolean,
   token: String,
@@ -21,7 +22,7 @@ function badgeClass(v) {
 function formatCell(v) {
   if (v === null || v === undefined || v === "") return "-";
   if (typeof v === "string" && v.includes("T")) return v.replace("T", " ").slice(0, 16);
-  return v;
+  return displayLabel(v);
 }
 </script>
 
@@ -29,7 +30,7 @@ function formatCell(v) {
   <main class="workspace student-dark-page sign-page">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Student Portal</p>
+        <p class="eyebrow">学生端</p>
         <h1>报名与签到</h1>
         <p class="subtitle">课程报名申请与每日签到奖励</p>
       </div>
@@ -44,7 +45,7 @@ function formatCell(v) {
         <div class="simple-list">
           <div v-for="e in enrollments" :key="e.id">
             <strong>课程 #{{ e.courseId }}</strong>
-            <span :class="['data-badge', badgeClass(e.enrollStatus)]">{{ e.enrollStatus }}</span>
+            <span :class="['data-badge', badgeClass(e.enrollStatus)]">{{ displayLabel(e.enrollStatus) }}</span>
             <small>{{ formatCell(e.createdAt) }} {{ e.remark || '' }}</small>
           </div>
           <p v-if="enrollments.length===0" class="state-block">暂无报名记录，可在我的课程中报名</p>

@@ -76,7 +76,7 @@ async function sendAiMessage() {
   <main class="workspace student-dark-page">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Student Portal</p>
+        <p class="eyebrow">学生端</p>
         <h1>
           <Sparkles :size="22" class="ai-title-icon"/>
           AI 学习助手

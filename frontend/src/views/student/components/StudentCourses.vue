@@ -30,7 +30,7 @@ function enrollmentClass(status) {
   <main class="workspace student-dark-page">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Student Portal</p>
+        <p class="eyebrow">学生端</p>
         <h1>我的课程</h1>
         <p class="subtitle">已报名通过或商城购买开通的课程</p>
       </div>

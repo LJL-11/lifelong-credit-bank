@@ -52,7 +52,7 @@ async function handleLogin() {
         <div class="seal emblem">印</div>
         <h1>
           终身学习学分银行
-          <span>Lifelong Learning Credit Bank</span>
+          <span>终身学习学分银行</span>
         </h1>
         <p class="brand-desc">集学分认证、学习档案、成果认定于一体的终身教育平台</p>
         <div class="features">

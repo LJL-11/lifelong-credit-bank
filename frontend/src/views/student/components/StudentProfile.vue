@@ -14,7 +14,7 @@ const emit = defineEmits(["show-toast"]);
   <main class="workspace student-dark-page">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Student Portal</p>
+        <p class="eyebrow">学生端</p>
         <h1>我的信息</h1>
         <p class="subtitle">查看和更新个人资料</p>
       </div>

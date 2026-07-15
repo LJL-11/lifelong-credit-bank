@@ -752,7 +752,7 @@ onMounted(() => {
     <main v-else class="workspace admin-dark-page">
       <header class="topbar">
         <div>
-          <p class="eyebrow">Lifelong Credit Bank</p>
+          <p class="eyebrow">终身学习学分银行</p>
           <h1>{{ currentModule.title }}</h1>
           <p class="subtitle">{{ currentModule.subtitle }}</p>
         </div>

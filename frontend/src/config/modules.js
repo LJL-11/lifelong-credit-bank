@@ -26,7 +26,7 @@ export const modules = {
       { key: "phone", label: "手机号" },
       { key: "email", label: "邮箱" },
       { key: "educationLevel", label: "学历" },
-      { key: "status", label: "状态", placeholder: "ACTIVE / DISABLED" },
+      { key: "status", label: "状态", placeholder: "启用 / 禁用" },
     ],
   },
   courses: {
@@ -61,7 +61,7 @@ export const modules = {
       { key: "learningStages", label: "学习阶段JSON", type: "textarea" },
       { key: "creditValue", label: "学分", type: "number" },
       { key: "creditPoint", label: "积分", type: "number" },
-      { key: "status", label: "状态", placeholder: "PUBLISHED / OFFLINE" },
+      { key: "status", label: "状态", placeholder: "已发布 / 已下线" },
     ],
   },
   products: {
@@ -86,7 +86,7 @@ export const modules = {
     fields: [
       { key: "productCode", label: "商品编码" },
       { key: "productName", label: "商品名称" },
-      { key: "productType", label: "类型", placeholder: "COURSE / MERCHANDISE / CERTIFICATE / SERVICE" },
+      { key: "productType", label: "类型", placeholder: "课程 / 实物 / 认证 / 服务" },
       { key: "courseId", label: "关联课程ID", type: "number" },
       { key: "creditPrice", label: "积分价格", type: "number" },
       { key: "stock", label: "库存 (-1=不限)", type: "number" },
@@ -171,7 +171,7 @@ export const modules = {
       { key: "courseId", label: "课程 ID", type: "number" },
       { key: "progress", label: "进度", type: "number" },
       { key: "score", label: "成绩", type: "number" },
-      { key: "result", label: "结果", placeholder: "PASSED / FAILED / LEARNING" },
+      { key: "result", label: "结果", placeholder: "已通过 / 未通过 / 学习中" },
     ],
   },
   "forum-posts": {
@@ -197,7 +197,7 @@ export const modules = {
       { key: "content", label: "内容", type: "textarea" },
       { key: "replyCount", label: "回复数", type: "number" },
       { key: "likeCount", label: "点赞数", type: "number" },
-      { key: "status", label: "状态", placeholder: "VISIBLE / HIDDEN" },
+      { key: "status", label: "状态", placeholder: "可见 / 隐藏" },
     ],
   },
   "flash-sales": {
@@ -225,7 +225,7 @@ export const modules = {
       { key: "stock", label: "秒杀库存", type: "number" },
       { key: "beginTime", label: "开始时间", placeholder: "yyyy-MM-dd HH:mm:ss" },
       { key: "endTime", label: "结束时间", placeholder: "yyyy-MM-dd HH:mm:ss" },
-      { key: "status", label: "状态", placeholder: "UPCOMING / ACTIVE / ENDED" },
+      { key: "status", label: "状态", placeholder: "未开始 / 进行中 / 已结束" },
     ],
   },
 

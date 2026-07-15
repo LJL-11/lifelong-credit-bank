@@ -12,7 +12,7 @@ const emit = defineEmits(["load-integrity", "show-toast"]);
   <main class="workspace student-dark-page">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Student Portal</p>
+        <p class="eyebrow">学生端</p>
         <h1>诚信评定</h1>
         <p class="subtitle">基于学习、签到、成果、论坛和求职行为自动计算</p>
       </div>

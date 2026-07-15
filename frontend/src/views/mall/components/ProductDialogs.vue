@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { displayLabel } from "@/utils/displayLabels.js"
 import { X, AlertCircle } from '@lucide/vue'
 
 const props = defineProps({
@@ -60,7 +61,7 @@ function increaseQuantity() {
         <div class="detail-hero">
           <span class="detail-emoji">{{ typeIcons[detailDialog.product?.productType] || "🎁" }}</span>
           <h2>{{ detailDialog.product?.productName }}</h2>
-          <span class="detail-type" :style="{ background: typeColors[detailDialog.product?.productType] + '15', color: typeColors[detailDialog.product?.productType] }">{{ typeLabels[detailDialog.product?.productType] || detailDialog.product?.productType }}</span>
+          <span class="detail-type" :style="{ background: typeColors[detailDialog.product?.productType] + '15', color: typeColors[detailDialog.product?.productType] }">{{ typeLabels[detailDialog.product?.productType] || displayLabel(detailDialog.product?.productType) }}</span>
         </div>
         <div class="detail-rows">
           <div class="detail-row"><span>积分价格</span><strong class="detail-price">{{ detailDialog.product?.creditPrice?.toLocaleString() }} 积分</strong></div>
