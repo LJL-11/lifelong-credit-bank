@@ -1,8 +1,12 @@
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/store/auth.js";
 import { LoaderCircle, LogIn, ShieldCheck } from "@lucide/vue";
 
 const emit = defineEmits(["login-success"]);
+const router = useRouter();
+const authStore = useAuthStore();
 
 const username = ref("");
 const password = ref("");
@@ -29,9 +33,9 @@ async function handleLogin() {
     }
     const {token, learnerId, realName, role, institutionName} = result.data;
     const userInfo = {learnerId, username: result.data.username, realName, role, institutionName};
-    localStorage.setItem("token", token);
-    localStorage.setItem("userInfo", JSON.stringify(userInfo));
+    authStore.setAuth(token, userInfo);
     emit("login-success", {token, userInfo});
+    router.push("/");
   } catch (err) {
     error.value = "网络错误，请检查后端服务";
   } finally {
