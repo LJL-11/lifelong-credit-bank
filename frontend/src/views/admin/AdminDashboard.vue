@@ -218,10 +218,15 @@ function refreshTheme() {
 
 // ---------- lifecycle ----------
 onMounted(() => {
-  loadCharts();
   window.addEventListener("resize", resizeAll);
   darkObserver = new MutationObserver(refreshTheme);
   darkObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  // 等父组件确认 token 有效后才加载图表
+  if (props.apiOnline) loadCharts();
+});
+
+watch(() => props.apiOnline, (online) => {
+  if (online && chartInstances.revenue == null) loadCharts();
 });
 
 onUnmounted(() => {

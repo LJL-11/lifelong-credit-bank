@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS ai_conversation (
+    id         BIGINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    learner_id BIGINT       NOT NULL COMMENT '学员ID',
+    title      VARCHAR(128) NOT NULL DEFAULT '新对话' COMMENT '对话标题',
+    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted    TINYINT      NOT NULL DEFAULT 0,
+    INDEX idx_learner (learner_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI对话会话表';

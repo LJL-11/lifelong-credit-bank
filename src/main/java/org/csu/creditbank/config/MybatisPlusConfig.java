@@ -21,7 +21,7 @@ public class MybatisPlusConfig {
             "credit_product", "credit_order", "credit_order_detail",
             "credit_account", "credit_transaction", "cart",
             "flash_sale", "flash_sale_record", "institution",
-            "forum_post_like"
+            "forum_post_like", "ai_conversation"
     );
 
     @Bean
