@@ -20,6 +20,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         String location = java.nio.file.Path.of(uploadDir).toAbsolutePath().normalize().toUri().toString();
+        // Path.toUri() 对目录不自动加尾部斜杠，Spring 解析相对路径时可能会出错
+        if (!location.endsWith("/")) {
+            location += "/";
+        }
         registry.addResourceHandler("/uploads/**").addResourceLocations(location);
     }
 
