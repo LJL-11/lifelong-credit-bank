@@ -41,6 +41,12 @@ public class CreditTransactionController {
             }
             wrapper.in(CreditTransaction::getLearnerId, learnerIds);
         }
-        return ApiResult.ok(creditTransactionService.page(Page.of(current, size), wrapper));
+        Page<CreditTransaction> page = creditTransactionService.page(Page.of(current, size), wrapper);
+        fillLearnerNames(page.getRecords());
+        return ApiResult.ok(page);
+    }
+
+    private void fillLearnerNames(List<CreditTransaction> transactions) {
+        org.csu.creditbank.controller.admin.AdminLearnerNames.fill(transactions, CreditTransaction::getLearnerId, CreditTransaction::setLearnerName, learnerService);
     }
 }

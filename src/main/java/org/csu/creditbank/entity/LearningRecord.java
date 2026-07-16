@@ -1,6 +1,7 @@
 package org.csu.creditbank.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,4 +23,7 @@ public class LearningRecord extends BaseEntity {
     private String result;
     private LocalDateTime completedAt;
     private Long institutionId;
+
+    @TableField(exist = false)
+    private String learnerName;
 }

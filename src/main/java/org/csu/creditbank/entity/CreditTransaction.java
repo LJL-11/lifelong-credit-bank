@@ -1,6 +1,7 @@
 package org.csu.creditbank.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,4 +25,7 @@ public class CreditTransaction extends BaseEntity {
     private Long relatedTransactionId;
     private String conversionId;
     private Integer feeAmount;
+
+    @TableField(exist = false)
+    private String learnerName;
 }

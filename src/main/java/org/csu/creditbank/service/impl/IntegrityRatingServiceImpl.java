@@ -39,6 +39,10 @@ public class IntegrityRatingServiceImpl extends ServiceImpl<IntegrityRatingMappe
                 .eq(ForumPost::getLearnerId, learnerId)
                 .eq(ForumPost::getStatus, "HIDDEN")
                 .count();
+        long visiblePosts = forumPostService.lambdaQuery()
+                .eq(ForumPost::getLearnerId, learnerId)
+                .eq(ForumPost::getStatus, "VISIBLE")
+                .count();
         long signIns = signInRecordService.lambdaQuery()
                 .eq(SignInRecord::getLearnerId, learnerId)
                 .count();
@@ -54,7 +58,7 @@ public class IntegrityRatingServiceImpl extends ServiceImpl<IntegrityRatingMappe
         int signinScore = (int) Math.min(20, signIns * 2);
         int achievementScore = (int) Math.min(25, approvedAchievements * 8);
         int jobScore = (int) Math.min(10, jobApplies * 2);
-        int forumScore = Math.max(0, 20 - (int) hiddenPosts * 5);
+        int forumScore = Math.max(0, (int) Math.min(20, visiblePosts * 4) - (int) hiddenPosts * 5);
         int score = Math.min(100, learningScore + signinScore + achievementScore + jobScore + forumScore);
 
         IntegrityRating rating = lambdaQuery().eq(IntegrityRating::getLearnerId, learnerId).one();

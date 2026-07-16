@@ -23,27 +23,32 @@ public class CoreBusinessController {
     private final BlockchainCredentialService credentialService;
     private final JobApplicationService jobApplicationService;
     private final IntegrityRatingService integrityRatingService;
+    private final LearnerService learnerService;
 
     public CoreBusinessController(CourseEnrollmentService enrollmentService,
                                   AchievementService achievementService,
                                   CreditAccountService accountService,
                                   BlockchainCredentialService credentialService,
                                   JobApplicationService jobApplicationService,
-                                  IntegrityRatingService integrityRatingService) {
+                                  IntegrityRatingService integrityRatingService,
+                                  LearnerService learnerService) {
         this.enrollmentService = enrollmentService;
         this.achievementService = achievementService;
         this.accountService = accountService;
         this.credentialService = credentialService;
         this.jobApplicationService = jobApplicationService;
         this.integrityRatingService = integrityRatingService;
+        this.learnerService = learnerService;
     }
 
     @GetMapping("/enrollments")
     public ApiResult<Page<CourseEnrollment>> enrollments(@RequestParam(defaultValue = "1") long current,
                                                           @RequestParam(defaultValue = "10") long size) {
-        return ApiResult.ok(enrollmentService.lambdaQuery()
+        Page<CourseEnrollment> page = enrollmentService.lambdaQuery()
                 .orderByDesc(CourseEnrollment::getCreatedAt)
-                .page(Page.of(current, size)));
+                .page(Page.of(current, size));
+        AdminLearnerNames.fill(page.getRecords(), CourseEnrollment::getLearnerId, CourseEnrollment::setLearnerName, learnerService);
+        return ApiResult.ok(page);
     }
 
     @PutMapping("/enrollments/{id}/review")
@@ -91,9 +96,11 @@ public class CoreBusinessController {
     @GetMapping("/job-applications")
     public ApiResult<Page<JobApplication>> jobApplications(@RequestParam(defaultValue = "1") long current,
                                                             @RequestParam(defaultValue = "10") long size) {
-        return ApiResult.ok(jobApplicationService.lambdaQuery()
+        Page<JobApplication> page = jobApplicationService.lambdaQuery()
                 .orderByDesc(JobApplication::getCreatedAt)
-                .page(Page.of(current, size)));
+                .page(Page.of(current, size));
+        AdminLearnerNames.fill(page.getRecords(), JobApplication::getLearnerId, JobApplication::setLearnerName, learnerService);
+        return ApiResult.ok(page);
     }
 
     @PutMapping("/job-applications/{id}/review")
@@ -116,11 +123,15 @@ public class CoreBusinessController {
     @GetMapping("/integrity-ratings")
     public ApiResult<Page<IntegrityRating>> integrityRatings(@RequestParam(defaultValue = "1") long current,
                                                               @RequestParam(defaultValue = "10") long size) {
-        return ApiResult.ok(integrityRatingService.page(Page.of(current, size)));
+        Page<IntegrityRating> page = integrityRatingService.page(Page.of(current, size));
+        AdminLearnerNames.fill(page.getRecords(), IntegrityRating::getLearnerId, IntegrityRating::setLearnerName, learnerService);
+        return ApiResult.ok(page);
     }
 
     @PostMapping("/integrity-ratings/{learnerId}/recompute")
     public ApiResult<IntegrityRating> recomputeIntegrity(@PathVariable Long learnerId) {
-        return ApiResult.ok(integrityRatingService.recompute(learnerId));
+        IntegrityRating rating = integrityRatingService.recompute(learnerId);
+        AdminLearnerNames.fill(java.util.List.of(rating), IntegrityRating::getLearnerId, IntegrityRating::setLearnerName, learnerService);
+        return ApiResult.ok(rating);
     }
 }

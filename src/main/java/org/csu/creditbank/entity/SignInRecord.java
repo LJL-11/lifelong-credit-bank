@@ -1,6 +1,7 @@
 package org.csu.creditbank.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,4 +20,7 @@ public class SignInRecord extends BaseEntity {
     private Integer rewardCredits;
     private String signType;
     private Long institutionId;
+
+    @TableField(exist = false)
+    private String learnerName;
 }

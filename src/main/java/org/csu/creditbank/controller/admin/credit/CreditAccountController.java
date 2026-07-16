@@ -44,7 +44,13 @@ public class CreditAccountController {
             }
             wrapper.in(CreditAccount::getLearnerId, learnerIds);
         }
-        return ApiResult.ok(creditAccountService.page(Page.of(current, size), wrapper));
+        Page<CreditAccount> page = creditAccountService.page(Page.of(current, size), wrapper);
+        fillLearnerNames(page.getRecords());
+        return ApiResult.ok(page);
+    }
+
+    private void fillLearnerNames(List<CreditAccount> accounts) {
+        org.csu.creditbank.controller.admin.AdminLearnerNames.fill(accounts, CreditAccount::getLearnerId, CreditAccount::setLearnerName, learnerService);
     }
 
     @PostMapping("/open/{learnerId}")

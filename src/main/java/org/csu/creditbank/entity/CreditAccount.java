@@ -1,6 +1,7 @@
 package org.csu.creditbank.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,4 +18,7 @@ public class CreditAccount extends BaseEntity {
     private Integer availableCredits;
     private Integer frozenCredits;
     private String accountStatus;
+
+    @TableField(exist = false)
+    private String learnerName;
 }

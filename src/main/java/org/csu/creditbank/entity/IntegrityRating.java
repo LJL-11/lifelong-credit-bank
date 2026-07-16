@@ -1,6 +1,7 @@
 package org.csu.creditbank.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -21,4 +22,7 @@ public class IntegrityRating extends BaseEntity {
     private Integer jobScore;
     private String remark;
     private Long institutionId;
+
+    @TableField(exist = false)
+    private String learnerName;
 }

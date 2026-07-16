@@ -1,6 +1,7 @@
 package org.csu.creditbank.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,6 +20,9 @@ public class Achievement extends BaseEntity {
     private String achievementType;
     private Integer suggestedCredits;
     private Long institutionId;
+
+    @TableField(exist = false)
+    private String learnerName;
     private String auditStatus;
     private String auditor;
     private LocalDateTime auditedAt;

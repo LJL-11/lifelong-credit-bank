@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, nextTick } from "vue";
-import { Sparkles, Bot, UserCircle, MessageSquare, Trash2, Pencil, Check, X } from "@lucide/vue";
+import { Sparkles, Bot, UserCircle, MessageSquare, Trash2, Pencil, Check, X, ChevronsLeft, ChevronsRight } from "@lucide/vue";
 
 const props = defineProps({
   loading: Boolean,
@@ -18,6 +18,7 @@ const conversations = ref([]);
 const activeConvId = ref(0);
 const renamingId = ref(0);
 const renameInput = ref("");
+const historyCollapsed = ref(false);
 
 // ——— 当前对话的消息（本地缓存，按 conversationId 存储） ———
 const msgStore = ref({});
@@ -171,6 +172,7 @@ async function confirmRename(convId) {
   renamingId.value = 0;
 }
 function cancelRename() { renamingId.value = 0; }
+function toggleHistorySidebar() { historyCollapsed.value = !historyCollapsed.value; }
 
 // ——— 发送消息 ———
 async function sendAiMessage() {
@@ -264,8 +266,14 @@ onMounted(() => {
 <template>
   <div class="ai-layout">
     <!-- ====== 左侧对话列表 ====== -->
-    <aside class="ai-sidebar">
+    <aside :class="['ai-sidebar', { collapsed: historyCollapsed }]">
       <div class="sidebar-header">
+        <div class="sidebar-title-row">
+          <span>历史对话</span>
+          <button class="sidebar-icon-button" type="button" title="收起历史对话" @click="toggleHistorySidebar">
+            <ChevronsLeft :size="16"/>
+          </button>
+        </div>
         <button class="ghost-button small" type="button" @click="newConversation">
           <MessageSquare :size="16"/> 新对话
         </button>
@@ -306,7 +314,16 @@ onMounted(() => {
 
     <!-- ====== 右侧聊天区 ====== -->
     <main class="ai-main">
-      <header class="topbar">
+      <header class="topbar ai-chat-topbar">
+        <button
+          v-if="historyCollapsed"
+          class="sidebar-expand-button"
+          type="button"
+          title="展开历史对话"
+          @click="toggleHistorySidebar"
+        >
+          <ChevronsRight :size="17"/>
+        </button>
         <div>
           <p class="eyebrow">学生端</p>
           <h1>
@@ -358,26 +375,63 @@ onMounted(() => {
   display: flex;
   height: calc(100vh - 60px);
   min-height: 500px;
+  background: var(--bg-app);
 }
 
 .ai-sidebar {
-  width: 240px;
-  min-width: 240px;
+  width: 248px;
+  min-width: 248px;
   border-right: 1px solid var(--border-color);
-  background: var(--bg-sidebar);
+  background: linear-gradient(180deg, #f7f3ea 0%, #f1ece1 100%);
   display: flex;
   flex-direction: column;
+  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.02);
+  transition: width 0.18s ease, min-width 0.18s ease, opacity 0.12s ease;
 }
 .ai-sidebar.collapsed {
   width: 0;
   min-width: 0;
+  opacity: 0;
   overflow: hidden;
   border-right: none;
 }
 
 .sidebar-header {
+  display: grid;
+  gap: 10px;
   padding: 14px 12px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color-light);
+}
+.sidebar-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 30px;
+}
+.sidebar-title-row span {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.sidebar-icon-button,
+.sidebar-expand-button {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-color-light);
+  border-radius: 6px;
+  background: #fbf8f1;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+.sidebar-icon-button:hover,
+.sidebar-expand-button:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--badge-danger-bg);
 }
 .sidebar-header .ghost-button {
   width: 100%;
@@ -387,21 +441,22 @@ onMounted(() => {
 .conv-list {
   flex: 1;
   overflow-y: auto;
-  padding: 6px 8px;
+  padding: 8px;
 }
 
 .conv-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 10px;
-  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.15s ease;
-  margin-bottom: 2px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  margin-bottom: 4px;
 }
-.conv-item:hover { background: var(--bg-hover); }
-.conv-item.active { background: rgba(99,102,241,0.12); }
+.conv-item:hover { background: #fbf8f1; border-color: #ded6c8; }
+.conv-item.active { background: #fff4ed; border-color: rgba(185, 28, 28, 0.18); }
 
 .conv-icon {
   flex-shrink: 0;
@@ -430,7 +485,7 @@ onMounted(() => {
   font-size: 12px;
   border: 1px solid var(--accent-primary);
   border-radius: 4px;
-  background: var(--bg-panel);
+  background: #fbf8f1;
   color: var(--text-primary);
   outline: none;
 }
@@ -453,7 +508,7 @@ onMounted(() => {
   color: var(--text-muted);
   cursor: pointer;
 }
-.icon-btn-sm:hover { background: var(--bg-hover); color: var(--text-secondary); }
+.icon-btn-sm:hover { background: #efe8dc; color: var(--text-secondary); }
 .icon-btn-sm.danger:hover { color: var(--accent-primary); }
 
 .conv-empty {
@@ -474,6 +529,14 @@ onMounted(() => {
 }
 .ai-main .topbar {
   margin-bottom: 16px;
+}
+.ai-chat-topbar {
+  align-items: center;
+  justify-content: flex-start;
+}
+.sidebar-expand-button {
+  flex: 0 0 auto;
+  margin-top: 2px;
 }
 
 .ai-chat-panel {
@@ -608,4 +671,20 @@ onMounted(() => {
   box-shadow: 0 0 0 3px rgba(99,102,241,0.08);
 }
 .ai-input-bar input::placeholder { color: var(--text-muted); }
+
+@media (max-width: 760px) {
+  .ai-layout {
+    height: calc(100vh - 48px);
+  }
+  .ai-sidebar {
+    width: 220px;
+    min-width: 220px;
+  }
+  .ai-main {
+    padding: 16px 14px 0;
+  }
+  .ai-msg {
+    max-width: 100%;
+  }
+}
 </style>

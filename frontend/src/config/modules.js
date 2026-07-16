@@ -103,7 +103,7 @@ export const modules = {
     operations: { credit: true, openAccount: true, freeze: true },
     columns: [
       { key: "id", label: "ID" },
-      { key: "learnerId", label: "学员 ID" },
+      { key: "learnerName", label: "学员姓名" },
       { key: "totalCredits", label: "累计积分" },
       { key: "availableCredits", label: "可用积分" },
       { key: "frozenCredits", label: "冻结积分" },
@@ -118,7 +118,7 @@ export const modules = {
     api: "/api/admin/credit-transactions",
     columns: [
       { key: "id", label: "ID" },
-      { key: "learnerId", label: "学员 ID" },
+      { key: "learnerName", label: "学员姓名" },
       { key: "accountId", label: "账户 ID" },
       { key: "transactionType", label: "类型", badge: true },
       { key: "amount", label: "数量" },
@@ -138,7 +138,7 @@ export const modules = {
     canEdit: false,
     columns: [
       { key: "id", label: "ID" },
-      { key: "learnerId", label: "学员 ID" },
+      { key: "learnerName", label: "学员姓名" },
       { key: "achievementName", label: "成果名称" },
       { key: "achievementType", label: "类型" },
       { key: "suggestedCredits", label: "建议积分" },
@@ -159,7 +159,7 @@ export const modules = {
     canEdit: true,
     columns: [
       { key: "id", label: "ID" },
-      { key: "learnerId", label: "学员 ID" },
+      { key: "learnerName", label: "学员姓名" },
       { key: "courseId", label: "课程 ID" },
       { key: "progress", label: "进度" },
       { key: "score", label: "成绩" },
@@ -183,7 +183,7 @@ export const modules = {
     canDelete: true,
     columns: [
       { key: "id", label: "ID" },
-      { key: "learnerId", label: "学员 ID" },
+      { key: "learnerName", label: "学员姓名" },
       { key: "title", label: "标题" },
       { key: "section", label: "板块" },
       { key: "replyCount", label: "回复数" },
@@ -236,7 +236,7 @@ export const modules = {
     api: "/api/admin/core/enrollments",
     columns: [
       { key: "id", label: "ID" },
-      { key: "learnerId", label: "学员ID" },
+      { key: "learnerName", label: "学员姓名" },
       { key: "courseId", label: "课程ID" },
       { key: "enrollStatus", label: "状态", badge: true },
       { key: "reviewer", label: "审核人" },
@@ -253,7 +253,7 @@ export const modules = {
     columns: [
       { key: "id", label: "ID" },
       { key: "jobId", label: "岗位ID" },
-      { key: "learnerId", label: "学员ID" },
+      { key: "learnerName", label: "学员姓名" },
       { key: "applyStatus", label: "状态", badge: true },
       { key: "resumeSummary", label: "简历摘要" },
       { key: "resumeUrl", label: "简历文件" },
@@ -268,7 +268,7 @@ export const modules = {
     api: "/api/admin/core/integrity-ratings",
     columns: [
       { key: "id", label: "ID" },
-      { key: "learnerId", label: "学员ID" },
+      { key: "learnerName", label: "学员姓名" },
       { key: "score", label: "总分" },
       { key: "levelName", label: "等级", badge: true },
       { key: "learningScore", label: "学习" },
